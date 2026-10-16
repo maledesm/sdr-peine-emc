@@ -17,3 +17,6 @@
 __pycache__/
 *.pyc
 *.bak
+
+# Demasiado grande para GitHub (95 MB): queda solo en la copia local
+/bibliografia/2024_Makhija_priam-precision-radio-instrument-antenna-measurements-tesis.pdf
