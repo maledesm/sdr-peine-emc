@@ -1,7 +1,7 @@
 ===============================================================================
 HISTORIAL DEL PROYECTO - SDR COMO GENERADOR PEINE PARA ENSAYOS DE CEM
 Trabajo Practico Integrador 2C2026 - Compatibilidad Electromagnetica - FIUBA
-Ultima actualizacion: 15/10/2026
+Ultima actualizacion: 16/10/2026
 ===============================================================================
 
 -------------------------------------------------------------------------------
@@ -2113,6 +2113,22 @@ CETEM / 13-10-2026 / Primera medicion en la camara  [MEDIDO]
   sumaron 10 dB en el dashboard. Las cifras de esta entrada ya incluyen
   ese ajuste. Sin el ajuste: SDR 43 dB sobre el Comb generator, Comb
   generator entre 29 y 59 dBuV/m, SDR de 40 a 56 dB sobre la pausa.
+
+REUNION / 16-10-2026 / Acuerdos con el profesor y repositorio
+  Reunion con Pablo Marino Belcaguy despues de la medicion en el CETEM. Le
+  gusto el trabajo. Se acordaron 20 puntos (P1 a P20) y una hoja de ruta
+  (puntos 0 a 8) hacia el informe final y el paper: en espanol, formato
+  IEEE primero y despues EMC Workshop. Queda una sola visita al CETEM,
+  probablemente en noviembre. Todo esta en docscuerdos_2026-10-16.md y
+  docsoadmap.md.
+  Se armo el repositorio privado https://github.com/maledesm/sdr-peine-emc
+  con esta carpeta (sin CONAE, tesis ni normas pagas) y documentacion en
+  docs\: historial.md (cronologia), conocimiento_tecnico.md y
+  bibliografia.md. CLAUDE.md tiene las reglas de seguridad y la forma de
+  trabajo.
+  Observacion: 24 lineas x 6 s = 2,4 min es la pasada SIN silencio; con
+  silencio dura 4 min 48 s. Si en el CETEM la pasada duro unos 2,5 min, el
+  silencio estaba destildado. A confirmar.
 
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
