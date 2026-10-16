@@ -1,0 +1,1768 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: 'bladeRF 2.0 micro xA9: peine de 70 a 420 MHz, lineas cada 10 MHz.
+      El receptor de la propia placa mide cada linea por cable y el flujo corrige
+      la amplitud de cada tono hasta dejarlas iguales. Despues transmite'
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: exp19_a9_peine_automatico
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: 'EXP-19 xA9: peine por tandas con calibracion automatica'
+    window_size: (2950,3450)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 16
+    rotation: 0
+    state: enabled
+blocks:
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: 'Tasa de muestreo, comun a TX y RX. En esta
+
+      PC no pasar de 25e6'
+    value: 20e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 16
+    rotation: 0
+    state: enabled
+- name: f_tono
+  id: variable
+  parameters:
+    comment: 'Cada portadora lleva dos tonos: en +f_tono y
+
+      en -f_tono'
+    value: 5e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 16
+    rotation: 0
+    state: enabled
+- name: amp
+  id: variable
+  parameters:
+    comment: 'Amplitud de un tono sin corregir. La suma de
+
+      los dos no debe pasar de 0.95'
+    value: '0.45'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 16
+    rotation: 0
+    state: enabled
+- name: ancho_banda
+  id: variable
+  parameters:
+    comment: Filtro analogico de la placa, en TX y en RX
+    value: 18e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 16
+    rotation: 0
+    state: enabled
+- name: tope
+  id: variable
+  parameters:
+    comment: 'Tope de seguridad de la ganancia de TX con
+
+      el cable al receptor: con 30 dB salen unos
+
+      -27 dBm como maximo'
+    value: '30'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 16
+    rotation: 0
+    state: enabled
+- name: f_primera
+  id: variable
+  parameters:
+    comment: 'Primera portadora. Sus lineas salen en 70 y
+
+      80 MHz'
+    value: 75e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 200
+    rotation: 0
+    state: enabled
+- name: paso_port
+  id: variable
+  parameters:
+    comment: Separacion entre portadoras
+    value: 20e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 200
+    rotation: 0
+    state: enabled
+- name: n_port
+  id: variable
+  parameters:
+    comment: 'Cantidad de portadoras: 18 dan 36 lineas, de
+
+      70 a 420 MHz'
+    value: '18'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 200
+    rotation: 0
+    state: enabled
+- name: respuesta_rx
+  id: variable
+  parameters:
+    comment: 'Cuantos dB de mas lee el RX en cada linea
+
+      (70, 80, ... 420 MHz). Queda en cero hasta
+
+      compararlo con un analizador'
+    value: '[0.0] * 36'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 200
+    rotation: 0
+    state: enabled
+- name: decim
+  id: variable
+  parameters:
+    comment: El filtro de cada tono baja la tasa a 1 MSPS
+    value: int(samp_rate / 1e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 400
+    rotation: 0
+    state: enabled
+- name: taps
+  id: variable_low_pass_filter_taps
+  parameters:
+    comment: Pasabajos que deja solo el tono elegido
+    gain: '1.0'
+    samp_rate: samp_rate
+    cutoff_freq: 100e3
+    width: 400e3
+    win: window.WIN_HAMMING
+    beta: '6.76'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 400
+    rotation: 0
+    state: enabled
+- name: largo_promedio
+  id: variable
+  parameters:
+    comment: 'Muestras que se promedian: 0,1 s a 1 MSPS'
+    value: '100000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 736
+    - 400
+    rotation: 0
+    state: enabled
+- name: nivel_inf
+  id: variable_function_probe
+  parameters:
+    block_id: sonda_inf
+    comment: 'Nivel del tono inferior leido por el RX, en
+
+      dB'
+    function_args: ''
+    function_name: level
+    poll_rate: '10'
+    value: '-120'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1066
+    - 400
+    rotation: 0
+    state: enabled
+- name: nivel_sup
+  id: variable_function_probe
+  parameters:
+    block_id: sonda_sup
+    comment: 'Nivel del tono superior leido por el RX, en
+
+      dB'
+    function_args: ''
+    function_name: level
+    poll_rate: '10'
+    value: '-120'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1396
+    - 400
+    rotation: 0
+    state: enabled
+- name: indice
+  id: variable
+  parameters:
+    comment: 'Portadora actual, de 0 a n_port - 1. La
+
+      cambia la receta'
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 620
+    rotation: 0
+    state: enabled
+- name: silencio
+  id: variable
+  parameters:
+    comment: '1: tonos apagados. 0: tonos encendidos. Lo
+
+      cambia la receta'
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 620
+    rotation: 0
+    state: enabled
+- name: correcciones
+  id: variable
+  parameters:
+    comment: 'Correccion de cada linea, en dB (0 o
+
+      negativa). Las calcula la receta'
+    value: '[0.0] * 36'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 620
+    rotation: 0
+    state: enabled
+- name: etapa
+  id: variable
+  parameters:
+    comment: 'Texto de la etapa actual. Lo cambia la
+
+      receta'
+    value: '''INICIACION'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 620
+    rotation: 0
+    state: enabled
+- name: pasadas
+  id: variable
+  parameters:
+    comment: Pasadas completas del peine en transmision
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 620
+    rotation: 0
+    state: enabled
+- name: desvio_antes
+  id: variable
+  parameters:
+    comment: 'Cuanto sobresalia cada linea antes de
+
+      corregir, en dB'
+    value: '[0.0] * 36'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 620
+    rotation: 0
+    state: enabled
+- name: desvio_despues
+  id: variable
+  parameters:
+    comment: 'Cuanto se aparta cada linea despues de
+
+      corregir, en dB'
+    value: '[0.0] * 36'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1996
+    - 620
+    rotation: 0
+    state: enabled
+- name: resultado
+  id: variable
+  parameters:
+    comment: Resumen de la ultima calibracion
+    value: '''todavia sin calibrar'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2326
+    - 620
+    rotation: 0
+    state: enabled
+- name: orden
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 1,0,1,4
+    label: Orden
+    labels: '[''Esperar (sin emitir)'', ''Calibrar (cable de TX1 a RX1)'', ''Transmitir
+      el peine'']'
+    options: '[0, 1, 2]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '0'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 820
+    rotation: 0
+    state: enabled
+- name: ganancia_base
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 1,4,1,3
+    label: Ganancia de TX
+    labels: '[''0 dB'', ''10 dB'', ''20 dB'', ''30 dB'']'
+    options: '[0, 10, 20, 30]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '30'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 820
+    rotation: 0
+    state: enabled
+- name: permanencia
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 1,7,1,3
+    label: Permanencia por portadora
+    labels: '[''0,5 s'', ''1 s'', ''2 s'', ''3 s'', ''5 s'']'
+    options: '[0.5, 1, 2, 3, 5]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '1'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 820
+    rotation: 0
+    state: enabled
+- name: rx_gain
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 1,10,1,2
+    label: Ganancia de RX
+    labels: '[''0 dB'', ''10 dB'', ''20 dB'', ''30 dB'', ''40 dB'', ''50 dB'', ''60
+      dB'']'
+    options: '[0, 10, 20, 30, 40, 50, 60]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '0'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 820
+    rotation: 0
+    state: enabled
+- name: freq
+  id: variable
+  parameters:
+    comment: 'Frecuencia de la portadora actual, en TX y
+
+      en RX'
+    value: f_primera + paso_port * indice
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1080
+    rotation: 0
+    state: enabled
+- name: tx_gain
+  id: variable
+  parameters:
+    comment: 'Ganancia que recibe la placa: nunca supera
+
+      el tope'
+    value: min(ganancia_base, tope)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 406
+    - 1080
+    rotation: 0
+    state: enabled
+- name: c_inf
+  id: variable
+  parameters:
+    comment: 'Correccion de la linea inferior actual, en
+
+      dB'
+    value: correcciones[2 * indice]
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 736
+    - 1080
+    rotation: 0
+    state: enabled
+- name: c_sup
+  id: variable
+  parameters:
+    comment: 'Correccion de la linea superior actual, en
+
+      dB'
+    value: correcciones[2 * indice + 1]
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1066
+    - 1080
+    rotation: 0
+    state: enabled
+- name: amp_inf
+  id: variable
+  parameters:
+    comment: Amplitud del tono inferior ya corregida
+    value: 0 if silencio == 1 else amp * 10 ** (c_inf / 20)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1436
+    - 1080
+    rotation: 0
+    state: enabled
+- name: amp_sup
+  id: variable
+  parameters:
+    comment: Amplitud del tono superior ya corregida
+    value: 0 if silencio == 1 else amp * 10 ** (c_sup / 20)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1886
+    - 1080
+    rotation: 0
+    state: enabled
+- name: et_etapa
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:16pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 0,0,1,12
+    label: '<span style=''font-size:16pt''>Etapa: </span>'
+    type: string
+    value: etapa
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1280
+    rotation: 0
+    state: enabled
+- name: et_portadora
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:13pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 2,0,1,4
+    label: '<span style=''font-size:13pt''>Portadora: </span>'
+    type: string
+    value: '''%d de %d, en %.0f MHz'' % (indice + 1, n_port, freq / 1e6)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 1280
+    rotation: 0
+    state: enabled
+- name: et_lineas
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:13pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 2,4,1,4
+    label: '<span style=''font-size:13pt''>Lineas: </span>'
+    type: string
+    value: '''%.0f y %.0f MHz'' % ((freq - f_tono) / 1e6, (freq + f_tono) / 1e6)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 1280
+    rotation: 0
+    state: enabled
+- name: et_pasadas
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:13pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 2,8,1,4
+    label: '<span style=''font-size:13pt''>Pasadas completas: </span>'
+    type: int
+    value: pasadas
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 1280
+    rotation: 0
+    state: enabled
+- name: et_amp
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 3,0,1,4
+    label: '<span style=''font-size:11pt''>Amplitudes: </span>'
+    type: string
+    value: '''%.3f y %.3f'' % (amp_inf, amp_sup)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 1280
+    rotation: 0
+    state: enabled
+- name: et_rx
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 3,4,1,4
+    label: '<span style=''font-size:11pt''>El RX lee ahora: </span>'
+    type: string
+    value: '''%.1f y %.1f dB'' % (nivel_inf, nivel_sup)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 1280
+    rotation: 0
+    state: enabled
+- name: et_resultado
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 3,8,1,4
+    label: '<span style=''font-size:11pt''>Planitud segun el RX: </span>'
+    type: string
+    value: resultado
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1996
+    - 1280
+    rotation: 0
+    state: enabled
+- name: et_tabla
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 5,0,1,12
+    label: 'Correcciones en dB, de 70 a 420 MHz: '
+    type: string
+    value: ''', ''.join([''%.1f'' % c for c in correcciones])'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2326
+    - 1280
+    rotation: 0
+    state: enabled
+- name: tono_superior
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Sale en portadora + 5 MHz
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    amp: amp_sup
+    freq: f_tono
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1480
+    rotation: 0
+    state: enabled
+- name: tono_inferior
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Sale en portadora - 5 MHz
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    amp: amp_inf
+    freq: -f_tono
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1680
+    rotation: 0
+    state: enabled
+- name: suma
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 511
+    - 1590
+    rotation: 0
+    state: enabled
+- name: osmosdr_sink_0
+  id: osmosdr_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    ant0: ''
+    ant1: ''
+    ant10: ''
+    ant11: ''
+    ant12: ''
+    ant13: ''
+    ant14: ''
+    ant15: ''
+    ant16: ''
+    ant17: ''
+    ant18: ''
+    ant19: ''
+    ant2: ''
+    ant20: ''
+    ant21: ''
+    ant22: ''
+    ant23: ''
+    ant24: ''
+    ant25: ''
+    ant26: ''
+    ant27: ''
+    ant28: ''
+    ant29: ''
+    ant3: ''
+    ant30: ''
+    ant31: ''
+    ant4: ''
+    ant5: ''
+    ant6: ''
+    ant7: ''
+    ant8: ''
+    ant9: ''
+    args: bladerf=321e0fa5875945d99b11070bb0a76d31
+    bb_gain0: '0'
+    bb_gain1: '20'
+    bb_gain10: '20'
+    bb_gain11: '20'
+    bb_gain12: '20'
+    bb_gain13: '20'
+    bb_gain14: '20'
+    bb_gain15: '20'
+    bb_gain16: '20'
+    bb_gain17: '20'
+    bb_gain18: '20'
+    bb_gain19: '20'
+    bb_gain2: '20'
+    bb_gain20: '20'
+    bb_gain21: '20'
+    bb_gain22: '20'
+    bb_gain23: '20'
+    bb_gain24: '20'
+    bb_gain25: '20'
+    bb_gain26: '20'
+    bb_gain27: '20'
+    bb_gain28: '20'
+    bb_gain29: '20'
+    bb_gain3: '20'
+    bb_gain30: '20'
+    bb_gain31: '20'
+    bb_gain4: '20'
+    bb_gain5: '20'
+    bb_gain6: '20'
+    bb_gain7: '20'
+    bb_gain8: '20'
+    bb_gain9: '20'
+    bw0: ancho_banda
+    bw1: '0'
+    bw10: '0'
+    bw11: '0'
+    bw12: '0'
+    bw13: '0'
+    bw14: '0'
+    bw15: '0'
+    bw16: '0'
+    bw17: '0'
+    bw18: '0'
+    bw19: '0'
+    bw2: '0'
+    bw20: '0'
+    bw21: '0'
+    bw22: '0'
+    bw23: '0'
+    bw24: '0'
+    bw25: '0'
+    bw26: '0'
+    bw27: '0'
+    bw28: '0'
+    bw29: '0'
+    bw3: '0'
+    bw30: '0'
+    bw31: '0'
+    bw4: '0'
+    bw5: '0'
+    bw6: '0'
+    bw7: '0'
+    bw8: '0'
+    bw9: '0'
+    clock_source0: ''
+    clock_source1: ''
+    clock_source2: ''
+    clock_source3: ''
+    clock_source4: ''
+    clock_source5: ''
+    clock_source6: ''
+    clock_source7: ''
+    comment: bladeRF 2.0 micro xA9, salida TX1
+    corr0: '0'
+    corr1: '0'
+    corr10: '0'
+    corr11: '0'
+    corr12: '0'
+    corr13: '0'
+    corr14: '0'
+    corr15: '0'
+    corr16: '0'
+    corr17: '0'
+    corr18: '0'
+    corr19: '0'
+    corr2: '0'
+    corr20: '0'
+    corr21: '0'
+    corr22: '0'
+    corr23: '0'
+    corr24: '0'
+    corr25: '0'
+    corr26: '0'
+    corr27: '0'
+    corr28: '0'
+    corr29: '0'
+    corr3: '0'
+    corr30: '0'
+    corr31: '0'
+    corr4: '0'
+    corr5: '0'
+    corr6: '0'
+    corr7: '0'
+    corr8: '0'
+    corr9: '0'
+    freq0: freq
+    freq1: 100e6
+    freq10: 100e6
+    freq11: 100e6
+    freq12: 100e6
+    freq13: 100e6
+    freq14: 100e6
+    freq15: 100e6
+    freq16: 100e6
+    freq17: 100e6
+    freq18: 100e6
+    freq19: 100e6
+    freq2: 100e6
+    freq20: 100e6
+    freq21: 100e6
+    freq22: 100e6
+    freq23: 100e6
+    freq24: 100e6
+    freq25: 100e6
+    freq26: 100e6
+    freq27: 100e6
+    freq28: 100e6
+    freq29: 100e6
+    freq3: 100e6
+    freq30: 100e6
+    freq31: 100e6
+    freq4: 100e6
+    freq5: 100e6
+    freq6: 100e6
+    freq7: 100e6
+    freq8: 100e6
+    freq9: 100e6
+    gain0: tx_gain
+    gain1: '10'
+    gain10: '10'
+    gain11: '10'
+    gain12: '10'
+    gain13: '10'
+    gain14: '10'
+    gain15: '10'
+    gain16: '10'
+    gain17: '10'
+    gain18: '10'
+    gain19: '10'
+    gain2: '10'
+    gain20: '10'
+    gain21: '10'
+    gain22: '10'
+    gain23: '10'
+    gain24: '10'
+    gain25: '10'
+    gain26: '10'
+    gain27: '10'
+    gain28: '10'
+    gain29: '10'
+    gain3: '10'
+    gain30: '10'
+    gain31: '10'
+    gain4: '10'
+    gain5: '10'
+    gain6: '10'
+    gain7: '10'
+    gain8: '10'
+    gain9: '10'
+    if_gain0: '0'
+    if_gain1: '20'
+    if_gain10: '20'
+    if_gain11: '20'
+    if_gain12: '20'
+    if_gain13: '20'
+    if_gain14: '20'
+    if_gain15: '20'
+    if_gain16: '20'
+    if_gain17: '20'
+    if_gain18: '20'
+    if_gain19: '20'
+    if_gain2: '20'
+    if_gain20: '20'
+    if_gain21: '20'
+    if_gain22: '20'
+    if_gain23: '20'
+    if_gain24: '20'
+    if_gain25: '20'
+    if_gain26: '20'
+    if_gain27: '20'
+    if_gain28: '20'
+    if_gain29: '20'
+    if_gain3: '20'
+    if_gain30: '20'
+    if_gain31: '20'
+    if_gain4: '20'
+    if_gain5: '20'
+    if_gain6: '20'
+    if_gain7: '20'
+    if_gain8: '20'
+    if_gain9: '20'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    nchan: '1'
+    num_mboards: '1'
+    sample_rate: samp_rate
+    sync: sync
+    time_source0: ''
+    time_source1: ''
+    time_source2: ''
+    time_source3: ''
+    time_source4: ''
+    time_source5: ''
+    time_source6: ''
+    time_source7: ''
+    type: fc32
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 841
+    - 1470
+    rotation: 0
+    state: enabled
+- name: osmosdr_source_0
+  id: osmosdr_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'bladeRF 2.0 micro xA9, entrada RX1. Ganancia
+
+      manual'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: fc32
+    args: bladerf=321e0fa5875945d99b11070bb0a76d31
+    sync: sync
+    num_mboards: '1'
+    nchan: '1'
+    sample_rate: samp_rate
+    freq0: freq
+    corr0: '0'
+    dc_offset_mode0: '0'
+    iq_balance_mode0: '0'
+    gain_mode0: 'False'
+    gain0: rx_gain
+    if_gain0: '0'
+    bb_gain0: '0'
+    ant0: ''
+    bw0: ancho_banda
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1960
+    rotation: 0
+    state: enabled
+- name: filtro_sup
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Deja solo el tono de +5 MHz
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: ccf
+    decim: decim
+    taps: taps
+    center_freq: f_tono
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 445
+    - 1900
+    rotation: 0
+    state: enabled
+- name: potencia_sup
+  id: blocks_complex_to_mag_squared
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Potencia instantanea
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 841
+    - 1924
+    rotation: 0
+    state: enabled
+- name: promedio_sup
+  id: blocks_moving_average_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Promedia los ultimos 0,1 s
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    length: largo_promedio
+    scale: 1.0 / largo_promedio
+    max_iter: '4000'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1171
+    - 1900
+    rotation: 0
+    state: enabled
+- name: a_db_sup
+  id: blocks_nlog10_ff
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Pasa a dB: 10 log10'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n: '10'
+    k: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1501
+    - 1912
+    rotation: 0
+    state: enabled
+- name: sonda_sup
+  id: blocks_probe_signal_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Deja leer el valor desde un Function Probe
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1765
+    - 1924
+    rotation: 0
+    state: enabled
+- name: filtro_inf
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Deja solo el tono de -5 MHz
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: ccf
+    decim: decim
+    taps: taps
+    center_freq: -f_tono
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 445
+    - 2070
+    rotation: 0
+    state: enabled
+- name: potencia_inf
+  id: blocks_complex_to_mag_squared
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Potencia instantanea
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 841
+    - 2094
+    rotation: 0
+    state: enabled
+- name: promedio_inf
+  id: blocks_moving_average_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Promedia los ultimos 0,1 s
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    length: largo_promedio
+    scale: 1.0 / largo_promedio
+    max_iter: '4000'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1171
+    - 2070
+    rotation: 0
+    state: enabled
+- name: a_db_inf
+  id: blocks_nlog10_ff
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Pasa a dB: 10 log10'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n: '10'
+    k: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1501
+    - 2082
+    rotation: 0
+    state: enabled
+- name: sonda_inf
+  id: blocks_probe_signal_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Deja leer el valor desde un Function Probe
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1765
+    - 2094
+    rotation: 0
+    state: enabled
+- name: linea_de_punto
+  id: variable
+  parameters:
+    comment: 'Los graficos tienen 256 puntos, 7 por linea:
+
+      a que linea (0 a 35) corresponde cada punto'
+    value: '[min(j // 7, 2 * n_port - 1) for j in range(256)]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2360
+    rotation: 0
+    state: enabled
+- name: curva_antes
+  id: variable
+  parameters:
+    comment: Desvio antes de corregir
+    value: '[desvio_antes[k] for k in linea_de_punto]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 477
+    - 2360
+    rotation: 0
+    state: enabled
+- name: datos_curva_antes
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: curva_antes
+    vlen: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1204
+    - 2360
+    rotation: 0
+    state: enabled
+- name: curva_despues
+  id: variable
+  parameters:
+    comment: Desvio despues de corregir
+    value: '[desvio_despues[k] for k in linea_de_punto]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 477
+    - 2490
+    rotation: 0
+    state: enabled
+- name: datos_curva_despues
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: curva_despues
+    vlen: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1204
+    - 2510
+    rotation: 0
+    state: enabled
+- name: ritmo_grafico_medicion
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Solo marca el ritmo del grafico
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: time
+    maximum: '0.01'
+    samples_per_second: '2000'
+    type: float
+    vlen: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1600
+    - 2348
+    rotation: 0
+    state: enabled
+- name: grafico_medicion
+  id: qtgui_vector_sink_f
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Lo que midio el RX: cuanto sobresale cada linea"'
+    vlen: '256'
+    x_start: (f_primera - f_tono) / 1e6 - 5
+    x_step: 10.0 / 7
+    x_axis_label: '"Frecuencia de la linea"'
+    y_axis_label: '"Desvio"'
+    x_units: '"MHz"'
+    y_units: '"dB"'
+    ref_level: '0'
+    grid: 'True'
+    autoscale: 'False'
+    average: '1.0'
+    ymin: '-2'
+    ymax: '10'
+    nconnections: '2'
+    update_time: '0.10'
+    showports: 'False'
+    gui_hint: 4,0,1,6
+    legend: 'True'
+    label1: '"Antes de corregir"'
+    width1: '2'
+    color1: '"red"'
+    alpha1: '1.0'
+    label2: '"Despues de corregir"'
+    width2: '3'
+    color2: '"dark green"'
+    alpha2: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1996
+    - 2360
+    rotation: 0
+    state: enabled
+- name: curva_correccion
+  id: variable
+  parameters:
+    comment: Correccion de cada linea
+    value: '[correcciones[k] for k in linea_de_punto]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 477
+    - 2680
+    rotation: 0
+    state: enabled
+- name: datos_curva_correccion
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: curva_correccion
+    vlen: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1204
+    - 2680
+    rotation: 0
+    state: enabled
+- name: curva_actual
+  id: variable
+  parameters:
+    comment: Marca las dos lineas que salen ahora
+    value: '[(correcciones[k] if (k // 2 == indice and silencio == 0) else -11) for
+      k in linea_de_punto]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 477
+    - 2810
+    rotation: 0
+    state: enabled
+- name: datos_curva_actual
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: curva_actual
+    vlen: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1204
+    - 2830
+    rotation: 0
+    state: enabled
+- name: ritmo_grafico_correccion
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Solo marca el ritmo del grafico
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: time
+    maximum: '0.01'
+    samples_per_second: '2000'
+    type: float
+    vlen: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1600
+    - 2668
+    rotation: 0
+    state: enabled
+- name: grafico_correccion
+  id: qtgui_vector_sink_f
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Correccion aplicada a cada linea"'
+    vlen: '256'
+    x_start: (f_primera - f_tono) / 1e6 - 5
+    x_step: 10.0 / 7
+    x_axis_label: '"Frecuencia de la linea"'
+    y_axis_label: '"Correccion"'
+    x_units: '"MHz"'
+    y_units: '"dB"'
+    ref_level: '0'
+    grid: 'True'
+    autoscale: 'False'
+    average: '1.0'
+    ymin: '-11'
+    ymax: '1'
+    nconnections: '2'
+    update_time: '0.10'
+    showports: 'False'
+    gui_hint: 4,6,1,6
+    legend: 'True'
+    label1: '"Correccion de cada linea"'
+    width1: '2'
+    color1: '"blue"'
+    alpha1: '1.0'
+    label2: '"Lineas que salen ahora"'
+    width2: '3'
+    color2: '"red"'
+    alpha2: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1996
+    - 2680
+    rotation: 0
+    state: enabled
+- name: receta
+  id: snippet
+  parameters:
+    alias: ''
+    comment: 'Secuencia del peine: esperar, calibrar o
+
+      transmitir'
+    priority: '0'
+    section: main_after_init
+    code: "# ============================================================================\n\
+      # RECETA DEL PEINE AUTOMATICO\n# Este codigo corre al mismo tiempo que el flujo.\
+      \ Hace lo que se elija en\n# \"Orden\" en la ventana: esperar, calibrar o transmitir.\n\
+      # Usa solo las variables del flujo: las lee con self.get_...() y las cambia\n\
+      # con self.set_...(). Generar los tonos, medir y mostrar lo hacen los bloques.\n\
+      # ============================================================================\n\
+      import time\nimport threading\n\nESPERA_SILENCIO = 0.3      # segundos con los\
+      \ tonos apagados antes de cada salto\nESPERA_LECTURA = 1.0       # segundos\
+      \ de espera antes de leer el receptor\n\n\ndef saltar_a(i):\n    # Apaga los\
+      \ tonos, pasa a la portadora numero i y los vuelve a encender.\n    # Asi no\
+      \ sale ningun tono mientras la placa cambia de frecuencia.\n    self.set_silencio(1)\n\
+      \    time.sleep(ESPERA_SILENCIO)\n    self.set_indice(i)\n    self.set_silencio(0)\n\
+      \n\ndef medir_todas_las_lineas():\n    # Recorre las portadoras y anota el nivel\
+      \ de cada linea leido por el RX.\n    # A cada lectura le resta lo que el propio\
+      \ RX lee de mas en esa linea.\n    respuesta = self.get_respuesta_rx()\n   \
+      \ niveles = []\n    for i in range(self.get_n_port()):\n        saltar_a(i)\n\
+      \        time.sleep(ESPERA_LECTURA)\n        niveles.append(self.get_nivel_inf()\
+      \ - respuesta[2 * i])\n        niveles.append(self.get_nivel_sup() - respuesta[2\
+      \ * i + 1])\n    return niveles\n\n\ndef calibrar():\n    cantidad = 2 * self.get_n_port()\
+      \             # cantidad de lineas\n    correcciones = [0.0] * cantidad    \
+      \          # se empieza sin corregir nada\n    self.set_correcciones(correcciones)\n\
+      \n    self.set_etapa('CALIBRACION, vuelta 1 de 3: midiendo sin corregir')\n\
+      \    niveles = medir_todas_las_lineas()\n    if min(niveles) < -75 or max(niveles)\
+      \ > -10:\n        self.set_resultado('CANCELADA: niveles fuera de rango (revisar\
+      \ el cable y las ganancias)')\n        return\n    objetivo = min(niveles) \
+      \                     # todas las lineas bajan hasta la mas debil\n    planitud_antes\
+      \ = max(niveles) - min(niveles)\n    self.set_desvio_antes([n - objetivo for\
+      \ n in niveles])\n\n    for vuelta in [2, 3]:\n        nuevas = []\n       \
+      \ for k in range(cantidad):\n            c = correcciones[k] + (objetivo - niveles[k])\n\
+      \            if c > 0:\n                c = 0.0                          # una\
+      \ linea no puede subir mas que el maximo\n            nuevas.append(c)\n   \
+      \     correcciones = nuevas\n        self.set_correcciones(correcciones)\n \
+      \       self.set_etapa('CALIBRACION, vuelta %d de 3: midiendo con la correccion'\
+      \ % vuelta)\n        niveles = medir_todas_las_lineas()\n\n    self.set_desvio_despues([n\
+      \ - objetivo for n in niveles])\n    planitud_despues = max(niveles) - min(niveles)\n\
+      \    self.set_resultado('antes %.1f dB, despues %.1f dB' % (planitud_antes,\
+      \ planitud_despues))\n\n\ndef transmitir_una_pasada():\n    for i in range(self.get_n_port()):\n\
+      \        if self.get_orden() != 2:\n            return                     \
+      \          # cambio la orden: se corta la pasada\n        saltar_a(i)\n    \
+      \    time.sleep(self.get_permanencia())\n    self.set_pasadas(self.get_pasadas()\
+      \ + 1)\n\n\ndef receta():\n    time.sleep(2)                               \
+      \ # deja que el flujo termine de arrancar\n    while True:\n        if self.get_orden()\
+      \ == 1:\n            calibrar()\n            self.set_orden(0)             \
+      \       # al terminar vuelve a esperar\n        elif self.get_orden() == 2:\n\
+      \            self.set_etapa('TRANSMISION')\n            transmitir_una_pasada()\n\
+      \        else:\n            self.set_etapa('EN ESPERA (sin emitir)')\n     \
+      \       self.set_silencio(1)\n            time.sleep(0.2)\n\n\nthreading.Thread(target=receta,\
+      \ daemon=True).start()\n"
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 3060
+    rotation: 0
+    state: enabled
+connections:
+- - tono_superior
+  - '0'
+  - suma
+  - '0'
+- - tono_inferior
+  - '0'
+  - suma
+  - '1'
+- - suma
+  - '0'
+  - osmosdr_sink_0
+  - '0'
+- - filtro_sup
+  - '0'
+  - potencia_sup
+  - '0'
+- - potencia_sup
+  - '0'
+  - promedio_sup
+  - '0'
+- - promedio_sup
+  - '0'
+  - a_db_sup
+  - '0'
+- - a_db_sup
+  - '0'
+  - sonda_sup
+  - '0'
+- - osmosdr_source_0
+  - '0'
+  - filtro_sup
+  - '0'
+- - filtro_inf
+  - '0'
+  - potencia_inf
+  - '0'
+- - potencia_inf
+  - '0'
+  - promedio_inf
+  - '0'
+- - promedio_inf
+  - '0'
+  - a_db_inf
+  - '0'
+- - a_db_inf
+  - '0'
+  - sonda_inf
+  - '0'
+- - osmosdr_source_0
+  - '0'
+  - filtro_inf
+  - '0'
+- - datos_curva_antes
+  - '0'
+  - ritmo_grafico_medicion
+  - '0'
+- - ritmo_grafico_medicion
+  - '0'
+  - grafico_medicion
+  - '0'
+- - datos_curva_despues
+  - '0'
+  - grafico_medicion
+  - '1'
+- - datos_curva_correccion
+  - '0'
+  - ritmo_grafico_correccion
+  - '0'
+- - ritmo_grafico_correccion
+  - '0'
+  - grafico_correccion
+  - '0'
+- - datos_curva_actual
+  - '0'
+  - grafico_correccion
+  - '1'
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0

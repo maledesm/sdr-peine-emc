@@ -1,0 +1,2297 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: 'bladeRF 2.0 micro xA9: peine de 70 a 420 MHz. Sin calibrar, las
+      lineas salen cerca de -3 dBm. En cada contador se carga el valor leido en el
+      analizador y el flujo sube esa linea hasta 0 dBm. La calibracion se guarda en
+      un archivo y se puede importar. SOLO para medir con el analizador: nunca con
+      el cable en RX1'
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: exp20_a9_peine_calibracion_manual
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: 'EXP-20 xA9: peine con calibracion manual por valor medido'
+    window_size: (3000,3600)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 16
+    rotation: 0
+    state: enabled
+blocks:
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: 'Tasa de muestreo. En esta PC no pasar de
+
+      25e6'
+    value: 20e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 16
+    rotation: 0
+    state: enabled
+- name: f_tono
+  id: variable
+  parameters:
+    comment: 'Cada portadora lleva dos tonos: en +f_tono y
+
+      en -f_tono'
+    value: 5e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 16
+    rotation: 0
+    state: enabled
+- name: ancho_banda
+  id: variable
+  parameters:
+    comment: Filtro analogico de la placa
+    value: 18e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 16
+    rotation: 0
+    state: enabled
+- name: ganancia_de_lectura
+  id: variable
+  parameters:
+    comment: 'Ganancia de TX con la que se leen en el
+
+      analizador los valores que se cargan en los
+
+      contadores'
+    value: '45'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 16
+    rotation: 0
+    state: enabled
+- name: amp_base
+  id: variable
+  parameters:
+    comment: 'Amplitud de cada tono sin compensar: deja
+
+      las lineas unos 3 dB por debajo del nivel
+
+      calibrado'
+    value: '0.25'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 16
+    rotation: 0
+    state: enabled
+- name: amp_max
+  id: variable
+  parameters:
+    comment: 'Amplitud maxima de un tono. La suma de los
+
+      dos no debe pasar de 0.95'
+    value: '0.47'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1996
+    - 16
+    rotation: 0
+    state: enabled
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import os
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2326
+    - 16
+    rotation: 0
+    state: enabled
+- name: f_primera
+  id: variable
+  parameters:
+    comment: 'Primera portadora. Sus lineas salen en 70 y
+
+      80 MHz'
+    value: 75e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 200
+    rotation: 0
+    state: enabled
+- name: paso_port
+  id: variable
+  parameters:
+    comment: Separacion entre portadoras
+    value: 20e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 200
+    rotation: 0
+    state: enabled
+- name: n_port
+  id: variable
+  parameters:
+    comment: 'Cantidad de portadoras: 18 dan 36 lineas, de
+
+      70 a 420 MHz'
+    value: '18'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 200
+    rotation: 0
+    state: enabled
+- name: permanencia
+  id: variable
+  parameters:
+    comment: 'Segundos en cada portadora. Tiene que ser
+
+      mayor que un barrido del analizador'
+    value: '2.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 200
+    rotation: 0
+    state: enabled
+- name: archivo
+  id: variable
+  parameters:
+    comment: 'Archivo donde se guarda la calibracion, en
+
+      la carpeta del flujo'
+    value: '''calibracion_peine.txt'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 200
+    rotation: 0
+    state: enabled
+- name: estado_archivo
+  id: variable
+  parameters:
+    comment: 'Texto sobre el archivo de calibracion. Lo
+
+      cambian los botones'
+    value: '''hay una guardada, sin importar'' if os.path.exists(archivo) else ''todavia
+      no hay ninguna guardada'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1726
+    - 200
+    rotation: 0
+    state: enabled
+- name: lista_de_pasos
+  id: variable
+  parameters:
+    comment: 'Los pasos del barrido: 0, 1, 2, ...'
+    value: list(range(100000))
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 400
+    rotation: 0
+    state: enabled
+- name: paso
+  id: variable_function_probe
+  parameters:
+    block_id: lista_de_pasos
+    comment: 'Cada ''permanencia'' segundos saca el primer
+
+      numero de la lista: es el paso actual'
+    function_args: '0'
+    function_name: pop
+    poll_rate: 1.0 / permanencia
+    value: '-1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 400
+    rotation: 0
+    state: enabled
+- name: pasos_por_pasada
+  id: variable
+  parameters:
+    comment: 'Recorriendo por nivel se agrega un paso en
+
+      silencio al final de cada pasada'
+    value: n_port + 1 if orden_recorrido == 1 else n_port
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 736
+    - 400
+    rotation: 0
+    state: enabled
+- name: posicion
+  id: variable
+  parameters:
+    comment: Lugar dentro de la pasada, desde 0
+    value: max(paso, 0) % pasos_por_pasada
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 400
+    rotation: 0
+    state: enabled
+- name: pasada
+  id: variable
+  parameters:
+    comment: Cuantas veces se recorrio el peine
+    value: max(paso, 0) // pasos_por_pasada + 1
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1726
+    - 400
+    rotation: 0
+    state: enabled
+- name: orden
+  id: variable
+  parameters:
+    comment: 'En que orden se visitan las portadoras: por
+
+      frecuencia, o de la menos compensada a la
+
+      mas compensada'
+    value: 'sorted(range(n_port), key=lambda p: comp[2 * p] + comp[2 * p + 1]) if
+      orden_recorrido == 1 else list(range(n_port))'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 600
+    rotation: 0
+    state: enabled
+- name: indice
+  id: variable
+  parameters:
+    comment: 'Portadora actual, de 0 a n_port - 1. El
+
+      valor n_port es el paso en silencio del
+
+      final de la pasada'
+    value: orden[posicion] if posicion < n_port else n_port
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 600
+    rotation: 0
+    state: enabled
+- name: entre_pasadas
+  id: variable
+  parameters:
+    comment: 1 durante el paso en silencio
+    value: 1 if indice >= n_port else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1126
+    - 600
+    rotation: 0
+    state: enabled
+- name: indice_freq
+  id: variable
+  parameters:
+    comment: 'Durante el paso en silencio la placa se
+
+      queda en la ultima portadora'
+    value: orden[n_port - 1] if indice >= n_port else indice
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1516
+    - 600
+    rotation: 0
+    state: enabled
+- name: freq
+  id: variable
+  parameters:
+    comment: Frecuencia de la portadora actual
+    value: f_primera + paso_port * indice_freq
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2116
+    - 600
+    rotation: 0
+    state: enabled
+- name: pausa
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    gui_hint: 1,0,1,3
+    label: 'PAUSA: la salida queda en silencio. Destildar para transmitir'
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 800
+    rotation: 0
+    state: enabled
+- name: orden_recorrido
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 1,6,1,3
+    label: Orden de recorrido
+    labels: '[''Por frecuencia'', ''De menor a mayor nivel (evita el efecto del retardo)'']'
+    options: '[0, 1]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '0'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 800
+    rotation: 0
+    state: enabled
+- name: ganancia
+  id: variable_qtgui_chooser
+  parameters:
+    comment: 'Tres puntos: se calibra en el mas bajo y se
+
+      sube de a 10 dB. La compensacion es la misma
+
+      en los tres'
+    gui_hint: 1,3,1,3
+    label: Ganancia de TX
+    labels: '[''45 dB: para leer y calibrar (lineas en -20 dBm)'', ''55 dB: lineas
+      en -10 dBm'', ''65 dB: lineas en 0 dBm'']'
+    options: '[45, 55, 65]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '45'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1396
+    - 800
+    rotation: 0
+    state: enabled
+- name: boton_guardar
+  id: variable_qtgui_push_button
+  parameters:
+    comment: 'Vale 1 mientras esta apretado. La accion
+
+      esta en el Python Snippet'
+    gui_hint: 4,0,1,2
+    label: Guardar calibracion
+    type: int
+    value: '0'
+    pressed: '1'
+    released: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 800
+    rotation: 0
+    state: enabled
+- name: boton_importar
+  id: variable_qtgui_push_button
+  parameters:
+    comment: 'Vale 1 mientras esta apretado. La accion
+
+      esta en el Python Snippet'
+    gui_hint: 4,2,1,2
+    label: Importar calibracion previa
+    type: int
+    value: '0'
+    pressed: '1'
+    released: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 800
+    rotation: 0
+    state: enabled
+- name: medidos
+  id: variable
+  parameters:
+    comment: 'Valor leido en el analizador para cada
+
+      linea, en dBm. 0 significa sin dato'
+    value: '[m_70, m_80, m_90, m_100, m_110, m_120, m_130, m_140, m_150, m_160, m_170,
+      m_180, m_190, m_200, m_210, m_220, m_230, m_240, m_250, m_260, m_270, m_280,
+      m_290, m_300, m_310, m_320, m_330, m_340, m_350, m_360, m_370, m_380, m_390,
+      m_400, m_410, m_420]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1060
+    rotation: 0
+    state: enabled
+- name: comp
+  id: variable
+  parameters:
+    comment: 'Compensacion de cada linea, en dB: lo que le
+
+      falta para el nivel calibrado (0 dBm con
+
+      ganancia 65, -20 dBm con 45). Sin dato, no
+
+      compensa'
+    value: '[(0.0 if leido == 0 else (ganancia_de_lectura - 65) - leido) for leido
+      in medidos]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 477
+    - 1060
+    rotation: 0
+    state: enabled
+- name: amp_tabla
+  id: variable
+  parameters:
+    comment: 'Amplitud de cada tono ya compensada, con
+
+      tope en amp_max. Los dos ceros del final son
+
+      el paso en silencio'
+    value: '[min(amp_base * 10 ** (db / 20.0), amp_max) for db in comp] + [0.0, 0.0]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 939
+    - 1060
+    rotation: 0
+    state: enabled
+- name: sin_margen
+  id: variable
+  parameters:
+    comment: 'Lineas que piden mas compensacion de la que
+
+      hay'
+    value: sum(1 for db in comp if amp_base * 10 ** (db / 20.0) > amp_max)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1533
+    - 1060
+    rotation: 0
+    state: enabled
+- name: cargadas
+  id: variable
+  parameters:
+    comment: Lineas que ya tienen un valor cargado
+    value: sum(1 for leido in medidos if leido != 0)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2062
+    - 1060
+    rotation: 0
+    state: enabled
+- name: emite
+  id: variable
+  parameters:
+    comment: '1 cuando el flujo esta transmitiendo (ni en
+
+      pausa ni arrancando)'
+    value: 1 if (pausa == 0 and paso >= 0) else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1260
+    rotation: 0
+    state: enabled
+- name: tx_gain
+  id: variable
+  parameters:
+    comment: 'Ganancia que recibe la placa: en pausa baja
+
+      al minimo'
+    value: ganancia if pausa == 0 else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 577
+    - 1260
+    rotation: 0
+    state: enabled
+- name: amp_inf_tx
+  id: variable
+  parameters:
+    comment: Amplitud del tono inferior de esta portadora
+    value: amp_tabla[2 * indice] if emite == 1 else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 973
+    - 1260
+    rotation: 0
+    state: enabled
+- name: amp_sup_tx
+  id: variable
+  parameters:
+    comment: Amplitud del tono superior de esta portadora
+    value: amp_tabla[2 * indice + 1] if emite == 1 else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1435
+    - 1260
+    rotation: 0
+    state: enabled
+- name: etapa
+  id: variable
+  parameters:
+    comment: Texto de la etapa actual
+    value: '''PAUSA (sin emitir)'' if pausa == 1 else (''INICIACION'' if paso < 0
+      else (''SILENCIO ENTRE PASADAS'' if entre_pasadas == 1 else ''TRANSMISION, pasada
+      %d'' % pasada))'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1930
+    - 1260
+    rotation: 0
+    state: enabled
+- name: et_etapa
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:15pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 0,0,1,3
+    label: '<span style=''font-size:15pt''>Etapa: </span>'
+    type: string
+    value: etapa
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1460
+    rotation: 0
+    state: enabled
+- name: et_portadora
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:15pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 0,3,1,3
+    label: '<span style=''font-size:15pt''>Portadora: </span>'
+    type: string
+    value: '''%.0f MHz (paso %d de %d)'' % (freq / 1e6, posicion + 1, pasos_por_pasada)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 1460
+    rotation: 0
+    state: enabled
+- name: et_lineas
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:15pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 0,6,1,3
+    label: '<span style=''font-size:15pt''>Lineas: </span>'
+    type: string
+    value: '''%.0f y %.0f MHz'' % ((freq - f_tono) / 1e6, (freq + f_tono) / 1e6)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 1460
+    rotation: 0
+    state: enabled
+- name: et_tiempos
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 2,6,1,3
+    label: '<span style=''font-size:11pt''>Pasada completa: </span>'
+    type: string
+    value: '''%.0f s (%.1f s por portadora)'' % (permanencia * pasos_por_pasada, permanencia)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 1460
+    rotation: 0
+    state: enabled
+- name: et_comp
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 2,3,1,3
+    label: '<span style=''font-size:11pt''>Compensacion de estas dos lineas: </span>'
+    type: string
+    value: '''%+.1f y %+.1f dB'' % (comp[2 * indice_freq], comp[2 * indice_freq +
+      1])'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 1460
+    rotation: 0
+    state: enabled
+- name: et_cargadas
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 3,0,1,3
+    label: '<span style=''font-size:11pt''>Lineas con valor cargado: </span>'
+    type: string
+    value: '''%d de %d'' % (cargadas, 2 * n_port)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 1460
+    rotation: 0
+    state: enabled
+- name: et_margen
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 3,3,1,3
+    label: '<span style=''font-size:11pt''>Lineas que piden mas de lo que hay: </span>'
+    type: int
+    value: sin_margen
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1996
+    - 1460
+    rotation: 0
+    state: enabled
+- name: et_archivo
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 4,4,1,5
+    label: '<span style=''font-size:11pt''>Calibracion en archivo: </span>'
+    type: string
+    value: estado_archivo
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1640
+    rotation: 0
+    state: enabled
+- name: et_titulo
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt''>" + str(x) + "</span>"'
+    gui_hint: 5,0,1,9
+    label: '<span style=''font-size:11pt''><b>Valor leido en el analizador para cada
+      linea (MHz), en dBm: </b></span>'
+    type: string
+    value: '''con MAX HOLD, con la ganancia de TX en %d dB y con ese contador en 0''
+      % ganancia_de_lectura'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 1640
+    rotation: 0
+    state: enabled
+- name: et_nivel
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 2,0,1,3
+    label: '<span style=''font-size:11pt''>Con esta ganancia: </span>'
+    type: string
+    value: '''sin calibrar unos %d dBm, calibradas %d dBm'' % (ganancia - 68, ganancia
+      - 65)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 736
+    - 1640
+    rotation: 0
+    state: enabled
+- name: tono_superior
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Sale en portadora + 5 MHz
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    amp: amp_sup_tx
+    freq: f_tono
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1840
+    rotation: 0
+    state: enabled
+- name: tono_inferior
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Sale en portadora - 5 MHz
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    amp: amp_inf_tx
+    freq: -f_tono
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2040
+    rotation: 0
+    state: enabled
+- name: suma
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 511
+    - 1950
+    rotation: 0
+    state: enabled
+- name: osmosdr_sink_0
+  id: osmosdr_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    ant0: ''
+    ant1: ''
+    ant10: ''
+    ant11: ''
+    ant12: ''
+    ant13: ''
+    ant14: ''
+    ant15: ''
+    ant16: ''
+    ant17: ''
+    ant18: ''
+    ant19: ''
+    ant2: ''
+    ant20: ''
+    ant21: ''
+    ant22: ''
+    ant23: ''
+    ant24: ''
+    ant25: ''
+    ant26: ''
+    ant27: ''
+    ant28: ''
+    ant29: ''
+    ant3: ''
+    ant30: ''
+    ant31: ''
+    ant4: ''
+    ant5: ''
+    ant6: ''
+    ant7: ''
+    ant8: ''
+    ant9: ''
+    args: bladerf=321e0fa5875945d99b11070bb0a76d31
+    bb_gain0: '0'
+    bb_gain1: '20'
+    bb_gain10: '20'
+    bb_gain11: '20'
+    bb_gain12: '20'
+    bb_gain13: '20'
+    bb_gain14: '20'
+    bb_gain15: '20'
+    bb_gain16: '20'
+    bb_gain17: '20'
+    bb_gain18: '20'
+    bb_gain19: '20'
+    bb_gain2: '20'
+    bb_gain20: '20'
+    bb_gain21: '20'
+    bb_gain22: '20'
+    bb_gain23: '20'
+    bb_gain24: '20'
+    bb_gain25: '20'
+    bb_gain26: '20'
+    bb_gain27: '20'
+    bb_gain28: '20'
+    bb_gain29: '20'
+    bb_gain3: '20'
+    bb_gain30: '20'
+    bb_gain31: '20'
+    bb_gain4: '20'
+    bb_gain5: '20'
+    bb_gain6: '20'
+    bb_gain7: '20'
+    bb_gain8: '20'
+    bb_gain9: '20'
+    bw0: ancho_banda
+    bw1: '0'
+    bw10: '0'
+    bw11: '0'
+    bw12: '0'
+    bw13: '0'
+    bw14: '0'
+    bw15: '0'
+    bw16: '0'
+    bw17: '0'
+    bw18: '0'
+    bw19: '0'
+    bw2: '0'
+    bw20: '0'
+    bw21: '0'
+    bw22: '0'
+    bw23: '0'
+    bw24: '0'
+    bw25: '0'
+    bw26: '0'
+    bw27: '0'
+    bw28: '0'
+    bw29: '0'
+    bw3: '0'
+    bw30: '0'
+    bw31: '0'
+    bw4: '0'
+    bw5: '0'
+    bw6: '0'
+    bw7: '0'
+    bw8: '0'
+    bw9: '0'
+    clock_source0: ''
+    clock_source1: ''
+    clock_source2: ''
+    clock_source3: ''
+    clock_source4: ''
+    clock_source5: ''
+    clock_source6: ''
+    clock_source7: ''
+    comment: 'bladeRF 2.0 micro xA9, salida TX1. Solo
+
+      hacia el analizador'
+    corr0: '0'
+    corr1: '0'
+    corr10: '0'
+    corr11: '0'
+    corr12: '0'
+    corr13: '0'
+    corr14: '0'
+    corr15: '0'
+    corr16: '0'
+    corr17: '0'
+    corr18: '0'
+    corr19: '0'
+    corr2: '0'
+    corr20: '0'
+    corr21: '0'
+    corr22: '0'
+    corr23: '0'
+    corr24: '0'
+    corr25: '0'
+    corr26: '0'
+    corr27: '0'
+    corr28: '0'
+    corr29: '0'
+    corr3: '0'
+    corr30: '0'
+    corr31: '0'
+    corr4: '0'
+    corr5: '0'
+    corr6: '0'
+    corr7: '0'
+    corr8: '0'
+    corr9: '0'
+    freq0: freq
+    freq1: 100e6
+    freq10: 100e6
+    freq11: 100e6
+    freq12: 100e6
+    freq13: 100e6
+    freq14: 100e6
+    freq15: 100e6
+    freq16: 100e6
+    freq17: 100e6
+    freq18: 100e6
+    freq19: 100e6
+    freq2: 100e6
+    freq20: 100e6
+    freq21: 100e6
+    freq22: 100e6
+    freq23: 100e6
+    freq24: 100e6
+    freq25: 100e6
+    freq26: 100e6
+    freq27: 100e6
+    freq28: 100e6
+    freq29: 100e6
+    freq3: 100e6
+    freq30: 100e6
+    freq31: 100e6
+    freq4: 100e6
+    freq5: 100e6
+    freq6: 100e6
+    freq7: 100e6
+    freq8: 100e6
+    freq9: 100e6
+    gain0: tx_gain
+    gain1: '10'
+    gain10: '10'
+    gain11: '10'
+    gain12: '10'
+    gain13: '10'
+    gain14: '10'
+    gain15: '10'
+    gain16: '10'
+    gain17: '10'
+    gain18: '10'
+    gain19: '10'
+    gain2: '10'
+    gain20: '10'
+    gain21: '10'
+    gain22: '10'
+    gain23: '10'
+    gain24: '10'
+    gain25: '10'
+    gain26: '10'
+    gain27: '10'
+    gain28: '10'
+    gain29: '10'
+    gain3: '10'
+    gain30: '10'
+    gain31: '10'
+    gain4: '10'
+    gain5: '10'
+    gain6: '10'
+    gain7: '10'
+    gain8: '10'
+    gain9: '10'
+    if_gain0: '0'
+    if_gain1: '20'
+    if_gain10: '20'
+    if_gain11: '20'
+    if_gain12: '20'
+    if_gain13: '20'
+    if_gain14: '20'
+    if_gain15: '20'
+    if_gain16: '20'
+    if_gain17: '20'
+    if_gain18: '20'
+    if_gain19: '20'
+    if_gain2: '20'
+    if_gain20: '20'
+    if_gain21: '20'
+    if_gain22: '20'
+    if_gain23: '20'
+    if_gain24: '20'
+    if_gain25: '20'
+    if_gain26: '20'
+    if_gain27: '20'
+    if_gain28: '20'
+    if_gain29: '20'
+    if_gain3: '20'
+    if_gain30: '20'
+    if_gain31: '20'
+    if_gain4: '20'
+    if_gain5: '20'
+    if_gain6: '20'
+    if_gain7: '20'
+    if_gain8: '20'
+    if_gain9: '20'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    nchan: '1'
+    num_mboards: '1'
+    sample_rate: samp_rate
+    sync: sync
+    time_source0: ''
+    time_source1: ''
+    time_source2: ''
+    time_source3: ''
+    time_source4: ''
+    time_source5: ''
+    time_source6: ''
+    time_source7: ''
+    type: fc32
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 841
+    - 1830
+    rotation: 0
+    state: enabled
+- name: linea_de_punto
+  id: variable
+  parameters:
+    comment: 'El grafico tiene 256 puntos, 7 por linea: a
+
+      que linea (0 a 35) corresponde cada punto'
+    value: '[min(j // 7, 2 * n_port - 1) for j in range(256)]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2260
+    rotation: 0
+    state: enabled
+- name: curva_comp
+  id: variable
+  parameters:
+    comment: Compensacion de cada linea, punto por punto
+    value: '[comp[k] for k in linea_de_punto]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2390
+    rotation: 0
+    state: enabled
+- name: curva_actual
+  id: variable
+  parameters:
+    comment: Marca las dos lineas que salen ahora
+    value: '[(comp[k] if (k // 2 == indice and emite == 1) else -2) for k in linea_de_punto]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2520
+    rotation: 0
+    state: enabled
+- name: datos_comp
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: curva_comp
+    vlen: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 742
+    - 2320
+    rotation: 0
+    state: enabled
+- name: datos_actual
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: curva_actual
+    vlen: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 742
+    - 2470
+    rotation: 0
+    state: enabled
+- name: ritmo_grafico
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Solo marca el ritmo del grafico
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: time
+    maximum: '0.01'
+    samples_per_second: '2000'
+    type: float
+    vlen: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1138
+    - 2308
+    rotation: 0
+    state: enabled
+- name: grafico
+  id: qtgui_vector_sink_f
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Compensacion aplicada a cada linea"'
+    vlen: '256'
+    x_start: (f_primera - f_tono) / 1e6 - 5
+    x_step: 10.0 / 7
+    x_axis_label: '"Frecuencia de la linea"'
+    y_axis_label: '"Compensacion"'
+    x_units: '"MHz"'
+    y_units: '"dB"'
+    ref_level: '0'
+    grid: 'True'
+    autoscale: 'False'
+    average: '1.0'
+    ymin: '-2'
+    ymax: '7'
+    nconnections: '2'
+    update_time: '0.10'
+    showports: 'False'
+    gui_hint: 10,0,1,9
+    legend: 'True'
+    label1: '"Compensacion de cada linea"'
+    width1: '2'
+    color1: '"blue"'
+    alpha1: '1.0'
+    label2: '"Lineas que salen ahora"'
+    width2: '3'
+    color2: '"red"'
+    alpha2: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1533
+    - 2320
+    rotation: 0
+    state: enabled
+- name: m_70
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 6,0,1,1
+    label: <div align='right'>70:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2700
+    rotation: 0
+    state: enabled
+- name: m_80
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 6,1,1,1
+    label: <div align='right'>80:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 266
+    - 2700
+    rotation: 0
+    state: enabled
+- name: m_90
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 6,2,1,1
+    label: <div align='right'>90:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 516
+    - 2700
+    rotation: 0
+    state: enabled
+- name: m_100
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 6,3,1,1
+    label: <div align='right'>100:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 766
+    - 2700
+    rotation: 0
+    state: enabled
+- name: m_110
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 6,4,1,1
+    label: <div align='right'>110:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1016
+    - 2700
+    rotation: 0
+    state: enabled
+- name: m_120
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 6,5,1,1
+    label: <div align='right'>120:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1266
+    - 2700
+    rotation: 0
+    state: enabled
+- name: m_130
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 6,6,1,1
+    label: <div align='right'>130:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1516
+    - 2700
+    rotation: 0
+    state: enabled
+- name: m_140
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 6,7,1,1
+    label: <div align='right'>140:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1766
+    - 2700
+    rotation: 0
+    state: enabled
+- name: m_150
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 6,8,1,1
+    label: <div align='right'>150:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 2700
+    rotation: 0
+    state: enabled
+- name: m_160
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 7,0,1,1
+    label: <div align='right'>160:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2890
+    rotation: 0
+    state: enabled
+- name: m_170
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 7,1,1,1
+    label: <div align='right'>170:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 266
+    - 2890
+    rotation: 0
+    state: enabled
+- name: m_180
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 7,2,1,1
+    label: <div align='right'>180:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 516
+    - 2890
+    rotation: 0
+    state: enabled
+- name: m_190
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 7,3,1,1
+    label: <div align='right'>190:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 766
+    - 2890
+    rotation: 0
+    state: enabled
+- name: m_200
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 7,4,1,1
+    label: <div align='right'>200:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1016
+    - 2890
+    rotation: 0
+    state: enabled
+- name: m_210
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 7,5,1,1
+    label: <div align='right'>210:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1266
+    - 2890
+    rotation: 0
+    state: enabled
+- name: m_220
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 7,6,1,1
+    label: <div align='right'>220:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1516
+    - 2890
+    rotation: 0
+    state: enabled
+- name: m_230
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 7,7,1,1
+    label: <div align='right'>230:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1766
+    - 2890
+    rotation: 0
+    state: enabled
+- name: m_240
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 7,8,1,1
+    label: <div align='right'>240:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 2890
+    rotation: 0
+    state: enabled
+- name: m_250
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 8,0,1,1
+    label: <div align='right'>250:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 3080
+    rotation: 0
+    state: enabled
+- name: m_260
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 8,1,1,1
+    label: <div align='right'>260:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 266
+    - 3080
+    rotation: 0
+    state: enabled
+- name: m_270
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 8,2,1,1
+    label: <div align='right'>270:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 516
+    - 3080
+    rotation: 0
+    state: enabled
+- name: m_280
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 8,3,1,1
+    label: <div align='right'>280:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 766
+    - 3080
+    rotation: 0
+    state: enabled
+- name: m_290
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 8,4,1,1
+    label: <div align='right'>290:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1016
+    - 3080
+    rotation: 0
+    state: enabled
+- name: m_300
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 8,5,1,1
+    label: <div align='right'>300:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1266
+    - 3080
+    rotation: 0
+    state: enabled
+- name: m_310
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 8,6,1,1
+    label: <div align='right'>310:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1516
+    - 3080
+    rotation: 0
+    state: enabled
+- name: m_320
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 8,7,1,1
+    label: <div align='right'>320:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1766
+    - 3080
+    rotation: 0
+    state: enabled
+- name: m_330
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 8,8,1,1
+    label: <div align='right'>330:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 3080
+    rotation: 0
+    state: enabled
+- name: m_340
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 9,0,1,1
+    label: <div align='right'>340:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 3270
+    rotation: 0
+    state: enabled
+- name: m_350
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 9,1,1,1
+    label: <div align='right'>350:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 266
+    - 3270
+    rotation: 0
+    state: enabled
+- name: m_360
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 9,2,1,1
+    label: <div align='right'>360:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 516
+    - 3270
+    rotation: 0
+    state: enabled
+- name: m_370
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 9,3,1,1
+    label: <div align='right'>370:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 766
+    - 3270
+    rotation: 0
+    state: enabled
+- name: m_380
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 9,4,1,1
+    label: <div align='right'>380:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1016
+    - 3270
+    rotation: 0
+    state: enabled
+- name: m_390
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 9,5,1,1
+    label: <div align='right'>390:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1266
+    - 3270
+    rotation: 0
+    state: enabled
+- name: m_400
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 9,6,1,1
+    label: <div align='right'>400:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1516
+    - 3270
+    rotation: 0
+    state: enabled
+- name: m_410
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 9,7,1,1
+    label: <div align='right'>410:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1766
+    - 3270
+    rotation: 0
+    state: enabled
+- name: m_420
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 9,8,1,1
+    label: <div align='right'>420:&nbsp;</div>
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '-40'
+    step: '0.1'
+    stop: '3'
+    value: '0'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 3270
+    rotation: 0
+    state: enabled
+- name: guardar_e_importar
+  id: snippet
+  parameters:
+    alias: ''
+    comment: 'Guarda la calibracion en un archivo y la
+
+      vuelve a cargar'
+    priority: '0'
+    section: main_after_init
+    code: "# ============================================================================\n\
+      # GUARDAR E IMPORTAR LA CALIBRACION\n# Es el unico codigo Python del flujo.\
+      \ Hace falta porque los bloques no saben\n# escribir ni leer un archivo con\
+      \ valores.\n#   Boton \"Guardar calibracion\": escribe en un archivo de texto\
+      \ los 36 valores\n#   cargados en la ventana, uno por renglon, junto a su frecuencia.\n\
+      #   Boton \"Importar calibracion previa\": lee ese archivo y pone cada valor\
+      \ en\n#   su contador.\n# ============================================================================\n\
+      import os\nimport time\n\n# Los 36 contadores de la ventana, en orden de frecuencia\
+      \ (70, 80, ... 420 MHz).\n# d_widget es la casilla con flechas que se ve en\
+      \ pantalla.\ncontadores = [\n    self._m_70_win.d_widget, self._m_80_win.d_widget,\
+      \ self._m_90_win.d_widget,\n    self._m_100_win.d_widget, self._m_110_win.d_widget,\
+      \ self._m_120_win.d_widget,\n    self._m_130_win.d_widget, self._m_140_win.d_widget,\
+      \ self._m_150_win.d_widget,\n    self._m_160_win.d_widget, self._m_170_win.d_widget,\
+      \ self._m_180_win.d_widget,\n    self._m_190_win.d_widget, self._m_200_win.d_widget,\
+      \ self._m_210_win.d_widget,\n    self._m_220_win.d_widget, self._m_230_win.d_widget,\
+      \ self._m_240_win.d_widget,\n    self._m_250_win.d_widget, self._m_260_win.d_widget,\
+      \ self._m_270_win.d_widget,\n    self._m_280_win.d_widget, self._m_290_win.d_widget,\
+      \ self._m_300_win.d_widget,\n    self._m_310_win.d_widget, self._m_320_win.d_widget,\
+      \ self._m_330_win.d_widget,\n    self._m_340_win.d_widget, self._m_350_win.d_widget,\
+      \ self._m_360_win.d_widget,\n    self._m_370_win.d_widget, self._m_380_win.d_widget,\
+      \ self._m_390_win.d_widget,\n    self._m_400_win.d_widget, self._m_410_win.d_widget,\
+      \ self._m_420_win.d_widget,\n]\n\n\ndef guardar():\n    valores = self.get_medidos()\
+      \                 # los 36 valores de la ventana\n    try:\n        archivo\
+      \ = open(self.get_archivo(), 'w')\n        # primer renglon: cuando se guardo\
+      \ y con que ganancia se leyeron los valores\n        archivo.write('# guardada\
+      \ el ' + time.strftime('%d-%m-%Y %H:%M') +\n                      ', valores\
+      \ leidos con ganancia %d dB\\n' % self.get_ganancia_de_lectura())\n        for\
+      \ k in range(len(valores)):\n            frecuencia = 70 + 10 * k\n        \
+      \    archivo.write('%d %.1f\\n' % (frecuencia, valores[k]))\n        archivo.close()\n\
+      \    except Exception:\n        self.set_estado_archivo('NO se pudo guardar')\n\
+      \        return\n    self.set_estado_archivo('guardada a las ' + time.strftime('%H:%M:%S'))\n\
+      \n\ndef importar():\n    if not os.path.exists(self.get_archivo()):\n      \
+      \  self.set_estado_archivo('no hay ninguna calibracion guardada')\n        return\n\
+      \    try:\n        archivo = open(self.get_archivo())\n        renglones = archivo.readlines()\n\
+      \        archivo.close()\n        if renglones[0].startswith('#'):\n       \
+      \     renglones = renglones[1:]            # se saltea el renglon de encabezado\n\
+      \        valores = []\n        for k in range(len(contadores)):\n          \
+      \  partes = renglones[k].split()        # cada renglon: frecuencia y valor\n\
+      \            valores.append(float(partes[1]))\n    except Exception:\n     \
+      \   self.set_estado_archivo('el archivo no se pudo leer: no se importo nada')\n\
+      \        return\n    for k in range(len(contadores)):\n        contadores[k].setValue(valores[k])\
+      \       # al cambiar el contador, el flujo se actualiza solo\n    self.set_estado_archivo('importada\
+      \ a las ' + time.strftime('%H:%M:%S'))\n\n\n# GNU Radio llama a set_boton_guardar(1)\
+      \ cuando se aprieta el boton y a\n# set_boton_guardar(0) cuando se suelta. Aca\
+      \ se define que hace esa llamada.\ndef al_tocar_guardar(valor):\n    if valor\
+      \ == 1:\n        guardar()\n\n\ndef al_tocar_importar(valor):\n    if valor\
+      \ == 1:\n        importar()\n\n\nself.set_boton_guardar = al_tocar_guardar\n\
+      self.set_boton_importar = al_tocar_importar\n"
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 3460
+    rotation: 0
+    state: enabled
+connections:
+- - tono_superior
+  - '0'
+  - suma
+  - '0'
+- - tono_inferior
+  - '0'
+  - suma
+  - '1'
+- - suma
+  - '0'
+  - osmosdr_sink_0
+  - '0'
+- - datos_comp
+  - '0'
+  - ritmo_grafico
+  - '0'
+- - ritmo_grafico
+  - '0'
+  - grafico
+  - '0'
+- - datos_actual
+  - '0'
+  - grafico
+  - '1'
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0

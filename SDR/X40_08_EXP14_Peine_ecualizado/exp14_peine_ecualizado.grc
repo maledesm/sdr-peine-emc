@@ -1,0 +1,2217 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: Peine por tandas de 300 a 510 MHz, calibracion de la placa al arrancar
+      y una amplitud elegible por tono (ecualizador). Ganancia fija en 30
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: exp14_peine_ecualizado
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: EXP-14 peine calibrado con ecualizador
+    window_size: (2700,2300)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 16
+    rotation: 0
+    state: enabled
+blocks:
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import numpy as np
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 16
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: Tasa de muestreo. Requiere USB 3
+    value: 20e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 16
+    rotation: 0
+    state: enabled
+- name: f_tono
+  id: variable
+  parameters:
+    comment: Los dos tonos van en +f_tono y -f_tono
+    value: 5e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 16
+    rotation: 0
+    state: enabled
+- name: tasa_ctrl
+  id: variable
+  parameters:
+    comment: Tasa de la rama de control del barrido
+    value: 10e3
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 16
+    rotation: 0
+    state: enabled
+- name: tx_gain
+  id: variable
+  parameters:
+    comment: Ganancia de transmision fija. La tabla de fuga vale solo para esta ganancia
+    value: '30'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 16
+    rotation: 0
+    state: enabled
+- name: portadoras
+  id: variable
+  parameters:
+    comment: 11 portadoras, de 305 a 505 MHz
+    value: '[305e6 + 20e6*i for i in range(11)]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1996
+    - 16
+    rotation: 0
+    state: enabled
+- name: modo
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 0,0,1,6
+    label: Modo
+    labels: '[]'
+    options: '[0, 1, 2]'
+    num_opts: '2'
+    orient: Qt.QHBoxLayout
+    type: real
+    value: '0'
+    widget: radio_buttons
+    option0: '0'
+    label0: Automatico
+    option1: '1'
+    label1: Manual
+    option2: '2'
+    label2: ''
+    option3: '3'
+    label3: ''
+    option4: '4'
+    label4: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 180
+    rotation: 0
+    state: enabled
+- name: portadora_manual
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 0,6,1,6
+    label: Portadora en modo manual
+    labels: '[''305 MHz'', ''325 MHz'', ''345 MHz'', ''365 MHz'', ''385 MHz'', ''405
+      MHz'', ''425 MHz'', ''445 MHz'', ''465 MHz'', ''485 MHz'', ''505 MHz'']'
+    options: '[305000000, 325000000, 345000000, 365000000, 385000000, 405000000, 425000000,
+      445000000, 465000000, 485000000, 505000000]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '305000000'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 180
+    rotation: 0
+    state: enabled
+- name: permanencia
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 0,12,1,11
+    label: Permanencia por portadora (s)
+    min_len: '250'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '1'
+    step: '0.5'
+    stop: '20'
+    value: '2'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 180
+    rotation: 0
+    state: enabled
+- name: et_portadora
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''%.0f MHz'' % x'
+    gui_hint: 1,0,1,5
+    label: 'Portadora: '
+    type: real
+    value: freq / 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 420
+    rotation: 0
+    state: enabled
+- name: et_inferior
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''%.0f MHz'' % x'
+    gui_hint: 1,5,1,5
+    label: 'Inferior: '
+    type: real
+    value: (freq - f_tono) / 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 420
+    rotation: 0
+    state: enabled
+- name: et_superior
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''%.0f MHz'' % x'
+    gui_hint: 1,10,1,5
+    label: 'Superior: '
+    type: real
+    value: (freq + f_tono) / 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 420
+    rotation: 0
+    state: enabled
+- name: et_paso
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''%d de 11'' % x'
+    gui_hint: 1,15,1,3
+    label: 'Paso: '
+    type: real
+    value: indice_activo + 1
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 420
+    rotation: 0
+    state: enabled
+- name: et_pico
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: (''%.2f'' % x) if x <= 1 else (''%.2f RECORTA'' % x)'
+    gui_hint: 1,18,1,5
+    label: 'Pico: '
+    type: real
+    value: a_inf + a_sup
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 420
+    rotation: 0
+    state: enabled
+- name: indice_medido
+  id: variable_function_probe
+  parameters:
+    block_id: blocks_probe_signal_x_0
+    comment: Lee la escalera de la rama de control
+    function_args: ''
+    function_name: level
+    poll_rate: '2'
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 580
+    rotation: 0
+    state: enabled
+- name: indice
+  id: variable
+  parameters:
+    comment: Paso del barrido automatico, desde 0
+    value: min(max(int(round(indice_medido)), 0), len(portadoras) - 1)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 580
+    rotation: 0
+    state: enabled
+- name: indice_activo
+  id: variable
+  parameters:
+    comment: 'Portadora en uso: la manual o la del barrido'
+    value: int(round((portadora_manual - portadoras[0]) / 20e6)) if modo == 1 else
+      indice
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 580
+    rotation: 0
+    state: enabled
+- name: freq
+  id: variable
+  parameters:
+    comment: Frecuencia del oscilador
+    value: portadoras[indice_activo]
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1766
+    - 580
+    rotation: 0
+    state: enabled
+- name: amps_inf
+  id: variable
+  parameters:
+    comment: Amplitudes de los tonos inferiores
+    value: '[amp_300, amp_320, amp_340, amp_360, amp_380, amp_400, amp_420, amp_440,
+      amp_460, amp_480, amp_500]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 740
+    rotation: 0
+    state: enabled
+- name: amps_sup
+  id: variable
+  parameters:
+    comment: Amplitudes de los tonos superiores
+    value: '[amp_310, amp_330, amp_350, amp_370, amp_390, amp_410, amp_430, amp_450,
+      amp_470, amp_490, amp_510]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 740
+    rotation: 0
+    state: enabled
+- name: a_inf
+  id: variable
+  parameters:
+    comment: Amplitud del tono inferior de la portadora en uso
+    value: amps_inf[indice_activo]
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1996
+    - 740
+    rotation: 0
+    state: enabled
+- name: a_sup
+  id: variable
+  parameters:
+    comment: Amplitud del tono superior de la portadora en uso
+    value: amps_sup[indice_activo]
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2326
+    - 740
+    rotation: 0
+    state: enabled
+- name: analog_sig_source_x_0
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '1'
+    comment: ''
+    freq: f_tono
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 900
+    rotation: 0
+    state: enabled
+- name: blocks_conjugate_cc_0
+  id: blocks_conjugate_cc
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 1020
+    rotation: 0
+    state: enabled
+- name: blocks_multiply_const_sup
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    const: a_sup
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 916
+    rotation: 0
+    state: enabled
+- name: blocks_multiply_const_inf
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    const: a_inf
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 1016
+    rotation: 0
+    state: enabled
+- name: blocks_add_xx_0
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 950
+    rotation: 0
+    state: enabled
+- name: osmosdr_sink_0
+  id: osmosdr_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    ant0: ''
+    ant1: ''
+    ant10: ''
+    ant11: ''
+    ant12: ''
+    ant13: ''
+    ant14: ''
+    ant15: ''
+    ant16: ''
+    ant17: ''
+    ant18: ''
+    ant19: ''
+    ant2: ''
+    ant20: ''
+    ant21: ''
+    ant22: ''
+    ant23: ''
+    ant24: ''
+    ant25: ''
+    ant26: ''
+    ant27: ''
+    ant28: ''
+    ant29: ''
+    ant3: ''
+    ant30: ''
+    ant31: ''
+    ant4: ''
+    ant5: ''
+    ant6: ''
+    ant7: ''
+    ant8: ''
+    ant9: ''
+    args: bladerf=0
+    bb_gain0: '0'
+    bb_gain1: '20'
+    bb_gain10: '20'
+    bb_gain11: '20'
+    bb_gain12: '20'
+    bb_gain13: '20'
+    bb_gain14: '20'
+    bb_gain15: '20'
+    bb_gain16: '20'
+    bb_gain17: '20'
+    bb_gain18: '20'
+    bb_gain19: '20'
+    bb_gain2: '20'
+    bb_gain20: '20'
+    bb_gain21: '20'
+    bb_gain22: '20'
+    bb_gain23: '20'
+    bb_gain24: '20'
+    bb_gain25: '20'
+    bb_gain26: '20'
+    bb_gain27: '20'
+    bb_gain28: '20'
+    bb_gain29: '20'
+    bb_gain3: '20'
+    bb_gain30: '20'
+    bb_gain31: '20'
+    bb_gain4: '20'
+    bb_gain5: '20'
+    bb_gain6: '20'
+    bb_gain7: '20'
+    bb_gain8: '20'
+    bb_gain9: '20'
+    bw0: 14e6
+    bw1: '0'
+    bw10: '0'
+    bw11: '0'
+    bw12: '0'
+    bw13: '0'
+    bw14: '0'
+    bw15: '0'
+    bw16: '0'
+    bw17: '0'
+    bw18: '0'
+    bw19: '0'
+    bw2: '0'
+    bw20: '0'
+    bw21: '0'
+    bw22: '0'
+    bw23: '0'
+    bw24: '0'
+    bw25: '0'
+    bw26: '0'
+    bw27: '0'
+    bw28: '0'
+    bw29: '0'
+    bw3: '0'
+    bw30: '0'
+    bw31: '0'
+    bw4: '0'
+    bw5: '0'
+    bw6: '0'
+    bw7: '0'
+    bw8: '0'
+    bw9: '0'
+    clock_source0: ''
+    clock_source1: ''
+    clock_source2: ''
+    clock_source3: ''
+    clock_source4: ''
+    clock_source5: ''
+    clock_source6: ''
+    clock_source7: ''
+    comment: ''
+    corr0: '0'
+    corr1: '0'
+    corr10: '0'
+    corr11: '0'
+    corr12: '0'
+    corr13: '0'
+    corr14: '0'
+    corr15: '0'
+    corr16: '0'
+    corr17: '0'
+    corr18: '0'
+    corr19: '0'
+    corr2: '0'
+    corr20: '0'
+    corr21: '0'
+    corr22: '0'
+    corr23: '0'
+    corr24: '0'
+    corr25: '0'
+    corr26: '0'
+    corr27: '0'
+    corr28: '0'
+    corr29: '0'
+    corr3: '0'
+    corr30: '0'
+    corr31: '0'
+    corr4: '0'
+    corr5: '0'
+    corr6: '0'
+    corr7: '0'
+    corr8: '0'
+    corr9: '0'
+    freq0: freq
+    freq1: 100e6
+    freq10: 100e6
+    freq11: 100e6
+    freq12: 100e6
+    freq13: 100e6
+    freq14: 100e6
+    freq15: 100e6
+    freq16: 100e6
+    freq17: 100e6
+    freq18: 100e6
+    freq19: 100e6
+    freq2: 100e6
+    freq20: 100e6
+    freq21: 100e6
+    freq22: 100e6
+    freq23: 100e6
+    freq24: 100e6
+    freq25: 100e6
+    freq26: 100e6
+    freq27: 100e6
+    freq28: 100e6
+    freq29: 100e6
+    freq3: 100e6
+    freq30: 100e6
+    freq31: 100e6
+    freq4: 100e6
+    freq5: 100e6
+    freq6: 100e6
+    freq7: 100e6
+    freq8: 100e6
+    freq9: 100e6
+    gain0: tx_gain
+    gain1: '10'
+    gain10: '10'
+    gain11: '10'
+    gain12: '10'
+    gain13: '10'
+    gain14: '10'
+    gain15: '10'
+    gain16: '10'
+    gain17: '10'
+    gain18: '10'
+    gain19: '10'
+    gain2: '10'
+    gain20: '10'
+    gain21: '10'
+    gain22: '10'
+    gain23: '10'
+    gain24: '10'
+    gain25: '10'
+    gain26: '10'
+    gain27: '10'
+    gain28: '10'
+    gain29: '10'
+    gain3: '10'
+    gain30: '10'
+    gain31: '10'
+    gain4: '10'
+    gain5: '10'
+    gain6: '10'
+    gain7: '10'
+    gain8: '10'
+    gain9: '10'
+    if_gain0: '0'
+    if_gain1: '20'
+    if_gain10: '20'
+    if_gain11: '20'
+    if_gain12: '20'
+    if_gain13: '20'
+    if_gain14: '20'
+    if_gain15: '20'
+    if_gain16: '20'
+    if_gain17: '20'
+    if_gain18: '20'
+    if_gain19: '20'
+    if_gain2: '20'
+    if_gain20: '20'
+    if_gain21: '20'
+    if_gain22: '20'
+    if_gain23: '20'
+    if_gain24: '20'
+    if_gain25: '20'
+    if_gain26: '20'
+    if_gain27: '20'
+    if_gain28: '20'
+    if_gain29: '20'
+    if_gain3: '20'
+    if_gain30: '20'
+    if_gain31: '20'
+    if_gain4: '20'
+    if_gain5: '20'
+    if_gain6: '20'
+    if_gain7: '20'
+    if_gain8: '20'
+    if_gain9: '20'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    nchan: '1'
+    num_mboards: '1'
+    sample_rate: samp_rate
+    sync: sync
+    time_source0: ''
+    time_source1: ''
+    time_source2: ''
+    time_source3: ''
+    time_source4: ''
+    time_source5: ''
+    time_source6: ''
+    time_source7: ''
+    type: fc32
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 880
+    rotation: 0
+    state: enabled
+- name: blocks_vector_source_x_0
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: list(range(len(portadoras)))
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1140
+    rotation: 0
+    state: enabled
+- name: blocks_repeat_0
+  id: blocks_repeat
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    interp: int(permanencia * tasa_ctrl)
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 1152
+    rotation: 0
+    state: enabled
+- name: blocks_throttle2_0
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: time
+    maximum: '0.05'
+    samples_per_second: tasa_ctrl
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 1140
+    rotation: 0
+    state: enabled
+- name: blocks_probe_signal_x_0
+  id: blocks_probe_signal_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 1152
+    rotation: 0
+    state: enabled
+- name: calibrar_lms
+  id: variable
+  parameters:
+    comment: 'True: corre calibrate lms al arrancar'
+    value: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1340
+    rotation: 0
+    state: enabled
+- name: generar_tabla
+  id: variable
+  parameters:
+    comment: 'True: genera la tabla de fuga. False: usa la de una corrida anterior'
+    value: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 1340
+    rotation: 0
+    state: enabled
+- name: ganancia_tabla
+  id: variable
+  parameters:
+    comment: Ganancia con la que se genera la tabla. Tiene que ser la del peine
+    value: tx_gain
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 1340
+    rotation: 0
+    state: enabled
+- name: calibracion
+  id: snippet
+  parameters:
+    alias: ''
+    comment: Calibra la placa con bladeRF-cli antes de abrirla
+    code: "# Corre ANTES de que el osmocom Sink abra la placa, cuando todavia esta\
+      \ libre.\n# Deja instalada la tabla de fuga: la biblioteca de la placa la carga\
+      \ sola y la aplica en cada sintonia.\nimport os, shutil, subprocess, time\n\n\
+      cli = r\"C:\\Program Files\\bladeRF\\x64\\bladeRF-cli.exe\"\ncarpeta = os.path.dirname(os.path.abspath(__file__))\n\
+      destino = os.path.join(os.environ[\"APPDATA\"], \"Nuand\", \"bladeRF\")    #\
+      \ donde la biblioteca busca las tablas\n\ndef correr(comandos):\n    \"\"\"\
+      Ejecuta comandos de bladeRF-cli y muestra la salida en la consola.\"\"\"\n \
+      \   args = [cli]\n    for c in comandos:\n        args += [\"-e\", c]\n    p\
+      \ = subprocess.Popen(args, cwd=carpeta, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,\
+      \ text=True)\n    for linea in p.stdout:\n        print(\"   [bladeRF-cli] \"\
+      \ + linea.rstrip())\n    p.wait()\n\nprint(\"=== EXP-14: calibracion antes de\
+      \ transmitir ===\")\nt_inicio = time.time()\nos.makedirs(destino, exist_ok=True)\n\
+      \nif self.calibrar_lms:\n    print(\"1) calibrate lms\")\n    correr([\"calibrate\
+      \ lms\"])\n\nif self.generar_tabla:\n    print(\"2) Generando la tabla de fuga\
+      \ para las portadoras del peine.\")\n    for f in os.listdir(carpeta):     \
+      \                  # borrar tablas de corridas anteriores\n        if f.endswith(\"\
+      _dc_tx.tbl\"):\n            os.remove(os.path.join(carpeta, f))\n    f_min =\
+      \ \"%dM\" % round(min(self.portadoras) / 1e6)\n    f_max = \"%dM\" % round(max(self.portadoras)\
+      \ / 1e6)\n    correr([\"set gain tx1 %d\" % self.ganancia_tabla, \"calibrate\
+      \ table dc tx %s %s 20M\" % (f_min, f_max)])\n    for f in os.listdir(carpeta):\n\
+      \        if f.endswith(\"_dc_tx.tbl\"):\n            shutil.copyfile(os.path.join(carpeta,\
+      \ f), os.path.join(destino, f))\n\n# Si una corrida anterior dejo la tabla desactivada\
+      \ y no hay una activa, volver a activarla.\nfor f in os.listdir(destino):\n\
+      \    if f.endswith(\"_dc_tx.tbl.desactivada\"):\n        activa = os.path.join(destino,\
+      \ f[:-len(\".desactivada\")])\n        if os.path.isfile(activa):\n        \
+      \    os.remove(os.path.join(destino, f))\n        else:\n            os.replace(os.path.join(destino,\
+      \ f), activa)\n\ninstaladas = [f for f in os.listdir(destino) if f.endswith(\"\
+      _dc_tx.tbl\")]\nprint(\"3) Tabla de fuga instalada: \" + (\", \".join(instaladas)\
+      \ or \"NINGUNA\"))\nprint(\"=== Fin de la calibracion ===\")\n\nlineas = [\"\
+      Calibracion terminada en %.0f segundos.\" % (time.time() - t_inicio), \"\",\n\
+      \          \"calibrate lms: \" + (\"ejecutada\" if self.calibrar_lms else \"\
+      omitida\"),\n          \"Tabla de fuga: \" + (\"generada ahora\" if self.generar_tabla\
+      \ else \"la de una corrida anterior\"),\n          \"Tabla instalada: \" + (\"\
+      si\" if instaladas else \"NO HAY NINGUNA\"),\n          \"\", \"Al aceptar se\
+      \ abre la placa y empieza a transmitir.\"]\ntry:\n    import winsound\n    for\
+      \ _ in range(3):\n        winsound.Beep(1000, 250)\nexcept Exception:\n    pass\n\
+      try:\n    Qt.QMessageBox.information(None, \"EXP-14: calibracion terminada\"\
+      , chr(10).join(lineas))\nexcept Exception as e:\n    print(\"No se pudo mostrar\
+      \ el cartel: %s\" % e)\nprint(\"=== Abriendo la placa para transmitir ===\"\
+      )\n"
+    priority: '0'
+    section: init_before_blocks
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 1340
+    rotation: 0
+    state: enabled
+- name: aspecto
+  id: snippet
+  parameters:
+    alias: ''
+    comment: Letra grande y selectores compactos
+    priority: '0'
+    section: main_after_init
+    code: "# Ajustes de aspecto que los bloques de GNU Radio no permiten configurar.\n\
+      # 1) Etiquetas de estado con letra grande, y con ancho minimo para que no se\
+      \ corten.\nextra = {'et_pico': 130, 'et_paso': 30}\nfor nombre in ('et_portadora',\
+      \ 'et_inferior', 'et_superior', 'et_paso', 'et_pico'):\n    barra = getattr(self,\
+      \ '_%s_tool_bar' % nombre)\n    ancho = 30 + extra.get(nombre, 0)\n    for accion\
+      \ in barra.actions():\n        etiqueta = barra.widgetForAction(accion)\n  \
+      \      etiqueta.setStyleSheet('font-size: 15pt; font-weight: bold')\n      \
+      \  ancho += etiqueta.sizeHint().width()\n    barra.setMinimumWidth(ancho)\n\
+      # 2) Selectores de amplitud: sin su etiqueta propia (la frecuencia esta en la\
+      \ fila de arriba) y sin cortarse.\nfor f in range(300, 511, 10):\n    barra\
+      \ = getattr(self, '_amp_%d_tool_bar' % f)\n    barra.actions()[0].setVisible(False)\n\
+      \    selector = getattr(self, '_amp_%d_combo_box' % f)\n    selector.setFixedWidth(56)\n\
+      \    barra.setMinimumWidth(62)\n# 3) Menos espacio entre columnas y tamano inicial\
+      \ de la ventana segun su contenido.\nself.top_grid_layout.setHorizontalSpacing(2)\n\
+      self.resize(self.top_widget.minimumSizeHint().width() + 50, 270)\n"
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 1340
+    rotation: 0
+    state: enabled
+- name: enc_mhz
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,0,1,1
+    label: MHz
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1560
+    rotation: 0
+    state: enabled
+- name: enc_amp
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 3,0,1,1
+    label: Amplitud
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_300
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,1,1,1
+    label: '300'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 231
+    - 1560
+    rotation: 0
+    state: enabled
+- name: amp_300
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,1,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 231
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_310
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,2,1,1
+    label: '310'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 446
+    - 1560
+    rotation: 0
+    state: enabled
+- name: amp_310
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,2,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 446
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_320
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,3,1,1
+    label: '320'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 661
+    - 1560
+    rotation: 0
+    state: enabled
+- name: amp_320
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,3,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 661
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_330
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,4,1,1
+    label: '330'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 876
+    - 1560
+    rotation: 0
+    state: enabled
+- name: amp_330
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,4,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 876
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_340
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,5,1,1
+    label: '340'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1091
+    - 1560
+    rotation: 0
+    state: enabled
+- name: amp_340
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,5,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1091
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_350
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,6,1,1
+    label: '350'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1306
+    - 1560
+    rotation: 0
+    state: enabled
+- name: amp_350
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,6,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1306
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_360
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,7,1,1
+    label: '360'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1521
+    - 1560
+    rotation: 0
+    state: enabled
+- name: amp_360
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,7,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1521
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_370
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,8,1,1
+    label: '370'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1736
+    - 1560
+    rotation: 0
+    state: enabled
+- name: amp_370
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,8,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1736
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_380
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,9,1,1
+    label: '380'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1951
+    - 1560
+    rotation: 0
+    state: enabled
+- name: amp_380
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,9,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1951
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_390
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,10,1,1
+    label: '390'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2166
+    - 1560
+    rotation: 0
+    state: enabled
+- name: amp_390
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,10,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2166
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_400
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,11,1,1
+    label: '400'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2381
+    - 1560
+    rotation: 0
+    state: enabled
+- name: amp_400
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,11,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2381
+    - 1820
+    rotation: 0
+    state: enabled
+- name: enc_410
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,12,1,1
+    label: '410'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 231
+    - 1680
+    rotation: 0
+    state: enabled
+- name: amp_410
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,12,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 231
+    - 2060
+    rotation: 0
+    state: enabled
+- name: enc_420
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,13,1,1
+    label: '420'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 446
+    - 1680
+    rotation: 0
+    state: enabled
+- name: amp_420
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,13,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 446
+    - 2060
+    rotation: 0
+    state: enabled
+- name: enc_430
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,14,1,1
+    label: '430'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 661
+    - 1680
+    rotation: 0
+    state: enabled
+- name: amp_430
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,14,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 661
+    - 2060
+    rotation: 0
+    state: enabled
+- name: enc_440
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,15,1,1
+    label: '440'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 876
+    - 1680
+    rotation: 0
+    state: enabled
+- name: amp_440
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,15,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 876
+    - 2060
+    rotation: 0
+    state: enabled
+- name: enc_450
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,16,1,1
+    label: '450'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1091
+    - 1680
+    rotation: 0
+    state: enabled
+- name: amp_450
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,16,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1091
+    - 2060
+    rotation: 0
+    state: enabled
+- name: enc_460
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,17,1,1
+    label: '460'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1306
+    - 1680
+    rotation: 0
+    state: enabled
+- name: amp_460
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,17,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1306
+    - 2060
+    rotation: 0
+    state: enabled
+- name: enc_470
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,18,1,1
+    label: '470'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1521
+    - 1680
+    rotation: 0
+    state: enabled
+- name: amp_470
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,18,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1521
+    - 2060
+    rotation: 0
+    state: enabled
+- name: enc_480
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,19,1,1
+    label: '480'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1736
+    - 1680
+    rotation: 0
+    state: enabled
+- name: amp_480
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,19,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1736
+    - 2060
+    rotation: 0
+    state: enabled
+- name: enc_490
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,20,1,1
+    label: '490'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1951
+    - 1680
+    rotation: 0
+    state: enabled
+- name: amp_490
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,20,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1951
+    - 2060
+    rotation: 0
+    state: enabled
+- name: enc_500
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,21,1,1
+    label: '500'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2166
+    - 1680
+    rotation: 0
+    state: enabled
+- name: amp_500
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,21,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2166
+    - 2060
+    rotation: 0
+    state: enabled
+- name: enc_510
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 2,22,1,1
+    label: '510'
+    type: string
+    value: ''''''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2381
+    - 1680
+    rotation: 0
+    state: enabled
+- name: amp_510
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 3,22,1,1
+    label: ' '
+    labels: '[''0.10'', ''0.15'', ''0.20'', ''0.25'', ''0.30'', ''0.35'', ''0.40'',
+      ''0.45'', ''0.50'', ''0.55'', ''0.60'', ''0.65'', ''0.70'']'
+    options: '[0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65,
+      0.70]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.4'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2381
+    - 2060
+    rotation: 0
+    state: enabled
+connections:
+- - analog_sig_source_x_0
+  - '0'
+  - blocks_multiply_const_sup
+  - '0'
+- - analog_sig_source_x_0
+  - '0'
+  - blocks_conjugate_cc_0
+  - '0'
+- - blocks_conjugate_cc_0
+  - '0'
+  - blocks_multiply_const_inf
+  - '0'
+- - blocks_multiply_const_sup
+  - '0'
+  - blocks_add_xx_0
+  - '0'
+- - blocks_multiply_const_inf
+  - '0'
+  - blocks_add_xx_0
+  - '1'
+- - blocks_add_xx_0
+  - '0'
+  - osmosdr_sink_0
+  - '0'
+- - blocks_vector_source_x_0
+  - '0'
+  - blocks_repeat_0
+  - '0'
+- - blocks_repeat_0
+  - '0'
+  - blocks_throttle2_0
+  - '0'
+- - blocks_throttle2_0
+  - '0'
+  - blocks_probe_signal_x_0
+  - '0'
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0

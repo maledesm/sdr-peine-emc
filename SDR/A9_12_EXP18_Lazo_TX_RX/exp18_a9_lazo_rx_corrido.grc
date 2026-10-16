@@ -1,0 +1,1266 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: 'bladeRF 2.0 micro xA9: transmite dos tonos en +/-5 MHz y los mide
+      con su propio receptor por cable. Version 2: el receptor se sintoniza 1 MHz
+      por encima del transmisor, para que cada tono caiga en una frecuencia propia
+      y la lectura no dependa de la fase entre los dos osciladores. Sin codigo Python'
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: exp18_a9_lazo_rx_corrido
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: 'EXP-18 v2 xA9: lazo TX1 a RX1 con el receptor corrido'
+    window_size: (2400,2200)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 16
+    rotation: 0
+    state: enabled
+blocks:
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: 'Tasa de muestreo, comun a TX y RX. En esta
+
+      PC no pasar de 25e6'
+    value: 20e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 16
+    rotation: 0
+    state: enabled
+- name: f_tono
+  id: variable
+  parameters:
+    comment: 'Dos tonos: en +f_tono y en -f_tono'
+    value: 5e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 16
+    rotation: 0
+    state: enabled
+- name: ancho_banda
+  id: variable
+  parameters:
+    comment: Filtro analogico de la placa, en TX y en RX
+    value: 18e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 16
+    rotation: 0
+    state: enabled
+- name: tope
+  id: variable
+  parameters:
+    comment: 'Tope de seguridad de la ganancia de TX con
+
+      el cable al receptor: con 30 dB salen unos
+
+      -27 dBm como maximo'
+    value: '30'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 16
+    rotation: 0
+    state: enabled
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import math
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1726
+    - 16
+    rotation: 0
+    state: enabled
+- name: decim
+  id: variable
+  parameters:
+    comment: El filtro de cada tono baja la tasa a 1 MSPS
+    value: int(samp_rate / 1e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 200
+    rotation: 0
+    state: enabled
+- name: taps
+  id: variable_low_pass_filter_taps
+  parameters:
+    comment: Pasabajos que deja solo el tono elegido
+    gain: '1.0'
+    samp_rate: samp_rate
+    cutoff_freq: 100e3
+    width: 400e3
+    win: window.WIN_HAMMING
+    beta: '6.76'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 200
+    rotation: 0
+    state: enabled
+- name: largo_promedio
+  id: variable
+  parameters:
+    comment: 'Muestras que se promedian: 0,1 s a 1 MSPS'
+    value: '100000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 736
+    - 200
+    rotation: 0
+    state: enabled
+- name: nivel_inf
+  id: variable_function_probe
+  parameters:
+    block_id: sonda_inf
+    comment: 'Nivel del tono inferior leido por el RX, en
+
+      dB'
+    function_args: ''
+    function_name: level
+    poll_rate: '5'
+    value: '-120'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1066
+    - 200
+    rotation: 0
+    state: enabled
+- name: nivel_sup
+  id: variable_function_probe
+  parameters:
+    block_id: sonda_sup
+    comment: 'Nivel del tono superior leido por el RX, en
+
+      dB'
+    function_args: ''
+    function_name: level
+    poll_rate: '5'
+    value: '-120'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1396
+    - 200
+    rotation: 0
+    state: enabled
+- name: portadora
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 1,0,1,2
+    label: Portadora
+    labels: '[''75 MHz'', ''135 MHz'', ''195 MHz'', ''255 MHz'', ''315 MHz'', ''335
+      MHz'', ''415 MHz'']'
+    options: '[75, 135, 195, 255, 315, 335, 415]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '75'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 420
+    rotation: 0
+    state: enabled
+- name: ganancia_tx
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 1,2,1,2
+    label: Ganancia de TX
+    labels: '[''0 dB'', ''10 dB'', ''20 dB'', ''30 dB'']'
+    options: '[0, 10, 20, 30]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '0'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 420
+    rotation: 0
+    state: enabled
+- name: amp
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 1,4,1,2
+    label: Amplitud de cada tono
+    labels: '[''0.05'', ''0.1'', ''0.2'', ''0.45'']'
+    options: '[0.05, 0.1, 0.2, 0.45]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.45'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 420
+    rotation: 0
+    state: enabled
+- name: hab_inf
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    gui_hint: 2,0,1,1
+    label: Tono inferior
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 420
+    rotation: 0
+    state: enabled
+- name: hab_sup
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    gui_hint: 2,1,1,1
+    label: Tono superior
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 420
+    rotation: 0
+    state: enabled
+- name: rx_gain
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 2,2,1,2
+    label: Ganancia de RX
+    labels: '[''0 dB'', ''10 dB'', ''20 dB'', ''30 dB'', ''40 dB'', ''50 dB'', ''60
+      dB'']'
+    options: '[0, 10, 20, 30, 40, 50, 60]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '10'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 420
+    rotation: 0
+    state: enabled
+- name: corrimiento
+  id: variable_qtgui_chooser
+  parameters:
+    comment: 'Cuanto mas arriba que el transmisor se
+
+      sintoniza el receptor'
+    gui_hint: 2,4,1,2
+    label: Corrimiento del RX
+    labels: '[''0 (igual que el TX)'', ''1 MHz'', ''2 MHz'']'
+    options: '[0, 1, 2]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '1'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1996
+    - 420
+    rotation: 0
+    state: enabled
+- name: freq
+  id: variable
+  parameters:
+    comment: Frecuencia del transmisor, en Hz
+    value: portadora * 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 680
+    rotation: 0
+    state: enabled
+- name: freq_rx
+  id: variable
+  parameters:
+    comment: 'Frecuencia del receptor: la del transmisor
+
+      mas el corrimiento'
+    value: freq + corrimiento * 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 680
+    rotation: 0
+    state: enabled
+- name: tx_gain
+  id: variable
+  parameters:
+    comment: 'Ganancia que recibe la placa: nunca supera
+
+      el tope'
+    value: min(ganancia_tx, tope)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 736
+    - 680
+    rotation: 0
+    state: enabled
+- name: nivel_estimado
+  id: variable
+  parameters:
+    comment: 'dBm por tono, segun el EXP-17: -33 dBm con
+
+      ganancia 30 y amplitud 0.45'
+    value: tx_gain - 56 + 20 * math.log10(amp)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1126
+    - 680
+    rotation: 0
+    state: enabled
+- name: nivel_mayor
+  id: variable
+  parameters:
+    comment: El mas alto de los dos tonos recibidos
+    value: max(nivel_inf, nivel_sup)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 680
+    rotation: 0
+    state: enabled
+- name: estado
+  id: variable
+  parameters:
+    comment: 'Zona de trabajo del receptor: entre -30 y
+
+      -12 dB'
+    value: '''SIN SENAL'' if nivel_mayor < -75 else (''BAJO: se puede subir la ganancia
+      de RX'' if nivel_mayor < -30 else (''BIEN'' if nivel_mayor < -12 else ''ALTO:
+      bajar la ganancia de RX''))'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1996
+    - 680
+    rotation: 0
+    state: enabled
+- name: et_tx
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:13pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 0,0,1,6
+    label: '<span style=''font-size:13pt''>Transmite: </span>'
+    type: string
+    value: '''%.0f y %.0f MHz, ganancia %d dB, unos %.0f dBm por tono. Recibe centrado
+      en %.0f MHz'' % ((freq - f_tono) / 1e6, (freq + f_tono) / 1e6, tx_gain, nivel_estimado,
+      freq_rx / 1e6)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 880
+    rotation: 0
+    state: enabled
+- name: et_estado
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:13pt''><b>" + str(x) + "</b></span>"'
+    gui_hint: 4,0,1,6
+    label: '<span style=''font-size:13pt''>Receptor: </span>'
+    type: string
+    value: estado
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 880
+    rotation: 0
+    state: enabled
+- name: et_inf
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:15pt''><b>%.1f dB</b></span>" %
+      x'
+    gui_hint: 3,0,1,2
+    label: '<span style=''font-size:15pt''>RX inferior: </span>'
+    type: real
+    value: nivel_inf
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 880
+    rotation: 0
+    state: enabled
+- name: et_sup
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:15pt''><b>%.1f dB</b></span>" %
+      x'
+    gui_hint: 3,2,1,2
+    label: '<span style=''font-size:15pt''>RX superior: </span>'
+    type: real
+    value: nivel_sup
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 880
+    rotation: 0
+    state: enabled
+- name: et_dif
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:15pt''><b>%+.1f dB</b></span>"
+      % x'
+    gui_hint: 3,4,1,2
+    label: '<span style=''font-size:15pt''>Superior - inferior: </span>'
+    type: real
+    value: nivel_sup - nivel_inf
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 880
+    rotation: 0
+    state: enabled
+- name: tono_superior
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Sale en portadora + 5 MHz
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    amp: amp * hab_sup
+    freq: f_tono
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1080
+    rotation: 0
+    state: enabled
+- name: tono_inferior
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Sale en portadora - 5 MHz
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    amp: amp * hab_inf
+    freq: -f_tono
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1280
+    rotation: 0
+    state: enabled
+- name: suma
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 511
+    - 1190
+    rotation: 0
+    state: enabled
+- name: osmosdr_sink_0
+  id: osmosdr_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    ant0: ''
+    ant1: ''
+    ant10: ''
+    ant11: ''
+    ant12: ''
+    ant13: ''
+    ant14: ''
+    ant15: ''
+    ant16: ''
+    ant17: ''
+    ant18: ''
+    ant19: ''
+    ant2: ''
+    ant20: ''
+    ant21: ''
+    ant22: ''
+    ant23: ''
+    ant24: ''
+    ant25: ''
+    ant26: ''
+    ant27: ''
+    ant28: ''
+    ant29: ''
+    ant3: ''
+    ant30: ''
+    ant31: ''
+    ant4: ''
+    ant5: ''
+    ant6: ''
+    ant7: ''
+    ant8: ''
+    ant9: ''
+    args: bladerf=321e0fa5875945d99b11070bb0a76d31
+    bb_gain0: '0'
+    bb_gain1: '20'
+    bb_gain10: '20'
+    bb_gain11: '20'
+    bb_gain12: '20'
+    bb_gain13: '20'
+    bb_gain14: '20'
+    bb_gain15: '20'
+    bb_gain16: '20'
+    bb_gain17: '20'
+    bb_gain18: '20'
+    bb_gain19: '20'
+    bb_gain2: '20'
+    bb_gain20: '20'
+    bb_gain21: '20'
+    bb_gain22: '20'
+    bb_gain23: '20'
+    bb_gain24: '20'
+    bb_gain25: '20'
+    bb_gain26: '20'
+    bb_gain27: '20'
+    bb_gain28: '20'
+    bb_gain29: '20'
+    bb_gain3: '20'
+    bb_gain30: '20'
+    bb_gain31: '20'
+    bb_gain4: '20'
+    bb_gain5: '20'
+    bb_gain6: '20'
+    bb_gain7: '20'
+    bb_gain8: '20'
+    bb_gain9: '20'
+    bw0: ancho_banda
+    bw1: '0'
+    bw10: '0'
+    bw11: '0'
+    bw12: '0'
+    bw13: '0'
+    bw14: '0'
+    bw15: '0'
+    bw16: '0'
+    bw17: '0'
+    bw18: '0'
+    bw19: '0'
+    bw2: '0'
+    bw20: '0'
+    bw21: '0'
+    bw22: '0'
+    bw23: '0'
+    bw24: '0'
+    bw25: '0'
+    bw26: '0'
+    bw27: '0'
+    bw28: '0'
+    bw29: '0'
+    bw3: '0'
+    bw30: '0'
+    bw31: '0'
+    bw4: '0'
+    bw5: '0'
+    bw6: '0'
+    bw7: '0'
+    bw8: '0'
+    bw9: '0'
+    clock_source0: ''
+    clock_source1: ''
+    clock_source2: ''
+    clock_source3: ''
+    clock_source4: ''
+    clock_source5: ''
+    clock_source6: ''
+    clock_source7: ''
+    comment: bladeRF 2.0 micro xA9, salida TX1
+    corr0: '0'
+    corr1: '0'
+    corr10: '0'
+    corr11: '0'
+    corr12: '0'
+    corr13: '0'
+    corr14: '0'
+    corr15: '0'
+    corr16: '0'
+    corr17: '0'
+    corr18: '0'
+    corr19: '0'
+    corr2: '0'
+    corr20: '0'
+    corr21: '0'
+    corr22: '0'
+    corr23: '0'
+    corr24: '0'
+    corr25: '0'
+    corr26: '0'
+    corr27: '0'
+    corr28: '0'
+    corr29: '0'
+    corr3: '0'
+    corr30: '0'
+    corr31: '0'
+    corr4: '0'
+    corr5: '0'
+    corr6: '0'
+    corr7: '0'
+    corr8: '0'
+    corr9: '0'
+    freq0: freq
+    freq1: 100e6
+    freq10: 100e6
+    freq11: 100e6
+    freq12: 100e6
+    freq13: 100e6
+    freq14: 100e6
+    freq15: 100e6
+    freq16: 100e6
+    freq17: 100e6
+    freq18: 100e6
+    freq19: 100e6
+    freq2: 100e6
+    freq20: 100e6
+    freq21: 100e6
+    freq22: 100e6
+    freq23: 100e6
+    freq24: 100e6
+    freq25: 100e6
+    freq26: 100e6
+    freq27: 100e6
+    freq28: 100e6
+    freq29: 100e6
+    freq3: 100e6
+    freq30: 100e6
+    freq31: 100e6
+    freq4: 100e6
+    freq5: 100e6
+    freq6: 100e6
+    freq7: 100e6
+    freq8: 100e6
+    freq9: 100e6
+    gain0: tx_gain
+    gain1: '10'
+    gain10: '10'
+    gain11: '10'
+    gain12: '10'
+    gain13: '10'
+    gain14: '10'
+    gain15: '10'
+    gain16: '10'
+    gain17: '10'
+    gain18: '10'
+    gain19: '10'
+    gain2: '10'
+    gain20: '10'
+    gain21: '10'
+    gain22: '10'
+    gain23: '10'
+    gain24: '10'
+    gain25: '10'
+    gain26: '10'
+    gain27: '10'
+    gain28: '10'
+    gain29: '10'
+    gain3: '10'
+    gain30: '10'
+    gain31: '10'
+    gain4: '10'
+    gain5: '10'
+    gain6: '10'
+    gain7: '10'
+    gain8: '10'
+    gain9: '10'
+    if_gain0: '0'
+    if_gain1: '20'
+    if_gain10: '20'
+    if_gain11: '20'
+    if_gain12: '20'
+    if_gain13: '20'
+    if_gain14: '20'
+    if_gain15: '20'
+    if_gain16: '20'
+    if_gain17: '20'
+    if_gain18: '20'
+    if_gain19: '20'
+    if_gain2: '20'
+    if_gain20: '20'
+    if_gain21: '20'
+    if_gain22: '20'
+    if_gain23: '20'
+    if_gain24: '20'
+    if_gain25: '20'
+    if_gain26: '20'
+    if_gain27: '20'
+    if_gain28: '20'
+    if_gain29: '20'
+    if_gain3: '20'
+    if_gain30: '20'
+    if_gain31: '20'
+    if_gain4: '20'
+    if_gain5: '20'
+    if_gain6: '20'
+    if_gain7: '20'
+    if_gain8: '20'
+    if_gain9: '20'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    nchan: '1'
+    num_mboards: '1'
+    sample_rate: samp_rate
+    sync: sync
+    time_source0: ''
+    time_source1: ''
+    time_source2: ''
+    time_source3: ''
+    time_source4: ''
+    time_source5: ''
+    time_source6: ''
+    time_source7: ''
+    type: fc32
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 841
+    - 1070
+    rotation: 0
+    state: enabled
+- name: osmosdr_source_0
+  id: osmosdr_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'bladeRF 2.0 micro xA9, entrada RX1. Ganancia
+
+      manual. Sintonizado en freq_rx'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: fc32
+    args: bladerf=321e0fa5875945d99b11070bb0a76d31
+    sync: sync
+    num_mboards: '1'
+    nchan: '1'
+    sample_rate: samp_rate
+    freq0: freq_rx
+    corr0: '0'
+    dc_offset_mode0: '0'
+    iq_balance_mode0: '0'
+    gain_mode0: 'False'
+    gain0: rx_gain
+    if_gain0: '0'
+    bb_gain0: '0'
+    ant0: ''
+    bw0: ancho_banda
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1560
+    rotation: 0
+    state: enabled
+- name: filtro_sup
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Deja solo el tono superior: lo busca en +5
+
+      MHz menos el corrimiento'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: ccf
+    decim: decim
+    taps: taps
+    center_freq: f_tono - corrimiento * 1e6
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 445
+    - 1500
+    rotation: 0
+    state: enabled
+- name: potencia_sup
+  id: blocks_complex_to_mag_squared
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Potencia instantanea
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 841
+    - 1524
+    rotation: 0
+    state: enabled
+- name: promedio_sup
+  id: blocks_moving_average_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Promedia los ultimos 0,1 s
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    length: largo_promedio
+    scale: 1.0 / largo_promedio
+    max_iter: '4000'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1171
+    - 1500
+    rotation: 0
+    state: enabled
+- name: a_db_sup
+  id: blocks_nlog10_ff
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Pasa a dB: 10 log10'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n: '10'
+    k: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1501
+    - 1512
+    rotation: 0
+    state: enabled
+- name: sonda_sup
+  id: blocks_probe_signal_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Deja leer el valor desde un Function Probe
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1765
+    - 1524
+    rotation: 0
+    state: enabled
+- name: filtro_inf
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Deja solo el tono inferior: lo busca en -5
+
+      MHz menos el corrimiento'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: ccf
+    decim: decim
+    taps: taps
+    center_freq: -f_tono - corrimiento * 1e6
+    samp_rate: samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 445
+    - 1690
+    rotation: 0
+    state: enabled
+- name: potencia_inf
+  id: blocks_complex_to_mag_squared
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Potencia instantanea
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 841
+    - 1714
+    rotation: 0
+    state: enabled
+- name: promedio_inf
+  id: blocks_moving_average_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Promedia los ultimos 0,1 s
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    length: largo_promedio
+    scale: 1.0 / largo_promedio
+    max_iter: '4000'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1171
+    - 1690
+    rotation: 0
+    state: enabled
+- name: a_db_inf
+  id: blocks_nlog10_ff
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Pasa a dB: 10 log10'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    n: '10'
+    k: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1501
+    - 1702
+    rotation: 0
+    state: enabled
+- name: sonda_inf
+  id: blocks_probe_signal_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Deja leer el valor desde un Function Probe
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1765
+    - 1714
+    rotation: 0
+    state: enabled
+- name: espectro
+  id: qtgui_freq_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: complex
+    name: '"Lo que recibe RX1 (para ver la forma; los niveles que valen son los de
+      arriba)"'
+    fftsize: '1024'
+    freqhalf: 'True'
+    wintype: window.WIN_BLACKMAN_hARRIS
+    norm_window: 'False'
+    fc: freq_rx
+    bw: samp_rate
+    grid: 'True'
+    autoscale: 'False'
+    average: '0.2'
+    ymin: '-120'
+    ymax: '0'
+    label: Nivel
+    units: dB
+    nconnections: '1'
+    update_time: '0.20'
+    showports: 'False'
+    gui_hint: 5,0,1,6
+    ctrlpanel: 'False'
+    legend: 'False'
+    axislabels: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 445
+    - 1880
+    rotation: 0
+    state: enabled
+connections:
+- - tono_superior
+  - '0'
+  - suma
+  - '0'
+- - tono_inferior
+  - '0'
+  - suma
+  - '1'
+- - suma
+  - '0'
+  - osmosdr_sink_0
+  - '0'
+- - filtro_sup
+  - '0'
+  - potencia_sup
+  - '0'
+- - potencia_sup
+  - '0'
+  - promedio_sup
+  - '0'
+- - promedio_sup
+  - '0'
+  - a_db_sup
+  - '0'
+- - a_db_sup
+  - '0'
+  - sonda_sup
+  - '0'
+- - osmosdr_source_0
+  - '0'
+  - filtro_sup
+  - '0'
+- - filtro_inf
+  - '0'
+  - potencia_inf
+  - '0'
+- - potencia_inf
+  - '0'
+  - promedio_inf
+  - '0'
+- - promedio_inf
+  - '0'
+  - a_db_inf
+  - '0'
+- - a_db_inf
+  - '0'
+  - sonda_inf
+  - '0'
+- - osmosdr_source_0
+  - '0'
+  - filtro_inf
+  - '0'
+- - osmosdr_source_0
+  - '0'
+  - espectro
+  - '0'
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0

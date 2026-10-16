@@ -1,0 +1,2493 @@
+===============================================================================
+HISTORIAL DEL PROYECTO - SDR COMO GENERADOR PEINE PARA ENSAYOS DE CEM
+Trabajo Practico Integrador 2C2026 - Compatibilidad Electromagnetica - FIUBA
+Ultima actualizacion: 15/10/2026
+===============================================================================
+
+-------------------------------------------------------------------------------
+1. OBJETIVO DEL PROYECTO
+-------------------------------------------------------------------------------
+Evaluar el uso de una radio definida por software (SDR) como sustituto de un
+generador peine comercial para la verificacion de sistemas de medicion de
+compatibilidad electromagnetica.
+
+Motivacion detectada en la visita al CETEM (Florencio Varela, 16/09/2026): el
+personal informa que en Argentina no cuentan con un agente que calibre todos sus
+equipos de CEM ni con un procedimiento de calibracion propio. No saben con
+certeza cuando un equipo esta descalibrado; lo estiman por antiguedad o por
+fallas evidentes.
+
+Objetivos, en orden de prioridad:
+  1) Usar la SDR como generador peine por tandas, para verificar el sistema de
+     emisiones radiadas y seguir su deriva en el tiempo. FOCO ACTUAL.
+  2) Usar la SDR como sonda para la calibracion del ensayo de susceptibilidad
+     radiada. Etapa posterior.
+
+-------------------------------------------------------------------------------
+2. ESTADO DEL ARTE (busqueda del 17/09/2026)
+-------------------------------------------------------------------------------
+No se encontro ningun trabajo publicado que use una SDR como sustituto de
+generador peine para verificacion de sistemas de CEM. Busqueda hecha en web
+abierta, sin acceso completo a IEEE Xplore: corresponde repetirla ahi antes de
+afirmar novedad.
+
+Trabajos cercanos mas relevantes:
+  - Mullner, Kriz, Haider, Kolb (Austrian Research Centers), "Conducted and
+    Radiated Comb Generator Measurement Techniques", 7th Int. Symp. on EMC and
+    Electromagnetic Ecology, San Petersburgo, 2007. Base metodologica del
+    objetivo 1. Define el procedimiento de system check: medicion de referencia,
+    diferencia contra la medicion actual y umbral de aceptacion. Demuestra que un
+    peine a bateria da resultados mas repetibles que un generador con cable,
+    porque el cable de transmision altera los modos de la camara.
+  - Tena Sanchez, Sierra Castaner (UPM), Foged, Gray (MVG), "EMC Measurement
+    System Based on Software Defined Radio and Diagnostic Techniques". SDR como
+    receptor de bajo costo, validado contra un laboratorio de CEM a 3 m.
+  - Calibradores de radiotelescopios con sincronizacion por GPS: CHIME con dron
+    y fuente pulsada (arXiv 2407.04848), PEACC con fuente sintetizada y dos
+    unidades (arXiv 2604.09859), ECHO (arXiv 1610.02607).
+  - Comparaciones interlaboratorio que usan un peine como artefacto viajero, con
+    evaluacion por z-score.
+
+-------------------------------------------------------------------------------
+3. EQUIPAMIENTO
+-------------------------------------------------------------------------------
+bladeRF x40 (primera generacion, prestada)
+  - Serie 96c4c15c9fc517a47ad39c98ae127a31
+  - Sin placa de expansion XB-200 (verificado abriendo la caja)
+  - Rango de sintonia: 237,5 MHz a 3,8 GHz (el fabricante especifica desde 300 MHz)
+  - Ancho de banda instantaneo maximo: 28 MHz. Salida maxima: aprox. +6 dBm
+  - Limites de los puertos segun Nuand: dano a +23 dBm; saturacion del ADC de
+    recepcion cerca de -13 dBm
+  - Firmware actualizado a 2.6.0 y FPGA hostedx40 v0.16.0 grabada en memoria
+    flash con autocarga (10/09/2026)
+
+bladeRF 2.0 micro xA9 (prestada por el profesor, alto valor)
+  - 47 MHz a 6 GHz, hasta 56 MHz de ancho de banda, 61,44 MSPS
+  - FPGA de 301 KLE, unos 292 KLE disponibles para el usuario
+  - Solo USB 3, sin Ethernet. Admite alimentacion externa
+  - Puede operar sin computadora, pero requiere diseno HDL propio; no hay
+    ejemplo oficial de Nuand
+  - En uso desde el 02/10/2026 (EXP-15 en adelante). Serie
+    321e0fa5875945d99b11070bb0a76d31. Firmware 2.4.0 y FPGA 0.14.0, sin
+    actualizar
+  - Transmite desde 47 MHz y recibe desde 70 MHz. La entrada del receptor
+    tolera hasta +2,5 dBm (dato del AD9361, a confirmar con la hoja de datos)
+  - En esta PC no pasar de 30 MSPS (EXP-16)
+
+Accesorios de RF disponibles al 04/10/2026: cables SMA y una carga de 50 ohm.
+Sin atenuador ni divisor.
+
+tinySA Ultra+ ZS-406
+  - 100 kHz a 5,4 GHz. Filtros de resolucion de 0,2 a 850 kHz
+  - Entrada maxima absoluta: +6 dBm con atenuacion interna en 0 dB
+  - Maximo sugerido con atenuacion automatica: 0 dBm. Medicion optima: por
+    debajo de -25 dBm
+  - Exactitud en frecuencia del orden del filtro de resolucion seleccionado
+  - Conectores: RF (entrada de medicion, tambien salida del generador interno) y
+    CAL (referencia interna de calibracion)
+  - El modo de alta frecuencia viene bloqueado de fabrica. Se habilita en
+    CONFIG / MORE / ENABLE ULTRA con el codigo 4321
+  - No se presenta como almacenamiento masivo por USB: es un puerto serie. Las
+    capturas se pasan sacando la tarjeta micro SD
+
+Raspberry Pi 4 de 2 GB, con USB 3. Candidata a alojar la SDR fuente dentro de la
+camara. Pendiente de caracterizar sus propias emisiones.
+
+-------------------------------------------------------------------------------
+4. ENTORNO DE SOFTWARE
+-------------------------------------------------------------------------------
+  - Radioconda 2025.03.14 en C:\Users\tinch\radioconda
+    GNU Radio 3.10.12, gr-osmosdr 0.2.0 y gr-soapy, con soporte bladeRF
+  - Paquete Nuand con bladeRF-cli en C:\Program Files\bladeRF\x64\
+  - Flujo de trabajo de GNU Radio: SDR\X40_01_Pruebas_iniciales\sdr_test_1.grc
+
+Particularidades verificadas de gr-osmosdr con bladeRF:
+  - En el bloque osmocom Sink solo actua el campo RF Gain, como ganancia total
+    (rango 17 a 73 dB). Los campos IF Gain y BB Gain se ignoran
+  - En el bloque osmocom Source, Gain Mode debe quedar en False
+  - Con tasa de muestreo de 1 MHz el filtro minimo de la placa es de 1,5 MHz, lo
+    que pliega hacia la ventana senales que estan fuera de ella. Usar 2 MHz
+  - La ganancia de RF se convierte a entero: solo cambia de a 1 dB (04/10/2026,
+    visto en el codigo fuente)
+  - Cada vez que se le fija la frecuencia, la placa resintoniza, aunque el
+    valor sea el mismo
+  - El osmocom Sink guarda hasta 512 x 4096 muestras: a 20 MSPS un cambio de
+    amplitud tarda unos 0,1 s en salir. Frecuencia y ganancia son inmediatas
+  - osmocom Source y osmocom Sink pueden abrir la misma placa a la vez si se
+    les da el mismo numero de serie
+
+-------------------------------------------------------------------------------
+5. METODOLOGIA ADOPTADA
+-------------------------------------------------------------------------------
+Medicion por estados sucesivos, tomada de la practica de medicion de fondo de
+los laboratorios de CEM. Para atribuir cada linea del espectro a su origen se
+mide en tres condiciones y se comparan:
+  Estado 1: instrumento receptor solo, sin la SDR. Da el fondo propio y ambiental
+  Estado 2: SDR alimentada pero sin transmitir. Revela emisiones propias del
+            equipo, como armonicos de sus relojes
+  Estado 3: SDR transmitiendo. Revela la senal util y sus productos asociados
+
+Para identificar el origen de una linea dudosa se usan dos pruebas:
+  - Cambiar la frecuencia del tono de banda base: si la linea se mueve en forma
+    proporcional, es un producto de la senal transmitida
+  - Cambiar la frecuencia del oscilador: si la linea se mueve con el, pertenece a
+    la cadena de la SDR; si se queda fija, es externa o de un reloj fijo
+
+-------------------------------------------------------------------------------
+6. BITACORA DE EXPERIMENTOS
+-------------------------------------------------------------------------------
+
+EXP-01 / 10-09-2026 / Puesta en marcha de la bladeRF x40
+  Actualizacion de firmware a 2.6.0 y grabado de la FPGA en flash. Verificacion
+  de recepcion y transmision. Resultado: placa operativa.
+
+EXP-02 / 12-09-2026 / Lazo interno transmisor a receptor en la propia placa
+  Montaje: sin antenas, misma placa transmitiendo y recibiendo.
+  Resultado: existe fuga interna medible del transmisor al receptor. Es la razon
+  por la que no se puede usar una sola SDR full duplex para medir acoplamiento
+  por aire sin caracterizar antes ese camino.
+
+EXP-03 / 12-09-2026 / Descubrimiento de espurias propias de la x40
+  Montaje: recepcion con la propia SDR, ventana de 2 MHz.
+  Resultado: lineas en multiplos exactos de 38,4 MHz, que es la frecuencia del
+  oscilador de referencia de la placa. Verificadas en 499,2 MHz (armonico 13) y
+  537,6 MHz (armonico 14), esta ultima predicha antes de medirla.
+  Consecuencia: al usar la SDR como receptora, toda linea en multiplo de
+  38,4 MHz debe tratarse como propia del instrumento. Dos caen cerca de puntos
+  tipicos de ensayo: 499,2 MHz junto a 500 MHz y 998,4 MHz junto a 1 GHz.
+
+EXP-04 / 26-09-2026 / Medicion conducida de la x40 con la tinySA
+  Montaje: cable coaxial directo del puerto de transmision de la x40 al conector
+  RF de la tinySA. Sin atenuador. Atenuacion interna de la tinySA en 0 dB.
+  Configuracion de la SDR: oscilador en 399,5 MHz, tono de banda base de 500 kHz
+  (emision resultante en 400,000 MHz), amplitud 0,1, tasa de muestreo 2 MHz.
+  Niveles calculados de antemano: -70 dBm con ganancia 17 y -57 dBm con ganancia
+  30. Margen respecto del maximo de la tinySA: unos 60 dB.
+
+  Vista ancha, 380 a 430 MHz, filtro de resolucion de 100 kHz:
+
+    Frecuencia        Estado 1     Estado 2      Estado 3      Estado 3
+                    (referencia)  (sin Tx)     (gan. 17)     (gan. 30)
+    ------------------------------------------------------------------------
+    384,0 MHz          nada       -80,3 dBm     -80 dBm       -80 dBm
+    399,5 MHz          nada         nada        -51,2 dBm     -38,7 dBm
+    400,0 MHz          nada         nada        -68 dBm       -55 dBm
+    422,4 MHz          nada       aprox -88     igual         igual
+    Piso de ruido    -98 dBm
+
+  Hallazgos:
+   a) El estado de referencia no presenta ninguna linea en 50 MHz de ventana.
+   b) Los armonicos 10 y 11 del reloj de 38,4 MHz salen en forma CONDUCIDA por
+      el conector de transmision, con la placa alimentada y sin transmitir. El
+      de 384,0 MHz esta 18 dB sobre el piso de ruido. Confirma el EXP-03 con un
+      instrumento independiente.
+   c) El control de ganancia es lineal: un cambio comandado de 13 dB produjo
+      unas 12,5 dB de cambio medido.
+   d) El nivel medido coincide con el calculado dentro de 2 dB, lo que valida el
+      modelo de potencia de salida de la placa.
+
+EXP-05 / 26-09-2026 / Detalle de la senal e identificacion de productos
+  Montaje: igual al EXP-04. Ventana de 398,5 a 400,5 MHz, filtro de 10 kHz,
+  ganancia de transmision 30.
+
+    Marcador   Frecuencia        Nivel        Separacion del oscilador
+    --------------------------------------------------------------------
+       3       399,5000 MHz    -40,1 dBm      referencia (fuga de portadora)
+       4       399,9994 MHz    -56,2 dBm      +499,4 kHz (tono util)
+       2       398,9988 MHz    -90,6 dBm      -501,2 kHz (imagen)
+       1       398,5623 MHz    -91,6 dBm      -937,7 kHz (espuria sin identificar)
+
+  Nota: la exactitud en frecuencia de la tinySA es del orden del filtro de
+  resolucion, 10 kHz en este caso, y los puntos del barrido estan separados unos
+  4,4 kHz. Las diferencias de decenas o centenas de Hz no son significativas.
+
+EXP-06 / 26-09-2026 / Prueba de identificacion por cambio del tono
+  Se cambio el tono de banda base de 500 kHz a 300 kHz, manteniendo todo lo demas.
+
+    Frecuencia        Nivel        Interpretacion
+    ------------------------------------------------------------------------
+    398,5623 MHz    -91,6 dBm     NO se movio: espuria fija
+    399,1993 MHz    -91,1 dBm     imagen, se movio a -300 kHz del oscilador
+    399,5022 MHz    -40,1 dBm     fuga de portadora, sin cambios
+    399,8006 MHz    -54,6 dBm     tono util, se movio a +300 kHz
+    399,0033 MHz   -102,6 dBm     posicion anterior de la imagen, ahora vacia
+
+  Conclusion: la imagen es efectivamente el espejo del tono respecto del
+  oscilador. La linea de 398,5623 MHz no depende del tono transmitido.
+
+EXP-07 / 26-09-2026 / Barrido de amplitud digital
+  Montaje: igual al EXP-05, tono de 500 kHz, ganancia de transmision fija en 30.
+  Se vario unicamente la amplitud digital de la senal de banda base.
+
+    Amplitud   Espuria      Imagen      Fuga de      Tono util
+               398,56 MHz   399,0 MHz   portadora    400,0 MHz
+                                        399,5 MHz
+    ---------------------------------------------------------------------
+      0,1      -93,1 dBm    -89,6 dBm   -40,1 dBm    -56,1 dBm
+      0,5      -90,6 dBm    -75,6 dBm   -40,1 dBm    -41,7 dBm
+      0,7      -91,6 dBm    -74,1 dBm   -40,1 dBm    -40,2 dBm
+
+  Hallazgos:
+   a) La fuga de portadora es completamente independiente de la amplitud
+      digital: -40,1 dBm en las tres condiciones, sin variacion apreciable.
+      Confirma que se origina en desbalances del modulador y no en los datos.
+   b) El tono util escala con la amplitud como corresponde a una relacion
+      lineal: de 0,1 a 0,5 subio 14,4 dB, contra 14,0 dB teoricos.
+   c) De 0,5 a 0,7 subio 1,5 dB contra 2,9 dB teoricos. Posible compresion
+      incipiente, pendiente de confirmar.
+   d) El rechazo de imagen se mantiene constante en unos 34 dB en todo el rango
+      de amplitudes, como corresponde a un desbalance relativo fijo.
+   e) Con amplitud 0,7 el tono util alcanza el nivel de la fuga de portadora.
+
+EXP-08 / 26-09-2026 / Matriz portadora, tono y amplitud  [COMPLETADO]
+  Datos completos en SDR\X40_03_EXP08_Matriz_amplitud\EXP08_planilla_datos.xlsx.
+  Capturas y archivos CSV en SDR\X40_03_EXP08_Matriz_amplitud\Capturas\, nombrados
+  por fila de la planilla (F01 a F17). Promediado de 16 barridos activado en la
+  tinySA, con espera hasta estabilizacion antes de cada lectura. Ganancia de
+  transmision fija en 30 dB. Piso de ruido con ese promediado: -107 a -110 dBm.
+
+  RESULTADOS PRINCIPALES
+
+  a) La espuria sigue a la portadora. Aparece en 399,0628 MHz cuando se emite en
+     400 MHz y en 599,0628 MHz cuando se emite en 600 MHz: siempre 937,2 kHz por
+     debajo. Su nivel es de -92 a -93 dBm y no depende de la amplitud, del tono
+     ni de la portadora. Sumado a que desaparece al desconectar la SDR, queda
+     establecido que la genera la cadena de transmision de la placa y que esta
+     amarrada al oscilador. Origen fisico todavia no identificado.
+
+  b) No hay compresion. La curva completa de siete amplitudes del caso A sigue la
+     relacion teorica de 20*log10 dentro de +/-0,3 dB en un rango de 17 dB. El
+     apartamiento de 1,4 dB observado en el EXP-07 era dispersion de medicion,
+     no un efecto real. Se resolvio activando el promediado.
+
+  c) La forma de la curva no depende ni de la portadora ni del corrimiento del
+     tono. A amplitud 0,7 la subida medida fue de 16,6 / 16,7 / 17,0 / 17,1 dB
+     en los cuatro casos, contra 16,9 dB teoricos.
+
+  d) Repetibilidad de la sesion: 0,3 dB en la tanda de 400 MHz y 0,1 dB en la de
+     600 MHz, medida repitiendo un punto al final de cada tanda. Esto fija el
+     umbral de deteccion del sistema: cambios mayores a medio dB son
+     distinguibles de la deriva propia.
+
+  e) La fuga de portadora es la magnitud mas estable de todo el sistema. En las
+     siete amplitudes del caso A vario 0,1 dB. Depende levemente de la
+     portadora: -40,2 dBm en 400 MHz y -41,0 dBm en 600 MHz.
+
+  f) Rechazo de imagen entre 31 y 35 dB. Empeora al subir la portadora y al
+     alejar el tono del oscilador: 34,4 a 35,2 dB en 400 MHz con 200 kHz, y 31,1
+     a 32,2 dB en 600 MHz con 600 kHz. Es una caracteristica del modulador y
+     depende de la frecuencia.
+
+  g) Planitud de la cadena: con amplitud 0,7 el tono sale entre -38,6 y -39,7 dBm
+     en las cuatro combinaciones, o sea algo mas de 1 dB de variacion entre
+     400 y 600 MHz.
+
+  h) Espurias menores a +/-200 kHz de la portadora, entre -95 y -100 dBm,
+     presentes aun con el tono en 600 kHz. Caerian sobre las lineas de un peine
+     de 200 kHz de paso.
+
+  ANOMALIAS
+  - El punto B2 con amplitud 0,4 se aparta 0,94 dB de la recta, mientras todos
+     los demas quedan dentro de 0,35 dB. Conviene repetirlo.
+  - La captura INVALIDA_B1_400MHz_600k_amp0.7_duplicado.bmp (originalmente
+     SA_260926_202504) es un duplicado de B1 con amplitud 0,7, tomada antes de
+     bajar la amplitud a 0,1. No usar.
+
+  IDEA QUE SURGE DE ESTOS DATOS
+  Como la fuga de portadora no depende de los datos transmitidos y resulto
+  estable dentro de 0,1 dB, puede servir como referencia interna de amplitud: si
+  la fuga cambia entre dos sesiones, cambio la cadena y no la senal generada.
+
+EXP-08 / diseno original / Matriz portadora, tono y amplitud
+  Objetivo: determinar si el comportamiento medido en el EXP-07 depende de la
+  frecuencia de la portadora, del corrimiento del tono, o de ninguno de los dos.
+  Si las cuatro curvas resultan iguales en forma, alcanza con caracterizar una
+  sola condicion y extrapolar al resto, lo que simplifica el diseno del peine.
+
+  Matriz: portadoras de 400 y 600 MHz, corrimientos de 200 y 600 kHz.
+  Caso A: 400 MHz y 200 kHz, curva completa de siete amplitudes.
+  Casos B1, B2 y B3: tres amplitudes cada uno (0,1 / 0,4 / 0,7).
+  Dos controles de deriva, uno al final de cada tanda de portadora.
+  Ganancia de transmision fija en 30 dB en todas las mediciones.
+
+  Flujo especifico: SDR\X40_03_EXP08_Matriz_amplitud\exp08_matriz_amplitud.grc.
+  Tiene selectores para portadora, tono, ganancia y amplitud, y muestra en
+  pantalla donde va a caer cada linea y que ventana configurar en la tinySA.
+  Planilla de carga: SDR\X40_03_EXP08_Matriz_amplitud\EXP08_planilla_datos.xlsx
+
+  Pregunta adicional que resuelve: al cambiar la portadora se vera si la espuria
+  de 398,5623 MHz acompana a la portadora o se queda fija. Ya se verifico que
+  desaparece al desconectar la SDR, o sea que la genera la placa.
+
+EXP-09 / diseno / Cancelacion de la imagen por pre-correccion IQ  [COMPLETADO]
+  Objetivo: medir cuanto se puede bajar la imagen sumando a la senal un termino
+  proporcional a su conjugado, y cuanto se mantiene esa correccion al cambiar el
+  tono y la portadora. Define si vale la pena corregir las imagenes del peine o
+  conviene dejarlas como artefacto conocido.
+
+  Fundamento: el desbalance de ganancia y fase entre las ramas I y Q hace que el
+  transmisor entregue a*x + b*conj(x). Para un tono x = A*exp(+j*w*t), el termino
+  conjugado es la imagen en -w. Si antes de transmitir se suma c*conj(x), la
+  imagen resultante es proporcional a (a*c + b), que se anula con c = -b/a. El
+  modulo de c esta del orden del rechazo medido, unos -34 dB; la fase hay que
+  buscarla. No se puede hacer con un coseno real en la frecuencia espejo: eso
+  sumaria las dos exponenciales y agregaria una linea nueva.
+
+  Flujo: SDR\X40_04_EXP09_Cancelacion_imagen\exp09_cancelacion_imagen.grc.
+    Signal Source (tono complejo) -> Add, entrada 0
+    Signal Source -> Complex Conjugate -> Multiply Const (c) -> Add, entrada 1
+    Add -> osmocom Sink
+  Controles: correccion encendida o apagada, modulo de c en dB (-50 a -20, paso
+  0,1) y fase de c en grados (-180 a 180, paso 0,5). Etiqueta de control del
+  pico de banda base, que debe quedar por debajo de 1.
+  Amplitud por defecto 0,5. Con ganancia 30 la imagen queda unos 32 dB sobre el
+  piso promediado, que es la profundidad maxima de nulo observable.
+
+  Limitacion prevista: si el desbalance depende de la frecuencia, un unico c
+  sirve para un solo tono. Para un peine haria falta un c por linea o un filtro
+  de correccion.
+
+EXP-09 / 26-09-2026 / Resultados, caso 400 MHz y tono de 200 kHz
+  Amplitud 0,5, ganancia 30. Imagen en 399,8 MHz.
+  Sin correccion: imagen en -75,8 dBm, unos 34 dB bajo el tono.
+
+  Busqueda gruesa de fase con |c| = -34 dB (filtro de 10 kHz, sin promediar):
+    -180: -69,0   -160: -68,7   -140: -69,3   -120: -69,8   -100: -70,5
+     -80: -71,5    -60: -73,4    -40: -75,4    -20: -81,0      0: -90,1
+      20: -88,0     40: -81,5     60: -76,6   (dBm)
+  La curva es simetrica alrededor de unos 10 grados y el maximo, cerca de
+  -170 grados, sube unos 7 dB sobre la imagen sola: coincide con el modelo de
+  dos fasores casi iguales. El valor en 0 grados (-90,1) coincide con el residuo
+  teorico de un error de fase de 10 grados (-91).
+
+  Leccion de medicion: con ventana de 2 MHz y filtro de 10 kHz el piso quedaba
+  en -100 dBm y la imagen corregida se perdia en el ruido, con saltos de 4 a
+  8 dB. Se resolvio con ventana de 20 kHz centrada en la imagen, filtro de
+  1 kHz y promediado 16: piso de -116 dBm y barrido rapido.
+
+  Ajuste fino (ventana de 20 kHz, filtro de 1 kHz, promediado 16):
+    fase 13: -91 / fase 15: -93 / fase 17: -93 dBm, con |c| = -34 dB
+    Barrido de |c| de -33 a -36 dB con fase 15: el mejor fue -34,5 dB. No se
+    anotaron los demas valores.
+  Mejor correccion: |c| = -34,5 dB, fase 15 grados.
+  Imagen corregida: fluctua entre -92,8 y -94,5 dBm, unos 22 dB sobre el piso.
+
+  Resultado: la imagen bajo unos 18 dB y el rechazo paso de unos 34 dB a unos
+  52 dB. El limite ya no lo pone el ruido del medidor sino la variacion del
+  propio residuo, que cerca del nulo es muy sensible a cambios minimos del
+  desbalance. Causa mas probable: deriva termica de la placa (sin verificar).
+
+  Prueba de validez del mismo c (-34,5 dB, 15 grados) en otras condiciones:
+    Caso                         Apagada     Encendida   Mejora
+    400 MHz, tono 600 kHz       -75,4 dBm   -92,0 dBm   16,6 dB
+    600 MHz, tono 200 kHz       -74,5 dBm   -82,0 dBm    7,5 dB
+  Conclusiones:
+   a) Dentro de una misma portadora el c se mantiene: del tono de 200 al de
+      600 kHz la mejora casi no cambio (18 contra 16,6 dB).
+   b) Al cambiar la portadora el c deja de servir. El residuo de 7,5 dB
+      equivale a un error de fase de unos 24 grados si el modulo fuera correcto.
+      Solo con el cambio de modulo no alcanza: el EXP-08 mostro alrededor de
+      1 dB de diferencia de rechazo entre 400 y 600 MHz, que explicaria un
+      residuo de unos 19 dB. Lo que mas cambia con la portadora es la fase del
+      desbalance, coherente con que la cuadratura del oscilador local se genera
+      en forma analogica dentro del LMS6002D.
+      CONFIRMADO: en 600 MHz, con el mismo modulo de -34,5 dB, el minimo
+      aparecio con fase de 35 grados y la imagen bajo a -91 dBm (16,5 dB de
+      mejora). La fase optima se corrio 20 grados entre 400 y 600 MHz, dentro
+      de los 20 a 25 grados estimados.
+   c) Consecuencia para el peine: un c por cada sintonia del oscilador, o sea
+      una tabla c(f_LO) que se mide y que ademas deriva con la temperatura.
+      Todas las lineas de una misma ventana comparten el c, al menos hasta
+      600 kHz de corrimiento. Falta ver corrimientos mayores.
+
+  Correccion obtenida en cada portadora (tono de 200 kHz, amplitud 0,5):
+    400 MHz: |c| = -34,5 dB, fase 15 grados -> imagen de -75,8 a unos -93,5 dBm
+    600 MHz: |c| = -34,5 dB, fase 35 grados -> imagen de -74,5 a -91 dBm
+
+  Capturas en SDR\X40_04_EXP09_Cancelacion_imagen\Capturas\:
+    E1: 400 MHz, 200 kHz, sin correccion, vista ancha de 2 MHz con 4
+        marcadores (espuria -91,0 / imagen -75,8 / fuga -40,1 / tono -40,2 dBm)
+    E2: imagen corregida con -34,5 dB y 15 grados, ventana de 20 kHz, filtro de
+        1 kHz: -94,3 dBm con piso de -116 dBm
+    E3: 400 MHz, tono de 600 kHz, imagen sin correccion: -75,4 dBm
+
+  METODO DE TRES PUNTOS (surge del analisis posterior de estos datos)
+  Con el modulo de c fijo, la potencia de la imagen en funcion de la fase es
+  P(fase) = |b|^2 + |g|^2 + 2*|b|*|g|*cos(fase - t), donde b es la imagen y g la
+  correccion. Tres lecturas a 0, 120 y 240 grados, lejos del nulo y por lo tanto
+  estables, alcanzan para despejar t, y con la lectura sin correccion tambien
+  |g|. La fase optima es t + 180 grados y el nivel optimo es el usado mas
+  10*log10(|b|^2 / |g|^2). Probado con las 13 fases de la busqueda gruesa: el
+  ajuste da 12,7 grados y un nivel 1,6 dB menor, contra 15 grados encontrados a
+  mano. El control de coherencia del modelo dio 1,01 (ideal 1). Se evita buscar
+  el nulo a ciegas en la zona donde las lecturas son mas ruidosas. Implementado
+  en la hoja Busqueda de la planilla del EXP-10.
+
+  OBSERVACION OPERATIVA: EL TRANSMISOR QUEDA ENCENDIDO
+  Al cerrar la ventana del flujo del EXP-08, los tonos desaparecieron pero la
+  fuga de portadora siguio saliendo, junto con la espuria de -937 kHz. El
+  proceso de Python quedo vivo, colgado en el cierre del osmocom Sink, con la
+  placa tomada; por eso el EXP-09 no podia abrirla ("insufficient
+  permissions"). Terminar el proceso no alcanzo: quedo esperando una
+  transferencia USB y recien murio al desenchufar la placa.
+  Interpretacion: sin muestras no hay tonos, pero el oscilador local y el
+  mezclador siguen habilitados, y la fuga no depende de las muestras.
+  Consecuencias:
+   - El estado de fondo "SDR alimentada sin transmitir" solo es valido con la
+     placa recien enchufada, como en el EXP-04.
+   - En la camara, entre tandas, la fuente seguiria emitiendo la portadora si no
+     deshabilita el transmisor en forma explicita.
+   - Antes de ejecutar un flujo, confirmar que no quede otro abierto.
+
+  HALLAZGO: LA ESPURIA ES UNA LINEA DEL OSCILADOR LOCAL
+  En la captura E1 aparece una linea en -736,7 kHz de la portadora, a
+  -91,8 dBm: es la espuria de -937,2 kHz corrida +200 kHz, igual que el tono.
+  Se verifico en los seis CSV del EXP-08: cada tono tiene una replica a
+  -937,2 kHz de el, y su nivel lo sigue:
+    Traza                  Fuga-937 (dBc)   Tono-937 (dBc)
+    F08 400/600k/0,1          -52,0          -50,2 (cerca del piso)
+    F10 400/600k/0,7          -52,5          -52,7
+    F12 600/200k/0,1          -52,0          -51,9 (cerca del piso)
+    F14 600/200k/0,7          -52,3          -51,6
+    F15 600/600k/0,1          -52,4          -49,9 (cerca del piso)
+    F17 600/600k/0,7          -52,0          -52,0
+  Conclusion: la espuria no es una senal que se suma, sino una linea espuria
+  del propio oscilador local, unos 52 dB bajo la portadora y a -937,2 kHz. Todo
+  lo que pasa por el mezclador sale con una replica a -937,2 kHz y -52 dBc. La
+  "espuria fija" de los experimentos anteriores es simplemente la replica de la
+  fuga de portadora, que es la linea mas fuerte. Por eso existe sin muestras y
+  por eso no depende del tono ni de la amplitud.
+  Consecuencia para el peine: cada linea del peine va a tener su replica a
+  -937,2 kHz y -52 dBc. Se suma a las imagenes en el plan de frecuencias.
+
+EXP-10 / 28-09-2026 / Primer intento, en pausa
+  Prueba rapida de la correccion e sobre la replica de la fuga (399,06 MHz),
+  con 400 MHz, 200 kHz, ganancia 30, amplitud 0,5 y 2 MSPS.
+  - Con ventana de 2 kHz y filtro de 200 Hz la tinySA resulto demasiado lenta
+    y sus lecturas poco confiables para separar la espuria de la linea e. Por
+    lo que se alcanzo a ver, el corrimiento estaria mas cerca de -937,7 kHz que
+    de -937,2 kHz. Coincide con la primera lectura del EXP-05 (-937,7 kHz). Las
+    dos quedan dentro del error de la vista ancha, de +/-2 kHz.
+  - Metodo alternativo, zero span centrado en 399,0625 MHz con filtro de
+    3 kHz y barrido de unos 2 s: con e apagada, la tinySA marco -107 dBm. Con
+    e encendida (-45 dBFS, fase 0, grueso en -937,70 kHz) se vio una variacion
+    muy lenta del nivel, con unos 20 s de periodo. No se pudo frenar con el
+    ajuste fino.
+  - Punto sin resolver: si la replica estuviera dentro del filtro, con e
+    apagada tendria que leerse cerca de -92 dBm y no -107. Entonces no queda
+    claro si la variacion lenta es un batido entre e y la espuria (que
+    implicaria estar a unos 0,05 Hz de ella) o una fluctuacion de la linea e
+    sola. Antes de retomar, verificar en zero span con e apagada que la lectura
+    sea la de la replica.
+  Decision del usuario: dejar el corrimiento en -937,7 kHz y retomar la
+  cancelacion de la espuria con un analizador de mejor resolucion y con la
+  xA9. Con la tinySA no se justifica seguir. Queda como artefacto conocido de
+  -52 dBc.
+
+EXP-10 / diseno / Cancelacion de la espuria del oscilador local  [EN PAUSA]
+  Objetivo: determinar si la replica de -937,2 kHz se puede eliminar, y si al
+  hacerlo aparece algo del otro lado de la portadora. Resultado esperado: o se
+  elimina en forma eficaz, o se demuestra que no se puede. Criterios:
+   - Eliminada: la replica baja 15 dB o mas y el nulo se mantiene al repetir la
+     lectura unos minutos despues (no sube mas de 6 dB).
+   - No eliminable: el batido entre la correccion y la espuria no se puede
+     frenar, o es erratico. Significa que la espuria no esta amarrada al reloj
+     de la placa y su fase relativa gira sin control.
+   - Si queda en un punto intermedio, se documenta y se sigue con el EXP-11 sin
+     abrir otro experimento sobre la espuria: -52 dBc es un artefacto conocido.
+
+  Fundamento: como la espuria es una linea del oscilador, hacen falta dos
+  correcciones distintas, las dos en la frecuencia f_esp = -937,2 kHz:
+   - e (aditiva): un tono en f_esp, de tamano y fase ajustables. Cancela la
+     replica de la fuga, que no pasa por las muestras.
+   - d (multiplicativa): se suma d*x*exp(j*2*pi*f_esp*t), una copia de la
+     propia senal corrida -937,2 kHz. Cancela la replica de cada linea digital.
+  Condicion para que funcione: la espuria tiene que estar amarrada en fase al
+  reloj de la placa. Si sale de la referencia de 38,4 MHz, se puede; si sale de
+  algo libre, como una fuente conmutada, no.
+
+  Flujo: SDR\X40_05_EXP10_Cancelacion_espuria\exp10_cancelacion_espuria.grc
+    tono -> (+ c*conj(tono), correccion de imagen del EXP-09) = x
+    x -> Add final, entrada 0
+    tono * Signal Source(f_esp) -> Multiply Const (d) -> Add final, entrada 1
+    Signal Source(f_esp) -> Multiply Const (e) -> Add final, entrada 2
+    Add final -> osmocom Sink (ancho de banda = 0,75 * tasa de muestreo)
+  Controles: tasa 2 o 4 MSPS, tono encendido o apagado, correccion de imagen
+  encendida o apagada (-34,5 dB y 15 grados por defecto), corrimiento de la
+  espuria grueso (-945 a -930 kHz, paso 10 Hz) y fino (+/-50 Hz, paso 0,01 Hz),
+  e y d con interruptor, nivel y fase cada uno. Etiquetas con la frecuencia de
+  cada linea: tono, imagen, fuga, replicas y gemelas.
+  Verificado sin la placa: la misma cadena de bloques corrida en GNU Radio con
+  un sumidero de vector en lugar del osmocom Sink pone cada linea donde
+  corresponde (tono, correccion de imagen, e en -937,2 kHz, d*x en -737,2 kHz)
+  y no genera nada en las posiciones de las gemelas (-197 dBc, cero numerico).
+  Con 2 MSPS el filtro analogico deja pasar solo +/-750 kHz y el tono de
+  cancelacion en -937 kHz saldria atenuado: conviene cancelar con 4 MSPS.
+
+  Correccion del diseno (28-09-2026, observacion del usuario): la version
+  original copiaba x, el tono ya corregido, en lugar del tono solo. Eso
+  fabricaba ademas una anticopia de la linea de correccion de imagen, d*c*conj(x)
+  en -1137 kHz, a -86 dBc, que con 2 MSPS se plegaba a +862,8 kHz. Es
+  innecesaria: el hardware copia la imagen y su correccion juntas, y como ya se
+  cancelan entre si en -200 kHz, su replica tambien se cancela sola. Sin nada
+  real que anular, esa anticopia quedaba como una linea nueva. Ahora d copia
+  solo el tono, que es lo unico que el hardware duplica sin compensacion. En
+  la practica no se podia medir (unos -126 dBm, bajo el piso de -116), pero
+  conceptualmente es lo correcto. El usuario hizo el cambio en GNU Radio
+  Companion: el in0 del Multiply sale del Signal Source del tono.
+
+  Prediccion para las gemelas: cada correccion es una linea mas que pasa por
+  el modulador, asi que tiene su propia imagen (unos 34 dB por debajo, o sea
+  cerca de -128 dBm) y su propia replica (52 dB por debajo). Ninguna deberia
+  verse. Si al cancelar aparece algo del otro lado, es un efecto no previsto.
+
+  Procedimiento (detalle fila por fila en EXP10_planilla_datos.xlsx):
+   Parte A, diagnostico sin cancelar: vista ancha; fuga, tono, replicas y
+     gemelas; frecuencia exacta de la replica con ventana de 2 kHz y filtro de
+     200 Hz; tono apagado; efecto de la correccion de imagen sobre el tono y las
+     replicas (la verificacion pendiente del EXP-09, prediccion de 0,003 dB);
+     repeticion con 4 MSPS para ver si el corrimiento cambia con la tasa.
+   Parte B, cancelacion con 4 MSPS: frenar el batido con el ajuste fino, tres
+     lecturas para calcular e, aplicar; lo mismo para d; verificacion de
+     gemelas, tono, fuga e imagen; control de que el nulo se mantiene.
+   Parte C, opcional: los mismos e y d en 600 MHz.
+
+EXP-11 / BORRADOR, sujeto al resultado del EXP-10 / Caracterizacion de la
+         cancelacion de imagen
+  Objetivo: obtener la tabla de correccion c que necesita el peine y saber
+  cuanto se puede confiar en ella, para disenar en el EXP-12 o 13 un peine con
+  la menor potencia de imagenes posible.
+  Preguntas:
+   1. Como varia c con la frecuencia del oscilador en el rango del plan, de
+      250 MHz a 1 GHz. Se sabe que la fase se corre unos 20 grados de 400 a
+      600 MHz.
+   2. Si un mismo c sirve para toda una ventana del peine, o hace falta uno por
+      linea. Hasta 600 kHz de corrimiento sirvio uno solo; falta ver hasta el
+      borde de la ventana.
+   3. Cuanto deriva c en el tiempo, con la placa ya en temperatura.
+   4. Si c depende de la amplitud o de la ganancia de transmision.
+  Matriz propuesta, con 4 MSPS para tener +/-1,5 MHz utiles:
+   - Portadoras: 300, 450, 600, 800 y 1000 MHz.
+   - Corrimientos del tono: 200, 700 y 1400 kHz, siempre del lado positivo,
+     como en un peine de un solo lado.
+   - Amplitud 0,5 y ganancia 30. Una sola prueba con amplitud 0,2 y otra con
+     ganancia 17, en 600 MHz y 700 kHz.
+   - Control de deriva: repetir 400 MHz y 200 kHz al principio, a la mitad y al
+     final, despues de 30 minutos de calentamiento.
+  Metodo: tres lecturas por punto mas la lectura sin correccion, con la hoja
+  de busqueda de tres puntos. Aplicar el c calculado y medir el residuo. Son
+  unos 15 puntos, con 5 lecturas cada uno, mas controles: una sesion.
+  Salida: tabla c(f_LO, f_tono) con el residuo de imagen de cada punto.
+  Criterio de decision para el peine:
+   - Si c varia menos de 2 grados y 0,3 dB dentro de una ventana: un c por
+     ventana del oscilador.
+   - Si varia mas: un c por linea. No es costoso, porque el peine se sintetiza
+     como suma de tonos y la correccion de cada linea es su propio termino
+     c_k*conj(x_k).
+  Pregunta abierta para decidir antes: si las lecturas se siguen tomando a mano
+  o se automatiza la lectura de la tinySA por USB.
+
+EXP-12 / 01-10-2026 / Primer resultado: el peine por tandas funciona
+  Captura y traza en SDR\X40_06_EXP12_Peine_por_tandas\Capturas\
+  (P1_peine_300-510MHz_maxhold). tinySA de 295 a 515 MHz, filtro de 100 kHz,
+  MAX HOLD, barrido de 2,3 s. Ganancia 30, amplitud 0,4 por tono.
+   - Aparecen las 22 lineas, de 300 a 510 MHz cada 10 MHz, y las 11 fugas de
+     portadora entre cada par.
+   - Tonos: de -39,2 dBm (300 MHz) a -43,2 dBm (510 MHz). Unos 4 dB de
+     diferencia, con tendencia a bajar al subir la frecuencia.
+   - Fugas: de -37,7 a -40,6 dBm, siempre por encima de sus dos tonos.
+   - Piso limpio, cerca de -92 dBm: no se ve ensuciamiento por las
+     resintonias repetidas del Function Probe.
+   - Cuidado con la planitud leida: con 450 puntos en 220 MHz hay un punto cada
+     490 kHz y el filtro es de 100 kHz, asi que una linea puede caer entre dos
+     puntos y leerse de menos. Los 4 dB son una cota, no una medida fina. Para
+     medir planitud conviene ir linea por linea con ventana angosta.
+
+EXP-13 / 01-10-2026 / Primer resultado: la tabla baja la fuga mas de 20 dB
+  Captura y traza en SDR\X40_07_EXP13_Peine_con_calibracion\Capturas\
+  (C1_8tonos_con_tabla_maxhold). tinySA de 295 a 375 MHz, filtro de 100 kHz,
+  MAX HOLD. Primera corrida, con calibrar_lms, generar_tabla y usar_tabla en
+  True. La calibracion fue muy rapida segun el usuario. Tabla generada:
+  96c4c15c9fc517a47ad39c98ae127a31_dc_tx.tbl, instalada en
+  %APPDATA%\Nuand\bladeRF.
+
+    Portadora   Fuga sin tabla (EXP-12)   Fuga con tabla   Mejora
+    305 MHz          -37,7 dBm              -58,1 dBm      20,4 dB
+    325 MHz          -38,7 dBm              -63,1 dBm      24,4 dB
+    345 MHz          -39,2 dBm              -63,6 dBm      24,4 dB
+    365 MHz          -39,8 dBm              -63,6 dBm      23,8 dB
+
+    Tono      EXP-12       EXP-13
+    300 MHz   -39,2 dBm    -38,6 dBm
+    310 MHz   -40,2 dBm    -39,6 dBm
+    320 MHz   -40,7 dBm    -40,1 dBm
+    330 MHz   -41,2 dBm    -41,1 dBm
+    340 MHz   -41,8 dBm    -41,1 dBm
+    350 MHz   -41,8 dBm    -41,6 dBm
+    360 MHz   -42,3 dBm    -41,6 dBm
+    370 MHz   -42,3 dBm    -41,7 dBm
+
+   - La fuga quedo entre 19 y 22 dB por debajo de los tonos; antes estaba por
+     encima.
+   - Los tonos no bajaron: leen entre 0,1 y 0,7 dB mas. No se puede atribuir a
+     la calibracion, porque la ventana paso de 220 a 80 MHz y con puntos mas
+     juntos se pierde menos nivel entre puntos.
+   - Planitud de los 8 tonos: 3,1 dB, cayendo con la frecuencia.
+   - Aparecen lineas chicas nuevas en MAX HOLD: -50 dBm en 339,54 MHz (un solo
+     punto, pegado al tono de 340), -71,6 dBm en 314,06 MHz y otra cerca de
+     -83 dBm. Posibles transitorios de resintonia capturados por el MAX HOLD;
+     sin confirmar.
+   - Consola de la corrida (pegada por el usuario):
+     calibrate lms cambio los registros: sintonia de filtros 23, filtro TX
+     I 30 y Q 33, filtro RX I 33 y Q 33, RX VGA2 referencia 23, etapa 1 I 19
+     y Q 17, etapa 2 I 29 y Q 30. Al abrir la placa de nuevo se leyeron los
+     mismos valores: LA CALIBRACION SOBREVIVE AL CIERRE Y LA REAPERTURA
+     mientras la placa siga alimentada.
+     set gain tx1 30 funciono: txvga1 -35 dB, txvga2 13 dB.
+     Tabla, valores de correccion por portadora:
+       305 MHz: I=-704, Q=304 (error 0,41 y 0,46)
+       325 MHz: I=-688, Q=304 (error 0,43 y 0,42)
+       345 MHz: I=-688, Q=304 (error 0,59 y 0,58)
+       365 MHz: I=-688, Q=304 (error 0,42 y 0,42)
+     Nuand indica que el error debe ser cercano a cero y menor que 10.
+   - La correccion casi no cambia entre 305 y 365 MHz, y los valores saltan
+     de a 16 (-704 y -688): es el paso minimo del registro del chip. Dos
+     consecuencias: la correccion se hace en los registros analogicos del
+     LMS6002D y no gasta rango digital, y el residuo de -58 a -63 dBm esta
+     probablemente limitado por ese paso. Un ajuste fino digital encima,
+     ahora muy chico, podria bajarlo mas. Sin probar.
+   - Falta: la corrida de comparacion con usar_tabla en False, en la misma
+     ventana de 295 a 375 MHz.
+
+  Consulta del usuario: tapar la fuga con un piso de ruido de -60 dBm
+  generado por la SDR. Descartado: el nivel de ruido que muestra un analizador
+  depende de su filtro (una linea no), ocuparia tanta potencia como los tonos,
+  y subir el piso achica el rango dinamico de la verificacion y puede tapar
+  defectos reales del laboratorio. La fuga, en frecuencia conocida y ya 20 dB
+  bajo los tonos, se ignora en el analisis.
+
+EXP-13 / diseno 01-10-2026 / Peine con calibracion de la placa  [PRIMERA CORRIDA HECHA]
+  Flujo: SDR\X40_07_EXP13_Peine_con_calibracion\exp13_peine_calibrado.grc
+  Es el EXP-12 mas un Python Snippet en la seccion Init - Before Blocks, que
+  corre antes de que el osmocom Sink abra la placa y llama a bladeRF-cli.
+  Tres variables del flujo lo gobiernan:
+   - calibrar_lms: corre calibrate lms y despues, en una apertura nueva,
+     calibrate lms show. Si los valores ya no son todos 31, la calibracion
+     interna sobrevive al cierre y la reapertura.
+   - generar_tabla: fija ganancia 30 y corre calibrate table dc tx 305M 505M
+     20M, o sea un valor por cada portadora del peine. Copia el archivo
+     <serie>_dc_tx.tbl a %APPDATA%\Nuand\bladeRF.
+   - usar_tabla: en False renombra la tabla instalada para que la biblioteca
+     no la cargue. Sirve para comparar el peine con y sin correccion.
+  Segun la pagina de Nuand (wiki DC offset and IQ Imbalance Correction):
+   - Procedimiento recomendado: cal lms y despues cal dc o cal table dc.
+   - Las tablas se buscan en %APPDATA%\Nuand\bladeRF, se cargan al abrir
+     la placa y en cada sintonia se aplica el valor mas cercano.
+   - La tabla no contempla la ganancia: generarla con la que se va a usar.
+   - La calibracion de una sola frecuencia hay que repetirla en cada
+     encendido; la tabla queda en el archivo.
+   - No hay calibracion automatica de balance IQ, solo manual.
+   - No dice que pasa en los conectores durante la calibracion ni cuanto
+     tarda.
+  Ajuste pedido por el usuario antes de probarlo: el EXP-13 usa solo 4
+  portadoras (305, 325, 345 y 365 MHz), o sea 8 tonos de 300 a 370 MHz,
+  porque la tinySA tiene 8 marcadores. La tabla se genera de 305M a 365M
+  cada 20M. Al terminar la calibracion suenan tres pitidos y aparece un
+  cartel con el resumen; la transmision empieza recien al aceptarlo.
+  Que medir: nivel de las 4 fugas con usar_tabla en False y en True, y
+  verificar que los 8 tonos no cambien.
+
+EXP-14 / 01-10-2026 / Primera corrida: 22 tonos calibrados
+  Captura y traza en SDR\X40_08_EXP14_Peine_ecualizado\Capturas\
+  (Q1_22tonos_calibrado_todo_en_0dB_maxhold). tinySA de 295 a 515 MHz, filtro
+  de 100 kHz, MAX HOLD, barrido de 2,3 s. Ecualizador en 0 dB en los 22 tonos.
+  Tabla de fuga generada para las 11 portadoras.
+   - Tonos: de -40,5 dBm (300 MHz) a -45,6 dBm (460 MHz). Con un punto cada
+     490 kHz y filtro de 100 kHz, parte de esa diferencia puede ser de lectura.
+   - Fugas: de -60,1 a -68,4 dBm en las 11 portadoras, o sea entre 20 y 25 dB
+     por debajo de los tonos. La tabla funciona en todo el rango.
+   - Alrededor de cada linea aparecen faldas anchas, hasta unos -75 dBm, que no
+     estaban en el EXP-12. El usuario movio el ecualizador durante la medicion:
+     cada cambio de amplitud es un salto brusco en la senal y el MAX HOLD lo
+     acumula. Sin confirmar; repetir sin tocar nada.
+   - El usuario probo ecualizar y no noto mucha diferencia. Motivo practico:
+     la tinySA tarda en actualizar con esa ventana.
+
+  Version 2 de la ventana, a pedido del usuario (mismo archivo):
+   - El ecualizador ya no es en dB con deslizadores: cada tono tiene un
+     selector con la amplitud digital directa, de 0,10 a 0,70 en pasos de
+     0,05, como en el EXP-08. Valor inicial 0,40.
+   - Todo en una sola fila: una fila con las 22 frecuencias y debajo los 22
+     selectores, con el nombre de la fila solo a la izquierda.
+   - Etiquetas de estado (portadora, tonos, paso, pico) con letra grande.
+   - Como hay dos tonos por portadora, el pico de banda base es la suma de las
+     dos amplitudes: si supera 1 la etiqueta muestra RECORTA. Dos tonos en
+     0,70 dan 1,40.
+   - El aspecto se ajusta con un segundo Python Snippet (Main - After Init),
+     porque los bloques de GNU Radio no permiten cambiar el tamano de letra ni
+     ocultar la etiqueta de cada selector.
+   - Probado sin la placa con un sumidero falso: ventana de 1587 por 270.
+
+  Version 3, a pedido del usuario: interruptor de la correccion de fuga
+   - La tabla de la biblioteca no se puede apagar en marcha: se carga al abrir
+     la placa y se aplica sola en cada sintonia. Por eso la correccion pasa a
+     manejarla el flujo.
+   - El snippet de calibracion sigue corriendo calibrate lms y calibrate table
+     dc tx, pero ya no instala la tabla: lee de la salida de bladeRF-cli los
+     valores I y Q de cada portadora, los guarda en fuga_por_portadora.csv y
+     los deja en la variable dc_tabla. Ademas renombra a .desactivada
+     cualquier tabla instalada en %APPDATA%, para que la biblioteca no la
+     aplique por su cuenta. El EXP-13 la reactiva si se corre con usar_tabla
+     en True.
+   - Selector "Correccion de fuga" (Apagada / Encendida) en la ventana.
+     dc_actual = dc_tabla[portadora en uso] * interruptor. Cada vez que
+     cambia, el snippet de aspecto llama a osmosdr_sink_0.set_dc_offset, que el
+     bloque de GRC no expone.
+   - Con generar_tabla en False se reutiliza la ultima medicion guardada.
+   - Probado sin la placa: los valores se leen bien, cambian al saltar de
+     portadora y van a cero con el interruptor apagado.
+   - SIN VERIFICAR CON LA PLACA: la escala que usa gr-osmosdr en
+     set_dc_offset. Se asumio el valor del registro dividido 2048. Si con el
+     interruptor encendido la fuga no baja a unos -60 dBm, la escala es otra.
+   - RESULTADO: no funciono con la placa (informado por el usuario, sin
+     captura). Al revisar el archivo guardado se vio ademas que solo se habian
+     leido 6 de las 11 portadoras: bladeRF-cli separa sus lineas de progreso
+     con retorno de carro y la busqueda las juntaba. No se investigo mas.
+
+  Version 4, la vigente: sin interruptor, la tabla se usa siempre
+  El usuario pidio simplificar. Se volvio al mecanismo del EXP-13, que si
+  estaba probado con la placa: el snippet corre calibrate lms, genera la tabla
+  para las 11 portadoras y la instala en %APPDATA%; la biblioteca la carga al
+  abrir la placa y la aplica en cada sintonia. Se quitaron el interruptor, las
+  variables dc_tabla y dc_actual, usar_tabla y la llamada a set_dc_offset. Si
+  habia quedado una tabla desactivada, el snippet la reactiva. Con
+  generar_tabla en False se usa la tabla de una corrida anterior. Queda igual
+  el resto: una fila de 22 selectores de amplitud y etiquetas grandes.
+  Probado sin la placa con un sumidero falso.
+
+  Corrida con la version 4 (01-10-2026, 03:08). Captura y traza:
+  Capturas\Q2_22tonos_tabla_siempre_activa_maxhold. tinySA de 295 a 515 MHz,
+  filtro de 100 kHz, MAX HOLD. No se sabe en que valores estaban los
+  selectores de amplitud.
+   - 22 tonos entre -41,5 y -44,4 dBm: 2,9 dB de rango, desvio de 0,7 dB. En
+     la captura Q1 habian sido 5,0 dB de rango y 1,2 dB de desvio.
+   - Fugas entre -60,5 dBm (305 MHz) y -71,4 dBm (505 MHz); nueve de las once
+     quedan por debajo de -66 dBm. De 18 a 27 dB bajo los tonos.
+   - Sin faldas alrededor de las lineas: a 1,5 MHz de cada tono se lee el piso,
+     -93 dBm. Es coherente con que las faldas de Q1 venian de mover el
+     ecualizador durante la medicion.
+   - Quedan algunas lineas chicas entre 300 y 310 MHz, de hasta unos -62 dBm,
+     sin identificar.
+
+EXP-14 / diseno 01-10-2026 / Peine calibrado con ecualizador  (version 1, con deslizadores)
+  Flujo: SDR\X40_08_EXP14_Peine_ecualizado\exp14_peine_ecualizado.grc
+  Pedido del usuario: calibrar de 300 a 500 MHz, ganancia fija en 30 sin
+  selector, sacar por ahora la fase del tono inferior, y un ecualizador: un
+  deslizador vertical por tono para editar su amplitud.
+   - 11 portadoras, de 305 a 505 MHz; 22 tonos, de 300 a 510 MHz. La tabla de
+     fuga se genera para las 11 portadoras, con el mismo snippet del EXP-13.
+   - Ecualizador: 22 deslizadores verticales en dos filas de 11 (300 a 400 y
+     410 a 510 MHz), en dB respecto de la amplitud base de 0,4, de -15 a
+     +1,5 dB en pasos de 0,1. Debajo de cada uno, su lectura en dB. El tope de
+     +1,5 dB deja el pico de banda base en 0,95 con los dos tonos al maximo.
+   - Senal: Signal Source (+5 MHz, amplitud 1) -> Multiply Const (a_sup) ->
+     Add; Signal Source -> Complex Conjugate -> Multiply Const (a_inf) -> Add
+     -> osmocom Sink. a_inf y a_sup toman el deslizador que corresponde a la
+     portadora en uso.
+  Probado sin la placa, con un sumidero falso en lugar del osmocom Sink: la
+  ventana se dibuja bien, la ganancia enviada es 30, los deslizadores cambian
+  la amplitud del tono correcto y el modo manual elige la portadora correcta.
+  La prueba encontro y corrigio un error en el modo manual.
+  Limitacion conocida: al saltar de portadora, la frecuencia cambia al
+  instante pero las amplitudes nuevas tardan en llegar a la antena lo que
+  tarden las muestras ya encoladas (del orden de 0,1 s). En ese lapso la
+  portadora nueva sale con las amplitudes de la anterior, y el MAX HOLD puede
+  capturarlo. El error es como mucho la diferencia de ajuste entre portadoras
+  vecinas. Para ajustar el ecualizador conviene el modo manual, que no tiene
+  ese problema.
+
+PASO A LA bladeRF 2.0 micro xA9 (02-10-2026)
+  El profesor dio el visto bueno para pasar a la xA9 despues de ver los
+  avances con la x40. Primera conexion a la PC, sin cable de RF. Lectura con
+  bladeRF-cli, sin modificar nada:
+    Placa: Nuand bladeRF 2.0 (bladerf2), FPGA de 301 KLE (es una xA9)
+    Serie: 321e0fa5875945d99b11070bb0a76d31
+    Firmware 2.4.0, FPGA 0.14.0 cargada desde la flash. USB 3 (SuperSpeed).
+    libbladeRF 2.6.0 la abre bien; solo avisa que conviene firmware 2.5.0 o
+    mayor y FPGA 0.16.0 o mayor. No se actualizo nada.
+    Ganancia de TX: de -23,75 a 66 dB. Frecuencia de TX: 47 MHz a 6 GHz
+    (RX desde 70 MHz). Tasa de muestreo: 520834 a 61,44 MSPS. Ancho de banda:
+    200 kHz a 56 MHz. Alimentacion por el conector de antena (bias tee):
+    apagada en los cuatro puertos; tiene que quedar asi.
+
+EXP-15 / 02-10-2026 / Primeras capturas con la xA9
+  Capturas en SDR\A9_09_EXP15_Ganancia_y_amplitud\Capturas\ (R1, R2 y R3).
+  tinySA de 99 a 101 MHz, atenuacion interna de 28 dB. El usuario no informo
+  ganancia ni amplitud; por el nivel del tono y por lo que sigue, la amplitud
+  estaba en 1,0 y la ganancia cerca de 55 dB.
+
+  Estado normal (R1 con filtro de 30 kHz, R2 con 10 kHz):
+    100,2 MHz  tono                    -5,3 / -6,4 dBm
+    100,0 MHz  fuga de portadora       -44,5 / -45,0 dBc
+     99,8 MHz  imagen                  -40,5 / -40,0 dBc
+     99,4 MHz  tercer armonico (-3f)   -43,0 / -42,0 dBc
+    resto de los multiplos de 200 kHz  por debajo de -60 dBc
+  Sin ninguna calibracion nuestra, la fuga queda 44 dB bajo el tono (en la
+  x40 sin calibrar estaba al mismo nivel que el tono) y la imagen a -40 dBc
+  (x40: -34 dBc). El tercer armonico indica que a este nivel la cadena ya no
+  es del todo lineal.
+
+  Transitorio (R3): cada 10 a 15 segundos, durante 1 o 2 segundos, aparece un
+  tren de lineas cada 200 kHz, todas a unos -12 dBc, y el tono baja unos 2 dB.
+  CAUSA IDENTIFICADA: desborde digital con amplitud 1,0. La placa usa muestras
+  de 12 bits, de -2048 a +2047. Una muestra de valor exactamente +1,0 se
+  convierte en 2048, que no entra, y da la vuelta a -2048. Con 200 kHz a
+  2 MSPS hay 10 muestras por ciclo: cuando una cae justo en el pico, hay una
+  muestra invertida por ciclo, o sea un impulso de tamano 2 cada 10 muestras.
+  Eso da todas las armonicas con amplitud 0,2 y el tono reducido a 0,8:
+  0,2/0,8 = -12,0 dBc y 20*log10(0,8) = -1,9 dB. Coincide con lo medido
+  (-11,5 a -14 dBc; tono de -6,4 a -7,9 dBm).
+  Es intermitente porque el oscilador numerico de GNU Radio no representa
+  exactamente la frecuencia y la posicion de las muestras se desliza muy
+  despacio respecto del pico. Reproducido sin la placa: un Signal Source de
+  200 kHz a 2 MSPS con amplitud 1,0 produce muestras de valor 2048 en rafagas
+  de unos 2 s (segundos 0 a 1 y 15 a 17 de una corrida de 30 s), una por
+  ciclo. Con amplitud 0,99 el maximo es 2027 y no puede ocurrir.
+  Consecuencia: la amplitud total nunca debe llegar a 1,0. Tope practico 0,95.
+
+EXP-15 / diseno 02-10-2026 / xA9: ganancia y amplitud  [EN CURSO]
+  Flujo: SDR\A9_09_EXP15_Ganancia_y_amplitud\exp15_a9_ganancia_amplitud.grc
+  Pedido del usuario: portadora en 100 MHz, tono a 200 kHz, ganancia ajustable
+  en forma fina hasta el maximo (no un selector) y amplitud de 0 a 1, para ver
+  hasta donde se esta en un rango seguro. Sin atenuador externo.
+   - Signal Source (200 kHz, amplitud de 0 a 1) -> osmocom Sink, que abre la
+     placa por su numero de serie para no confundirla con la x40. 2 MSPS,
+     filtro de 1,5 MHz.
+   - Deslizador de ganancia de -23,75 a 66 dB en pasos de 0,25. Arranca en 0.
+   - Tope de seguridad, a pedido del usuario: selector de 5 opciones (0, 20,
+     40, 55 y 66 dB). La ganancia que llega a la placa es el minimo entre el
+     deslizador y el tope. Arranca en 0 dB. Etiquetas grandes con la ganancia
+     aplicada y si el tope esta limitando.
+   - Probado sin la placa con un sumidero falso: con el deslizador en 66 y el
+     tope en 0 se envia 0; la ganancia enviada nunca supero el tope.
+   - Atencion: si el deslizador quedo alto, subir el tope hace saltar la
+     ganancia de golpe. Bajar el deslizador antes de subir el tope.
+  Niveles esperados, a confirmar midiendo: segun se recuerda de Nuand, 60 dB
+  de ganancia dan unos 0 dBm con senal a fondo de escala. Con eso, los topes
+  de 0, 20, 40, 55 y 66 dB darian unos -60, -40, -20, -5 y +6 dBm.
+  La tinySA tolera +6 dBm con atenuacion interna en 0 dB y mide mejor por
+  debajo de -25 dBm: para los topes de 55 y 66 hay que subir antes su
+  atenuacion interna.
+
+EXP-16 / diseno 02-10-2026 / xA9: cuatro tonos en banda ancha  [PENDIENTE]
+  Flujo: SDR\A9_10_EXP16_Cuatro_tonos_banda_ancha\exp16_a9_cuatro_tonos.grc
+  Pedido del usuario: usar el mayor ancho de banda posible, superponer un tono
+  a la imagen de otro y ver que pasa.
+   - 50 MSPS, filtro de 50 MHz. Cuatro Signal Source en -20, -10, +10 y
+     +20 MHz, cada uno con su Multiply Const, sumados y al osmocom Sink.
+   - Portadora por selector: 100 MHz, 500 MHz, 1, 1,5, 2, 3, 4 y 5 GHz.
+   - Ganancia por selector: 0, 15, 30, 45, 55 y 60 dB (el maximo de la placa
+     es 66; el usuario pidio no incluirlo). Arranca en 0.
+   - Por tono: casilla para habilitarlo, columna de botones con la amplitud
+     y deslizador vertical de fase de -180 a 180 grados. Al arrancar solo
+     esta habilitado el de +10 MHz, con amplitud 0,5.
+   - Amplitudes: 0,005 / 0,01 / 0,02 / 0,05 y de 0,1 a 0,9. Las chicas se
+     agregaron con acuerdo del usuario: la imagen de la xA9 esta unos 40 dB
+     bajo el tono, y para cancelarla o duplicarla el tono superpuesto tiene
+     que ser de ese tamano (alrededor de 0,01). Con 0,1 a 0,9 la fase solo
+     cambiaria la linea entre 0,1 y 0,8 dB.
+   - Proteccion contra el desborde, elegida por el usuario: si la suma de las
+     amplitudes habilitadas pasa de 0,95, todos los tonos se achican en la
+     misma proporcion. Etiquetas grandes con la suma y la escala aplicada.
+  Probado sin la placa con un sumidero falso: cuatro tonos en 0,9 dan suma
+  3,60 y escala 0,264, o sea suma real 0,95. La ganancia enviada nunca supero
+  60. La misma cadena de bloques, sin placa, genera a 81 MSPS en la PC del
+  usuario: alcanza para los 50 MSPS, con margen de 1,6 veces.
+  A tener en cuenta al medir: los tonos de +/-20 MHz deberian salir algo mas
+  bajos que los de +/-10 MHz por la caida del conversor cerca del borde de
+  banda; con portadora en 5 GHz el tono de +20 MHz cae en 5,02 GHz, en el
+  limite de la tinySA; con ganancia de 45 o mas hay que subir antes la
+  atenuacion interna de la tinySA.
+
+EXP-16 / 02-10-2026 / Primer intento y consulta sobre calibracion de la xA9
+  Resultado informado por el usuario, sin capturas: la xA9 sube mucho el piso
+  de ruido, cosa que no pasaba con la x40. Pidio investigar que calibracion
+  admite la placa.
+  Lo que se averiguo (lectura de la placa con bladeRF-cli, encabezados de la
+  biblioteca instalada y wiki de Nuand):
+   - El comando calibrate de bladeRF-cli no aplica: responde "Only use this
+     calibration on bladeRF x40 and x115 devices". No hay calibrate lms ni
+     tabla de fuga para la xA9.
+   - El AD9361 hace sus calibraciones solo (sintetizadores, filtros, continua
+     y cuadratura). No hay comando para dispararlas ni ajustarlas.
+   - La biblioteca tiene "gain calibration": una tabla por placa que corrige
+     el nivel segun la frecuencia (bladerf_load_gain_calibration). Mejora la
+     exactitud del nivel, no el ruido. No se encontro de donde sale el archivo.
+   - Filtro FIR de transmision del chip: esta en bypass, que es el valor por
+     defecto. Opciones: int1, int2, int4.
+   - Estado leido: alimentacion por USB, 4,66 V y 0,69 A (3,2 W); chip a
+     42 grados; modo de sintonia por host; sin referencia externa.
+   - Firmware 2.4.0 y FPGA 0.14.0 usan el "tamano de mensaje antiguo" en el
+     USB; la biblioteca sugiere firmware 2.5.0 y FPGA 0.16.0 o mayores.
+   - La wiki de Nuand describe los cortes de muestras en transmision como un
+     espectro "inesperadamente ruidoso", y dice que el LED3 de la placa se
+     apaga un instante cuando ocurren.
+  Hipotesis, sin verificar, en orden de probabilidad:
+   1. Cortes de muestras a 50 MSPS: la PC genera a 81 MSPS, pero el envio por
+      USB con el tamano de mensaje antiguo puede no alcanzar.
+   2. Piso del propio analizador: con atenuacion interna de 28 dB el piso de
+      la tinySA sube unos 28 dB aunque la SDR no emita nada.
+   3. Ruido propio del transmisor con 50 MHz de ancho y ganancia alta.
+  Pruebas para distinguirlas: apagar la transmision y ver si el piso baja;
+  bajar la tasa a 10 o 20 MSPS; mirar el LED3; repetir con el EXP-15 (2 MSPS).
+
+  CONFIRMADO: son cortes de muestras a 50 MSPS.
+  Capturas en SDR\A9_10_EXP16_Cuatro_tonos_banda_ancha\Capturas\ (S1 a S3):
+  portadora en 100 MHz, solo el tono de +10 MHz, tinySA de 75 a 125 MHz.
+                         S1 (aten. 6 dB)   S2 (aten. 30 dB)   S3 (filtro 10 kHz)
+    Tono, 110 MHz          -33,7 dBm          -3,3 dBm           -5,7 dBm
+    Fuga, 100 MHz          -4,2 dBc           -2,7 dBc           -2,7 dBc
+    Imagen, 90 MHz         -38,5 dBc          -38,8 dBc          -39,1 dBc
+    Entre las lineas       -42,5 dBc          -41,8 dBc          -42,5 dBc
+    A 115 MHz              -52,2 dBc          -51,7 dBc          -51,4 dBc
+  Evidencia:
+   - Las "faldas" guardan la misma relacion con el tono con 30 dB de
+     diferencia de nivel entre S1 y S2: salen de la propia senal, no son ruido
+     sumado ni el piso de la tinySA.
+   - La linea de la portadora esta apenas 3 a 4 dB bajo el tono. En el EXP-15,
+     a 2 MSPS, la fuga estaba a -44,5 dBc y el espectro era limpio.
+   - El usuario confirmo que el LED de la placa titila, que segun Nuand indica
+     cortes en la transmision.
+  Interpretacion: cuando faltan muestras la placa deja de emitir el tono por
+  un instante. El tono interrumpido al azar ensancha su espectro (las faldas)
+  y lo que sale durante los huecos cae sobre la portadora (la linea fuerte en
+  100 MHz). El rechazo de imagen, 39 dB a 10 MHz de la portadora, no se ve
+  afectado.
+  Causa probable: el envio por USB con firmware 2.4.0 y FPGA 0.14.0 (tamano de
+  mensaje antiguo) no alcanza los 50 MSPS. La PC genera a 81 MSPS, asi que el
+  limite no es el calculo.
+
+EXP-16 / 02-10-2026 / Resultado: limite de tasa de la xA9 en esta PC
+  Medido por el usuario con la version 2 (senal generada con tabla, o sea que
+  el calculo no limita), mirando el LED de la placa y el espectro:
+    25 MSPS: LED encendido fijo, espectro limpio.
+    40 MSPS: el LED titila.
+    50 MSPS: el LED directamente se apaga.
+  Por encima de 30 MSPS el comportamiento es raro e irrepetible: a veces
+  funciona bien y a veces no. Conclusion del usuario: no transmitir por encima
+  de 30 MSPS.
+  Como la cadena de GNU Radio corre a 246 MSPS sin placa, el limite esta en
+  el envio por USB con firmware 2.4.0 y FPGA 0.14.0 (tamano de mensaje
+  antiguo). Sin verificar si mejora con firmware 2.5.0 y FPGA 0.16.0 o con
+  buferes de USB mas grandes.
+  Consecuencia: con 25 a 30 MSPS entran tonos hasta +/-10 MHz. El ancho util
+  por sintonia queda parecido al de la x40 (dos lineas separadas 20 MHz), no
+  el doble como se esperaba de los 56 MHz de la xA9.
+
+EXP-16 / version 2, 02-10-2026 / Seis tonos y selector de tasa  [PROBADO]
+  Flujo: SDR\A9_10_EXP16_Cuatro_tonos_banda_ancha\exp16_a9_seis_tonos_tasa.grc
+  (la version de cuatro tonos, exp16_a9_cuatro_tonos.grc, queda en la carpeta).
+  Pedido del usuario tras confirmar los cortes a 50 MSPS: selector de tasa,
+  dos tonos mas en +/-5 MHz, sin deslizador de fase, y que solo se puedan
+  encender los tonos que entran en la tasa elegida.
+   - Tasa: 15, 20, 25, 30, 40 y 50 MSPS. Arranca en 25. Filtro de la placa:
+     0,9 por la tasa, con tope de 56 MHz.
+   - Seis tonos: -20, -10, -5, +5, +10 y +20 MHz, con casilla y amplitud cada
+     uno. Un tono entra si su frecuencia no supera 0,4 de la tasa: +/-5 MHz
+     desde 15 MSPS, +/-10 MHz desde 25 MSPS, +/-20 MHz solo con 50 MSPS.
+   - Si un tono no entra, el flujo lo deja apagado aunque este tildado, lo
+     dice en una etiqueta, y su casilla y su amplitud quedan en gris.
+   - Se mantiene el escalado automatico cuando la suma pasa de 0,95.
+   - Cambio de fondo en como se genera la senal: como los seis tonos y todas
+     las tasas son multiplos de 5 MHz, la suma es periodica. Se reemplazaron
+     los Signal Source por un solo Vector Source que repite una tabla
+     precalculada (1000 periodos de 5 MHz). Motivo: con seis generadores la PC
+     llegaba a solo 46 a 66 MSPS, muy justo para 50; con la tabla, la cadena
+     corre a 246 MSPS sin placa. Asi el calculo deja de ser una posible causa
+     de cortes y lo que quede es atribuible al USB.
+  Probado sin la placa: a cada tasa la tabla contiene exactamente las lineas
+  que corresponden, con la amplitud pedida y pico de 0,95 como maximo.
+  Que medir: a cada tasa, si el LED titila y si aparecen las faldas. La tasa
+  mas alta limpia es el limite del conjunto PC, USB y placa con este firmware.
+
+EXP-17 a EXP-19 / 04-10-2026 / Plan para tener un peine con la xA9 en el dia
+  Contexto informado por el usuario: el profesor aprobo usar MAX HOLD en el
+  analizador, al menos al principio, para no tener que sincronizar la SDR con
+  el analizador. Tambien le gusto la idea de muestrear la salida con el
+  receptor de la propia placa para dejar el peine lo mas plano posible. Hace
+  falta la xA9 porque la banda de interes empieza por debajo de los 300 MHz
+  de la x40.
+  Decisiones del usuario:
+   - Sin ajuste de fase por ahora: solo ajuste de ganancia.
+   - Siempre un tono sobre la imagen del otro (dos tonos, en +5 y -5 MHz).
+   - La ventana tiene que mostrar todo lo que pasa: etapa, portadora actual,
+     lineas, ganancias de calibracion.
+   - Banda para empezar: 70 a 420 MHz, lineas cada 10 MHz. Son 36 lineas en
+     18 portadoras, de 75 a 415 MHz. El receptor de la xA9 arranca en 70 MHz.
+   - Accesorios disponibles: cables SMA y una carga de 50 ohm. Sin atenuador
+     ni divisor. Tal vez consiga un atenuador de 3 dB.
+   - Autorizo conectar TX1 con RX1 por cable directo, con tope de ganancia.
+   - Python: mejor sin Python. Si hace falta, codigo muy sencillo, como de
+     alguien que programa hace dos meses, que pueda entender, replicar y
+     explicar.
+   - Pidio dos sistemas para presentarle al profesor: uno con calibracion
+     manual y otro con calibracion automatica. Es probable que la primera
+     medicion en la camara se haga con el manual, porque no sabe si llega a
+     conseguir un divisor.
+  Datos verificados antes de disenar, en el codigo fuente de gr-osmosdr:
+   - set_gain convierte la ganancia a entero: desde GNU Radio la ganancia de
+     RF de la placa solo cambia de a 1 dB. El deslizador de 0,25 dB del
+     EXP-15 en realidad se movia de a 1 dB.
+   - set_center_freq resintoniza siempre, aunque la frecuencia no cambie. Un
+     Function Probe que lee mas seguido que los saltos resintoniza de mas.
+   - El sumidero guarda hasta 512 x 4096 muestras: a 20 MSPS pasan unos 0,1 s
+     entre que se cambia una amplitud y que ese cambio sale por el conector.
+     Un cambio de frecuencia o de ganancia de RF, en cambio, es inmediato.
+   - El AD9361 tolera hasta +2,5 dBm en la entrada del receptor, segun la
+     lista de correo de Ettus (no se pudo abrir la hoja de datos para
+     confirmarlo). Con el tope de 40 dB el transmisor entrega unos -20 dBm
+     como maximo: quedan mas de 20 dB de margen. (Corregido el mismo dia:
+     la placa entrega 4 dB mas de lo estimado y el tope para el lazo con
+     el receptor paso a 30 dB. Ver el resultado del EXP-17.)
+  Consecuencias para el diseno:
+   - Sin Python no se puede apagar la senal antes de cada salto. Por eso el
+     sistema manual corrige solo con la ganancia de RF (de a 1 dB, por
+     portadora), que cambia junto con la frecuencia. Si corrigiera con la
+     amplitud digital, durante 0,1 s despues de cada salto la portadora nueva
+     saldria con la amplitud de la anterior, y MAX HOLD se quedaria con ese
+     valor.
+   - El sistema automatico usa un Python Snippet corto que apaga los tonos
+     0,3 s antes de cada salto. Asi puede corregir cada linea por separado
+     con la amplitud digital, y durante la resintonia solo sale la fuga.
+   - El receptor no sabe por si solo si el peine es plano, porque tiene su
+     propia respuesta en frecuencia. Hay que compararlo una vez contra un
+     analizador y guardar la diferencia (variable respuesta_rx del EXP-19).
+
+EXP-17 / diseno 04-10-2026 / xA9: peine con calibracion manual  [PROBADO]
+  Flujo: SDR\A9_11_EXP17_Peine_manual\exp17_a9_peine_manual.grc
+  Sin codigo Python. 61 bloques.
+   - 20 MSPS, filtro de 18 MHz. Dos Signal Source (+5 y -5 MHz, amplitud 0,45
+     cada uno) -> Add -> osmocom Sink.
+   - Barrido: una lista con los pasos 0, 1, 2, ... y un Function Probe que
+     saca el siguiente (pop) una vez por permanencia. Cada lectura es un
+     salto, o sea que hay una sola resintonia por salto. La permanencia es
+     una variable (1 s): para cambiarla hay que editarla y volver a ejecutar.
+   - Calibracion manual: 18 selectores, uno por portadora, de 0 a -12 dB de a
+     1 dB. Se suman a la ganancia base (0, 10, 20, 30 o 40 dB; arranca en 30;
+     tope 40). La variable tabla_inicial guarda la tabla de arranque.
+   - Ventana: etapa, portadora, lineas, ganancia aplicada, nivel estimado,
+     duracion de la pasada, grafico de barras con la correccion de cada linea
+     y en rojo las dos lineas que salen en ese momento, y la tabla en texto
+     para copiarla.
+   - Las letras grandes se logran con etiquetas en HTML, sin Python. La
+     ventana abre chica y con los textos cortados: hay que maximizarla la
+     primera vez (queda guardado para la proxima).
+  Probado con una placa simulada: una resintonia por salto; la ganancia
+  enviada sigue la tabla y nunca supera 40; en silencio la amplitud es 0.
+  Limitacion conocida: en cada salto la placa resintoniza con los tonos
+  encendidos. Hay que ver en la tinySA si eso ensucia el MAX HOLD.
+
+EXP-17 / 04-10-2026 / Resultado: peine de 70 a 420 MHz sin corregir  [MEDIDO]
+  Capturas en SDR\A9_11_EXP17_Peine_manual\Capturas\ (M1 y M2). tinySA en
+  MAX HOLD, filtro de 300 kHz, atenuacion 0 dB. Ganancia 30, amplitud 0,45
+  por tono, permanencia 1 s, tabla de correcciones en cero.
+    M1: 65 a 245 MHz, barrido de 519 ms.  M2: 245 a 425 MHz, 367 ms.
+  Las 36 lineas estan presentes:
+    nivel medio -33,1 dBm; maxima -31,8 (320 MHz); minima -33,9 (120 MHz)
+    planitud 2,2 dB de punta a punta; desvio estandar 0,43 dB
+    sin la linea de 320 MHz, las otras 35 entran en 1,3 dB
+    promedio por portadora: de -32,7 a -33,6 dBm (0,8 dB entre portadoras)
+  Entre las lineas:
+    fuga de portadora (75, 95, ... 415 MHz): -80 a -82 dBm, o sea 47 a 49 dB
+      bajo las lineas
+    armonicos del reloj de 38,4 MHz: 192,0 MHz a -77,7 dBm; 345,6 MHz a
+      -74,8 dBm; 422,4 MHz a -74,0 dBm
+    piso de la tinySA: -90 a -91 dBm. Nada mas sobresale del piso: con este
+      filtro no se ve suciedad por las resintonias. Falta la captura con el
+      filtro de 850 kHz, que es mas sensible a destellos cortos.
+  Comparacion: el mejor peine de la x40 (EXP-14, con tabla de fuga y
+  ecualizador) tenia 2,9 dB de planitud, desvio de 0,7 dB y la fuga 18 a
+  27 dB bajo los tonos. La xA9 lo supera sin corregir nada.
+  Calibracion manual: no hace falta. La diferencia entre portadoras (0,8 dB)
+  es menor que el paso del selector (1 dB) y del orden de lo que resuelve la
+  tinySA: sus trazas salen de a 0,5 dB, y con 450 puntos en 180 MHz cada
+  linea puede leerse hasta unos 0,6 dB de menos segun donde caiga. La tabla
+  queda en cero.
+  Unica anomalia: la linea de 320 MHz esta 1,4 dB sobre sus vecinas y 2,0 dB
+  sobre su pareja de 310 MHz. Como los dos tonos de una portadora nacen
+  iguales, una diferencia asi no deberia existir. Sin explicacion por ahora:
+  hay que ver si se repite.
+  Nivel de salida: -33 dBm por linea con ganancia 30 y amplitud 0,45. La
+  estimacion previa (-37 dBm) estaba 4 dB baja: a fondo de escala la placa
+  entrega unos +4 dBm con ganancia 60, no 0 dBm. La etiqueta "Nivel estimado"
+  del EXP-17 sigue mostrando el valor viejo.
+  El usuario cerro el programa entre la medicion y el pasaje de las capturas
+  a la PC. No afecta: el flujo arranca siempre igual.
+  Cambios en los EXP-18 y 19 a partir de este resultado, antes de usarlos:
+   - Tope de ganancia de TX bajado de 40 a 30 dB mientras el cable vaya al
+     receptor: con 30 dB el pico de la senal es de unos -27 dBm. Ettus
+     publica 0 dBm como entrada maxima para su placa con el mismo chip (antes
+     publicaba -15 dBm) y recomienda atenuar entre transmisor y receptor. El
+     valor de +2,5 dBm del chip sale de esa misma lista de correo; nadie cita
+     ahi la hoja de datos. Con -27 dBm quedan 12 dB bajo el valor mas
+     conservador.
+   - Estimacion de nivel corregida: ganancia - 56 en vez de ganancia - 60.
+   - EXP-18: se agrego la portadora de 315 MHz, para mirar la linea de
+     320 MHz con el receptor.
+  Nombres originales de la tinySA:
+    M1_65-245MHz_RBW300k_sin_corregir   <- SA_261004_182102 / 182105
+    M2_245-425MHz_RBW300k_sin_corregir  <- SA_261004_182217 / 182220
+
+EXP-17 / variante 04-10-2026 / Peine manual con selector de nivel  [PROBADO]
+  Flujo: SDR\A9_11_EXP17_Peine_manual\exp17_a9_peine_manual_niveles.grc
+  (el flujo original, exp17_a9_peine_manual.grc, queda en la carpeta).
+  Pedido del usuario tras el primer resultado: repetir el EXP-17 con mas
+  ganancia, porque sospecha que la planitud y el desvio pueden cambiar al
+  subir la potencia. Pidio selectores que dejen las lineas en -20, -10 y
+  -5 dBm y, si lo ve bien, en 0 dBm.
+   - Igual al EXP-17, salvo el selector de ganancia, que ahora se elige por el
+     nivel que deja en cada linea: -33 dBm (ganancia 30), -20 (43), -10 (53),
+     -5 (58) y 0 dBm (63). La relacion sale de lo medido con ganancia 30.
+   - Tope de seguridad: sin tildar la casilla de niveles altos la ganancia no
+     pasa de 53 (-10 dBm por linea) aunque el selector pida mas, y la ventana
+     avisa que esta limitada.
+   - Permanencia de 2 s, para medir todo el peine en un solo barrido de 65 a
+     425 MHz (la tinySA tarda cerca de 1 s con el filtro de 300 kHz).
+   - La etiqueta de nivel ya usa la relacion medida (ganancia - 56).
+  Niveles en juego con dos tonos: la potencia total es 3 dB mas que la de una
+  linea y el pico 6 dB mas. Con lineas de 0 dBm: +3 dBm en total y +6 dBm de
+  pico.
+  Limites de la tinySA Ultra segun su fabricante: +6 dBm como maximo absoluto
+  con atenuacion interna de 0 dB; +20 dBm de pico de corta duracion con 30 dB
+  de atenuacion; maximo sugerido de 0 dBm con atenuacion automatica. Por eso
+  la serie se mide con la atenuacion fija en 30 dB desde antes de empezar,
+  incluida una captura de referencia a -33 dBm.
+  Este flujo es solo para medir con el analizador: con lineas de 0 dBm el
+  pico supera lo que tolera el receptor de la xA9. Nunca usarlo con el cable
+  en RX1.
+  Probado con la placa simulada: sin la casilla la ganancia enviada no paso
+  de 53; con la casilla llego a 63; al destildarla volvio a 53.
+
+EXP-17 / 04-10-2026 / Resultado: el mismo peine con lineas de 0 dBm  [MEDIDO]
+  Capturas en SDR\A9_11_EXP17_Peine_manual\Capturas\ (N1 y N2), hechas con el
+  flujo exp17_a9_peine_manual_niveles.grc en la opcion de 0 dBm (ganancia
+  63). tinySA en MAX HOLD, filtro de 300 kHz, atenuacion fija en 30 dB.
+  El usuario informo que los niveles intermedios tambien funcionaron bien,
+  pero solo guardo las capturas de 0 dBm, en los mismos dos tramos de antes.
+                              a -33 dBm (M1, M2)   a 0 dBm (N1, N2)
+    nivel medio de las lineas     -33,1 dBm           -0,3 dBm
+    planitud de punta a punta       2,2 dB             2,1 dB
+    desvio estandar                 0,43 dB            0,41 dB
+    fuga de portadora              -47,8 dBc          -38,5 dBc
+  Conclusiones:
+   - Subir 33 dB de ganancia subio las lineas 32,8 dB: no hay compresion
+     medible con lineas de 0 dBm (total +3 dBm, pico +6 dBm).
+   - La planitud y el desvio no cambian con el nivel. La sospecha del usuario
+     de que podian cambiar bastante no se confirmo hasta 0 dBm.
+   - La forma del peine es la misma en los dos niveles: 32 de las 36 lineas
+     coinciden dentro de 0,5 dB, que es lo que resuelve la tinySA. Sirve para
+     el sistema automatico: se podria calibrar a bajo nivel con el cable
+     directo y transmitir a 0 dBm con la misma tabla.
+   - Las lineas sueltas no se repiten: a -33 dBm sobresalia la de 320 MHz
+     (+1,4 dB) y a 0 dBm la de 210 MHz (+1,0 dB), y la de 320 MHz quedo
+     normal. Parecen picos momentaneos que MAX HOLD retiene, no una propiedad
+     del peine. Sin esa linea, cada serie entra en 1,3 a 1,4 dB.
+   - La fuga empeoro 9 dB respecto de las lineas al subir la ganancia: paso de
+     -81 a -39 dBm. Sigue 38 dB bajo las lineas y cae entre ellas.
+   - Aparecen lineas en 225, 285, 345 y 405 MHz, a unos -48 dBm. Son el
+     triple de las portadoras de 75, 95, 115 y 135 MHz, y estan 9,2 dB bajo la
+     fuga: es la relacion del tercer armonico de una onda cuadrada (9,5 dB),
+     o sea el tercer armonico del oscilador de la placa, que no tiene filtro
+     de salida.
+   - Consecuencia probable, sin verificar: cada portadora emite ademas sus
+     dos lineas alrededor del triple de su frecuencia, unos 10 dB mas abajo.
+     Dentro de la banda caen sobre lineas del peine y MAX HOLD las tapa. Por
+     encima de 420 MHz no hay nada que las tape: deberian verse lineas desde
+     430 MHz, cerca de -10 dBm. Falta mirarlo.
+   - Fuera de eso no hay nada por encima del piso (-58 a -60 dBm con 30 dB de
+     atenuacion).
+  Decision del usuario: tomar 0 dBm por linea como nivel de referencia del
+  peine. El profesor habia pedido transmitir a 5 dBm; con dos tonos por
+  portadora la placa no llega (ganancia maxima 66, pico cerca de su maximo
+  de +8 dBm). Con un solo tono por portadora se llegaria a +5 dBm.
+  Nombres originales de la tinySA:
+    N1_65-245MHz_0dBm_aten30_RBW300k   <- SA_261004_190712 / 190714
+    N2_245-425MHz_0dBm_aten30_RBW300k  <- SA_261004_190504 / 190507
+
+EXP-17 / 04-10-2026 / Resultado: lineas fuera de banda (armonicos)  [MEDIDO]
+  Captura N3: 425 a 1300 MHz, MAX HOLD, filtro de 850 kHz, atenuacion fija
+  en 30 dB, barrido de 1,39 s. El flujo seguia emitiendo solo el peine de 70
+  a 420 MHz, con lineas de 0 dBm y permanencia de 2 s.
+  Confirmado: por encima de la banda aparecen unas 50 lineas que el flujo no
+  genera. Son armonicos impares de cada portadora, cada uno con sus dos
+  lineas a +/-5 MHz:
+    triple (14 pares, de 460/470 a 1240/1250 MHz):   -10 a -14 dBm
+    quintuple (de 470/480 a 1270/1280 MHz):          -14 a -20 dBm
+    septuple:                                        -19 a -21 dBm
+    nueve veces:                                     -22 a -24 dBm
+    once veces:                                      -24 a -25 dBm
+  Con las lineas del peine en 0 dBm, el tercer armonico queda solo 10 a 14 dB
+  abajo. Es lo esperable de un mezclador que conmuta con onda cuadrada (el
+  tercer armonico de una cuadrada esta 9,5 dB bajo la fundamental) y de una
+  salida sin filtro.
+  Tambien hay productos menores, de -44 a -50 dBm: 430 MHz (-43,6 dBm, justo
+  sobre el borde superior del peine), 450, 490, 510, 540, 560 MHz y otros.
+  Consecuencias:
+   - Dentro de la banda del peine los armonicos de las portadoras bajas caen
+     sobre frecuencias de otras lineas, 10 dB o mas por debajo: en MAX HOLD
+     quedan tapados y no alteran la lectura de cada linea.
+   - Fuera de la banda se ven. Quien mire por encima de 420 MHz va a
+     encontrar lineas que no son del peine.
+   - Un analizador que no use MAX HOLD (por ejemplo, uno de tiempo real) va
+     a ver, mientras sale cada portadora, tambien sus armonicos.
+   - Probable, sin verificar: el receptor de la xA9 tampoco filtra, asi que
+     en el lazo TX-RX va a recibir esos armonicos junto con la fundamental y
+     sumarlos a la lectura. Puede meter un error del orden de 1 dB, que
+     depende de la frecuencia y del cable. Hay que tenerlo en cuenta en los
+     EXP-18 y 19.
+   - Para limpiar la salida haria falta un filtro pasabajos externo. Uno
+     solo no alcanza para toda la banda: el triple de 70 MHz (210 MHz) ya
+     cae dentro del peine.
+  Nombre original de la tinySA:
+    N3_425-1300MHz_0dBm_aten30_RBW850k_armonicos <- SA_261004_191616 / 191619
+
+EXP-18 / diseno 04-10-2026 / xA9: lazo TX1 a RX1 en una portadora  [PROBADO]
+  Flujo: SDR\A9_12_EXP18_Lazo_TX_RX\exp18_a9_lazo_tx_rx.grc
+  Sin codigo Python. 42 bloques. Primera conexion del transmisor con el
+  receptor de la misma placa, por cable directo.
+   - Transmision: como en el EXP-17 pero en una sola portadora (75, 135, 195,
+     255, 315, 335 o 415 MHz). Ganancia de TX por selector: arranca en 0,
+     tope 30 (era 40; se bajo tras el resultado del EXP-17).
+   - Recepcion: osmocom Source con ganancia manual y, por cada tono,
+     Frequency Xlating FIR Filter (lleva el tono a 0 Hz y baja a 1 MSPS) ->
+     Complex to Mag^2 -> Moving Average (0,1 s) -> Log10 -> Probe Signal. Un
+     Function Probe lee cada nivel 5 veces por segundo.
+   - El nivel se muestra en dB respecto del fondo de escala del receptor.
+     Zona de trabajo sugerida: entre -30 y -12 dB por tono.
+  Probado con la placa simulada: las lecturas coinciden con lo esperado dentro
+  de 0,02 dB al cambiar ganancia de TX, ganancia de RX, amplitud y portadora.
+  Sin placa, la PC procesa las dos cadenas a la vez a 75 MSPS (transmision) y
+  67 MSPS (recepcion): mas de 3 veces lo que piden los 20 MSPS.
+  Que averiguar: si el receptor sigue al transmisor dB a dB, que ganancia de
+  RX conviene, y si transmitir y recibir a la vez a 20 MSPS produce cortes
+  (LED de la placa). Si los produce, bajar samp_rate a 15e6.
+
+EXP-18 / 04-10-2026 / Resultado: primer lazo TX1 a RX1  [MEDIDO]
+  Datos dictados por el usuario, sin capturas. Cable directo de TX1 a RX1.
+  Portadora de 75 MHz salvo donde se indica, amplitud 0,45 por tono.
+  Lo que funciono:
+   - El LED quedo fijo: transmitir y recibir a la vez a 20 MSPS no produce
+     cortes.
+   - El receptor sigue al transmisor. Con ganancia de RX 0:
+       TX 0:   inferior -57,6 a -58,4    superior -56,9 a -58,1
+       TX 10:  inferior -47,9 a -48,3    superior -47,2 a -48,4
+       TX 20:  inferior -37,8            superior -38,1
+       TX 30:  inferior -27,6            superior -28,0
+     Cada 10 dB de ganancia de TX dan 9,9 a 10,3 dB en el receptor. Con poca
+     senal la lectura se mueve +/-0,5 dB; con TX 20 o 30 queda quieta.
+   - Ganancia de RX: con 10 dB las lecturas son -18,5 y -18,8 (zona buena);
+     con 20 dB ya marca ALTO. Con RX 0 y lineas de -33 dBm la lectura es de
+     -27,8 dB: el fondo de escala del receptor equivale a unos -5 dBm por
+     tono.
+   - Amplitud digital (TX 30, RX 10): 0,45 da -18,5 / -18,8; 0,2 da -25,5 /
+     -25,8; 0,1 da -31,6 / -32,2; 0,05 da -37,6 / -38,3. Coincide con lo
+     esperado (-7,0, -6,0 y -6,0 dB por paso) dentro de 0,4 dB.
+   - Estabilidad sin tocar nada: 0,1 dB en un minuto.
+  Lo que no funciono:
+   - Entre portadoras la lectura cambia hasta 4 dB (TX 30, RX 10):
+       135 MHz -16,4 / -16,2    195 MHz -18,5 / -18,8    255 MHz -20,2 / -20,4
+       315 MHz -19,9 / -19,65   335 MHz -18,1 / -17,8    415 MHz -17,0 / -17,3
+     La tinySA mostro que esas lineas salen iguales dentro de 1 dB.
+   - Al volver a pasar por las mismas portadoras las lecturas cambiaron 1 a
+     2 dB (135 MHz paso de -16 a -18), siempre entre -16 y -20 dB. O sea que
+     no es una respuesta fija del receptor: cambia con cada sintonia.
+   - Al apagar el tono inferior, la lectura inferior bajo solo 0,5 dB, en
+     todas las portadoras. Deberia haber caido decenas de dB: el receptor no
+     esta separando un tono del otro.
+  (La interpretacion que sigue quedo desmentida en parte por la version 2:
+  ver su resultado mas abajo.)
+  Interpretacion (hipotesis, a confirmar con la version 2): los dos tonos son
+  simetricos respecto de la portadora y el receptor esta sintonizado en la
+  misma frecuencia que el transmisor. Vista por el receptor, esa senal no
+  gira: queda sobre una sola direccion, fijada por la fase entre los dos
+  osciladores, que es distinta en cada sintonia. El AD9361 corrige solo su
+  cuadratura suponiendo una senal comun, y con esta senal se desajusta: deja
+  de rechazar la imagen, cada tono aparece tambien del otro lado, y el nivel
+  leido pasa a depender de esa fase. Asi no sirve para calibrar: el error
+  (+/-2 dB) es mayor que el desnivel real del peine (+/-1 dB).
+
+EXP-18 / version 2, 04-10-2026 / Receptor corrido 1 MHz  [PROBADO]
+  Flujo: SDR\A9_12_EXP18_Lazo_TX_RX\exp18_a9_lazo_rx_corrido.grc
+  (la version 1, exp18_a9_lazo_tx_rx.grc, queda en la carpeta).
+  Cambio: el receptor se sintoniza por encima del transmisor. Selector de
+  corrimiento: 0, 1 o 2 MHz; arranca en 1 MHz. Con 1 MHz los tonos se buscan
+  en +4 y -6 MHz. Asi cada tono cae en una frecuencia propia, su imagen cae
+  en otra (-4 y +6 MHz), los armonicos que entran por el receptor caen en
+  otras, y la fuga queda en -1 MHz. La ganancia de RX arranca en 10 dB.
+  Con el corrimiento en 0 se reproduce la version 1, para comparar dentro del
+  mismo flujo.
+  Probado con la placa simulada: con 1 y 2 MHz las lecturas coinciden con lo
+  esperado, y al apagar el tono inferior su lectura cae al ruido.
+  Que mirar: si al apagar un tono su lectura cae de verdad, si al volver a
+  una portadora la lectura se repite, y cuanto cambia entre portadoras.
+
+EXP-18 / version 2, 04-10-2026 / Resultado a 75 MHz y cambio de rumbo  [MEDIDO]
+  Seis capturas de pantalla de la ventana, pasadas por el usuario en el chat
+  (no quedaron en la carpeta). Portadora de 75 MHz, TX 30, RX 10, amplitud
+  0,45.
+                              RX inferior   RX superior   diferencia
+    Los dos tonos encendidos
+      corrimiento 0              -17,2         -17,5         -0,3
+      corrimiento 1 MHz          -16,9         -18,4         -1,5
+      corrimiento 2 MHz          -16,3         -19,0         -2,8
+    Solo el tono superior
+      corrimiento 0              -75,7         -16,7        +59,0
+      corrimiento 1 MHz          -58,1         -18,6        +39,5
+      corrimiento 2 MHz          -57,4         -19,2        +38,2
+  Lo que muestran:
+   - Con corrimiento 0 el receptor separa bien los tonos: al apagar el
+     inferior, su lectura cae 59 dB. La interpretacion anterior ("el receptor
+     no separa los tonos") estaba MAL: se apoyaba en la frase "baja 0,5 dB"
+     del primer informe, que se referia a otra cosa (probablemente al tono
+     que queda encendido).
+   - Con el receptor corrido aparecen lineas nuevas en el espectro recibido.
+     No las emite la placa: el transmisor no cambio. Son copias de los tonos
+     que se forman dentro del receptor a partir de los armonicos del
+     transmisor (EXP-17). Con 1 MHz de corrimiento aparecen en 74 y 84 MHz,
+     17 a 22 dB bajo los tonos, justo donde corresponde al tercer armonico
+     (-2 y +8 MHz respecto del receptor); con 2 MHz se mueven a 78 y 68 MHz.
+     Tambien se ven las del quinto y el septimo, mas chicas.
+   - Con corrimiento 0 esas copias caen exactamente sobre los tonos y se
+     suman a ellos con una fase que cambia en cada sintonia. Una copia 17 a
+     22 dB abajo cambia la lectura entre +/-0,7 y +/-1,2 dB. Esto explica,
+     mejor que la hipotesis anterior, por que en la version 1 la lectura
+     cambiaba 1 a 2 dB al volver a la misma portadora.
+   - Con el receptor corrido se ve ademas la imagen del transmisor: al apagar
+     el tono inferior queda en 70 MHz una linea 38 a 40 dB bajo el tono
+     superior, igual al rechazo de imagen medido con la tinySA. Con
+     corrimiento 0 el receptor la esconde (su correccion de cuadratura la
+     anula junto con su propia imagen).
+   - Con el receptor corrido los dos tonos se leen distinto (1,5 dB con
+     1 MHz y 2,8 dB con 2 MHz): caen en frecuencias distintas de la banda
+     base del receptor, que no es plana.
+  No se hizo la prueba de volver a las mismas portadoras con el receptor
+  corrido, asi que no se sabe si asi la lectura se repite.
+  DECISION DEL USUARIO: la calibracion va a ser manual, contra un analizador
+  de espectro conectado directo a la placa (el del CETEM, o la tinySA si no
+  se puede), ajustando cada valor hasta dejar las lineas en 0 dBm. El lazo
+  con el receptor queda de lado: suma sus propios defectos (copias por
+  armonicos, banda base no plana) y haria falta filtrar o atenuar para
+  confiar en el. El EXP-19, como estaba planteado, queda suspendido.
+
+EXP-19 / diseno 04-10-2026 / xA9: peine con calibracion automatica [SUSPENDIDO]
+  Flujo: SDR\A9_13_EXP19_Peine_automatico\exp19_a9_peine_automatico.grc
+  69 bloques y un Python Snippet de unas 60 lineas con comentarios, llamado
+  receta. Es el unico codigo Python del flujo.
+   - Senal y medicion: las mismas cadenas de bloques de los EXP-17 y 18.
+   - La receta hace lo que se elija en el selector Orden:
+       Esperar: tonos apagados.
+       Calibrar: tres vueltas por las 18 portadoras. En la primera mide cada
+         linea sin corregir, y la mas debil pasa a ser el objetivo. En la
+         segunda y en la tercera aplica la correccion y vuelve a medir. Tarda
+         unos 70 s. Si los niveles estan fuera de rango (menos de -75 dB o
+         mas de -10 dB) cancela y avisa.
+       Transmitir: recorre las portadoras con la permanencia elegida.
+     Antes de cada salto apaga los tonos 0,3 s.
+   - La correccion de cada linea se aplica bajando la amplitud de su tono.
+     La ganancia de RF queda fija.
+   - Ventana: etapa, orden, portadora, lineas, pasadas, amplitudes, lectura
+     del receptor en vivo, planitud antes y despues, grafico de lo que midio
+     el receptor (antes y despues), grafico de la correccion con las lineas
+     que salen en ese momento, y las 36 correcciones en texto.
+   - respuesta_rx: 36 valores, en cero por ahora. Sirve para descontar la
+     respuesta del propio receptor una vez medida contra un analizador.
+  Probado con la placa simulada (desnivel inventado de 9,4 dB, retardo de
+  0,1 s): la planitud segun el receptor pasa de 9,4 a 0,0 dB; ninguna de las
+  resintonias ocurrio con tonos saliendo; la ganancia de RF no cambio. La
+  planitud real de la salida simulada quedo en 3,5 dB, que es exactamente la
+  respuesta inventada del receptor: confirma que hace falta respuesta_rx.
+  Con un solo cable: calibrar con TX1 conectado a RX1 y despues pasar el
+  cable al analizador o a la antena. Con un divisor no haria falta moverlo y
+  el receptor seguiria leyendo durante la transmision.
+  Los tres flujos son validos segun GNU Radio Companion, y en el lienzo
+  dibujado con su propio codigo ningun bloque se superpone con otro.
+  Siguiente, segun resultados: EXP-20, con respuesta_rx medida contra la
+  tinySA, la calibracion guardada en un archivo y el procedimiento diario
+  cronometrado.
+
+EXP-20 / diseno 04-10-2026 / xA9: calibracion manual por valor medido [MEDIDO]
+  Flujo: SDR\A9_14_EXP20_Peine_calibracion_manual\
+         exp20_a9_peine_calibracion_manual.grc
+  Idea del usuario, para calibrar a mano sin Python y que funcione bien con
+  MAX HOLD: arrancar con las lineas 3 dB abajo y cargar, en un control por
+  linea, el valor leido en el analizador. El flujo compensa lo que falta para
+  0 dBm. Como todas las lineas suben al calibrar, MAX HOLD las actualiza solo
+  y se ve cuales faltan. Pidio ademas un boton de pausa, y guardar la
+  calibracion en un archivo con un boton para importarla, porque se calibra
+  con el analizador y despues se usa en la camara.
+  Respuestas del usuario: un valor por linea (36); contadores con flechas;
+  los valores los lee el con los marcadores.
+   - Ganancia fija en 65. Amplitud sin compensar 0,25 por tono (lineas cerca
+     de -3 dBm); tope 0,47, o sea hasta +5,5 dB de compensacion.
+   - 36 contadores, de -10 a +3 en pasos de 0,1. Valor 0 = sin dato, sin
+     compensacion. Compensacion = -(valor cargado). Para retocar: si una
+     linea quedo 0,3 dB arriba, se le suma 0,3 a su contador.
+   - Arranca en PAUSA: amplitud 0 y ganancia 0, hasta destildar la casilla.
+     En pausa el barrido sigue contando por dentro.
+   - Barrido con la lista de pasos y el Function Probe, como el EXP-17.
+     Permanencia de 2 s (variable).
+   - Selector de orden de recorrido. "Por frecuencia": como siempre. "De
+     menor a mayor nivel": visita las portadoras de la menos compensada a la
+     mas compensada y agrega un paso en silencio al final de cada pasada.
+     Motivo: la amplitud digital llega 0,1 s tarde, asi que despues de cada
+     salto la portadora nueva sale un instante con la amplitud de la
+     anterior; si la anterior era mayor, MAX HOLD lo retiene. Ordenando de
+     menor a mayor, ese instante siempre queda por debajo.
+   - El paso en silencio se hizo como una portadora mas, de amplitud 0. Con
+     una variable aparte para el silencio, al salir de el la amplitud tomaba
+     por un instante el valor de la portadora anterior (visto en simulacion).
+   - Guardar e importar: unico codigo Python, un Python Snippet de 67 lineas
+     con comentarios. Guarda un renglon por linea (frecuencia y valor) en
+     calibracion_peine.txt, en la carpeta del flujo. Hace falta porque los
+     bloques no escriben ni leen archivos de valores.
+   - Ventana: etapa, portadora y paso, lineas, compensacion de las dos lineas
+     actuales, cuantas lineas tienen valor, cuantas piden mas de lo que hay,
+     estado del archivo, los 36 contadores y un grafico de barras con la
+     compensacion y las lineas que salen.
+  Probado con la placa simulada: arranca sin emitir; la compensacion sale
+  bien; guardar, borrar e importar devuelve los 36 valores; sin archivo
+  avisa y no falla. Con un patron exagerado (portadoras alternadas con 3 dB
+  de diferencia), en orden de frecuencia 9 portadoras salen 3 dB altas
+  durante el retardo; en orden de menor a mayor nivel, ninguna.
+  A tener en cuenta: los contadores usan coma decimal; la ganancia 65 no se
+  midio todavia (se midio hasta 63); este flujo es solo para el analizador,
+  con atenuacion de 30 dB, y nunca con el cable en RX1; la calibracion vale
+  con el cable con que se midio.
+  CAMBIO DEL 05-10-2026, a pedido del usuario antes de medir: selector de
+  ganancia de TX con tres puntos, para comprobar la compensacion a bajo nivel
+  y no pasarse del limite.
+   - 45 dB (lineas calibradas en -20 dBm), 55 dB (-10 dBm) y 65 dB (0 dBm).
+     Arranca en 45. Sin calibrar, las lineas salen 3 dB por debajo de esos
+     valores.
+   - Los valores se leen siempre con la ganancia en 45 dB (variable
+     ganancia_de_lectura). La compensacion de cada linea es lo que le falta
+     para -20 dBm a esa ganancia, y es la misma en los tres puntos. Se apoya
+     en lo medido en el EXP-17: la forma del peine no cambia con el nivel.
+   - Un contador en 0 sigue significando sin dato: no compensa.
+   - Los contadores ahora van de -40 a +3.
+   - El archivo guardado lleva un primer renglon con la fecha y la ganancia
+     de lectura.
+  Probado con la placa simulada: en pausa manda ganancia 0; al destildar,
+  45; al elegir 65, 65. La compensacion, guardar e importar siguen bien.
+
+EXP-20 / 05-10-2026 / Primera medicion y archivo de calibracion  [MEDIDO]
+  Capturas en SDR\A9_14_EXP20_Peine_calibracion_manual\Capturas\ (C1 y C2):
+  peine sin calibrar, MAX HOLD, filtro de 300 kHz, atenuacion fija en 30 dB.
+  El usuario las tomo con la ganancia en 65 dB (no en 45) y pidio que el
+  archivo de calibracion se genere a partir de ellas.
+  Leido en las 36 lineas: media -3,16 dBm, de -3,9 a -1,2 dBm, planitud de
+  2,7 dB, desvio de 0,55 dB. El nivel previsto sin calibrar era -3,4 dBm: la
+  ganancia 65 se comporta como se esperaba. Fuga: -35 a -37 dBm.
+  Tres lineas sobresalen 1,5 a 2 dB de sus vecinas: 320 MHz (-2,2), 380 MHz
+  (-1,8) y 390 MHz (-1,2). No coinciden con las series anteriores, donde
+  esas lineas eran normales; la de 320 MHz ya habia sobresalido una vez. Las
+  de 380 y 390 MHz son de portadoras consecutivas (375 y 395 MHz), o sea que
+  un solo salto de portadora, justo cuando el analizador pasaba por ahi,
+  explica las dos. Se las toma como picos momentaneos que MAX HOLD retiene
+  en el instante del salto. Causa sin identificar: puede ser la placa al
+  resintonizar o la respuesta del analizador a un cambio brusco.
+  Archivo generado: calibracion_peine.txt, en la carpeta del flujo.
+   - Como el flujo espera valores leidos con ganancia 45, a cada lectura se
+     le restaron 20 dB. La compensacion que resulta es exactamente lo que le
+     falta a cada linea para 0 dBm con la ganancia en 65.
+   - Las tres lineas dudosas no se usaron tal cual: se reemplazaron por el
+     valor de la otra linea de su portadora mas la diferencia que tenian en
+     la serie a 0 dBm del EXP-17: 320 MHz -3,7; 380 MHz -3,2; 390 MHz -3,8.
+     Si esos picos fueran reales, esas tres lineas van a quedar 1,5 a 2 dB
+     altas en forma estable despues de calibrar, y hay que corregirlas.
+   - Con los valores usados: planitud de 1,3 dB y desvio de 0,34 dB antes de
+     compensar. Compensacion de +2,6 a +3,9 dB; amplitud maxima 0,39 por
+     tono, con tope en 0,47.
+  Comprobado con la placa simulada: el flujo importa el archivo, carga las 36
+  lineas y ninguna queda sin margen.
+  Falta: verificar con el analizador que las lineas queden en 0 dBm. Conviene
+  tomar dos capturas por tramo, reiniciando MAX HOLD entre una y otra, y
+  quedarse con el menor valor de cada linea para descartar los picos.
+  Nombres originales de la tinySA:
+    C1_65-245MHz_gan65_sin_calibrar   <- SA_261005_004531 / 004533
+    C2_245-425MHz_gan65_sin_calibrar  <- SA_261005_004657 / 004700
+
+EXP-20 / 05-10-2026 / Verificacion de la calibracion  [INFORMADO]
+  El usuario importo calibracion_peine.txt y miro el peine calibrado con la
+  tinySA. Resultado, en sus palabras: las lineas "quedaron practicamente
+  perfectas"; lo unico, el pico de 280 MHz quedo en 2,4 dBm. No dejo
+  capturas de esta verificacion.
+  Lectura (no confirmada): la linea de 280 MHz se habia leido normal al
+  calibrar (-3,2 dBm con ganancia 65), asi que lo mas probable es otro pico
+  momentaneo de MAX HOLD y no un error del archivo. Para confirmarlo hay que
+  reiniciar MAX HOLD y volver a mirar esa linea. No menciono las lineas de
+  320, 380 y 390 MHz: se entiende que quedaron bien, lo que apoya haberlas
+  tratado como picos momentaneos.
+  Decision del usuario: pasar a un flujo nuevo con la banda ampliada (EXP-21).
+
+EXP-21 / diseno 05-10-2026 / xA9: peine de 50 MHz a 1 GHz  [EN CURSO]
+  Flujo: SDR\A9_15_EXP21_Peine_50MHz_1GHz\exp21_a9_peine_50MHz_1GHz.grc
+  Pedido del usuario: una copia del EXP-20 con las lineas de 50 MHz a 1 GHz;
+  6 s en cada portadora, porque la tinySA tarda 2,8 s en barrer de 45 a
+  1005 MHz con filtro de 300 kHz; y un boton "Generar calibracion" que lea
+  con Python el .csv del analizador y arme el archivo de calibracion,
+  teniendo en cuenta que los picos no caen justo en la frecuencia de la
+  linea. Sugirio una libreria que busque picos y asignar a cada linea el pico
+  mas cercano, o cualquier otra forma, lo mas facil posible.
+  Lo que cambia respecto del EXP-20:
+   - 48 portadoras, de 55 a 995 MHz cada 20 MHz: 96 lineas, de 50 a 1000 MHz
+     cada 10 MHz. La xA9 transmite desde 47 MHz.
+   - Permanencia de 6 s. Una pasada completa dura 4 min 48 s (4 min 54 s
+     recorriendo por nivel, por el paso en silencio).
+   - 96 contadores en 8 filas de 12. Grafico de 512 puntos repartidos entre
+     las 96 lineas, de 45 a 1005 MHz.
+   - Tres botones: Generar calibracion, Guardar calibracion e Importar
+     calibracion previa. El estado del archivo ocupa un renglon entero.
+   - Variable nueva nivel_sin_calibrar = ganancia - 68 (dBm).
+   - El archivo calibracion_peine.txt tiene 96 renglones y no es compatible
+     con el del EXP-20, que tiene 36.
+  Boton Generar calibracion (Python Snippet archivos_de_calibracion):
+   - Abre una ventana para elegir la captura; se pueden elegir varias.
+   - Formato de la tinySA: un renglon por punto, frecuencia en MHz y nivel
+     en dBm separados por coma, sin encabezado. Tambien acepta punto y coma,
+     renglones de titulo y frecuencias en Hz.
+   - Pico de cada linea: el nivel mas alto que haya a menos de 4 MHz de la
+     linea. No se uso una libreria de busqueda de picos: el pico mas cercano
+     puede ser la fuga de la portadora o un pico de ruido, y el maximo en
+     una ventana es mas simple y no se confunde. Las lineas vecinas estan a
+     10 MHz y, con un punto cada 2,1 MHz (toda la banda en 450 puntos), su
+     pico aparece a mas de 7,8 MHz: quedan afuera de la ventana.
+   - Con varias capturas, de cada linea se usa el valor mas bajo. Sirve para
+     descartar los picos momentaneos de MAX HOLD, y tambien para cubrir la
+     banda en tramos: una captura que no llega a una linea no cuenta.
+   - La captura tiene que ser del peine SIN calibrar. Si hay contadores
+     cargados, no genera y avisa: hay que cerrar el programa y abrirlo.
+   - La captura tiene que haberse tomado con la ganancia que esta elegida en
+     la ventana. Cada valor se pasa a ganancia 45 restando la diferencia, y
+     se redondea a 0,1 dB.
+   - Control: si alguna linea se leyo mas de 6 dB arriba o mas de 8 dB abajo
+     del nivel esperado sin calibrar, no genera nada y dice que linea fue.
+     Atrapa una pasada incompleta, la pausa, otra ganancia u otro archivo.
+   - Si todo esta bien carga los contadores, guarda el archivo y escribe
+     cuantas capturas y cuantas lineas uso.
+   - Este boton actua al soltarlo; los otros dos, al apretarlos.
+  Probado con la placa simulada y capturas inventadas con el formato de la
+  tinySA:
+   - Barrido: 48 frecuencias, de 55 a 995 MHz, saltos de 20 MHz y vuelta al
+     principio. En pausa manda ganancia 0; al destildar, la elegida.
+   - Guardar e importar con 96 renglones.
+   - Generar con una captura de toda la banda: las 96 lineas, sin diferencia
+     con lo esperado; el nivel calibrado que resulta queda en 0 +/- 0,05 dBm.
+   - Con el pico en el punto de abajo y con frecuencias en Hz: igual.
+   - Una captura con un pico de +2,4 dB en 280 MHz: esa linea queda mal por
+     2,4 dB. Dos capturas con picos en lineas distintas: sin error.
+   - Dos mitades de banda elegidas juntas: 96 lineas. Una sola mitad: 48.
+   - No genera con: ventana cancelada, archivo que no es captura, captura
+     sin peine, captura de otra banda, captura a 65 con el selector en 45 o
+     en 55, o con valores ya cargados.
+   - Con las capturas reales C1 y C2 del EXP-20: carga 36 lineas, iguales a
+     las que se habian sacado a mano.
+  No se probo la ventana real de elegir archivo: en la simulacion se la
+  reemplazo por una lista de nombres.
+  Lienzo revisado: 158 bloques, ninguno pisado. La ventana necesita por lo
+  menos 1390 x 845 puntos; en pantallas mas chicas aparecen barras de
+  desplazamiento.
+  A tener en cuenta:
+   - El margen de compensacion es de 5,5 dB sobre la amplitud base, o sea
+     que una linea que salga mas de 2,4 dB por debajo del nivel nominal no
+     llega a 0 dBm. De 420 a 1000 MHz y en 50 y 60 MHz no se sabe todavia
+     cuanto cae la salida: lo dice la primera captura.
+   - Los armonicos de las portadoras bajas ahora caen dentro de la banda,
+     siempre sobre otras lineas del peine (todo queda en multiplos de
+     10 MHz) y 10 dB o mas por debajo: con MAX HOLD quedan tapados.
+   - La calibracion queda tan buena como el analizador con que se hizo.
+   - Solo hacia el analizador, con atenuacion fija en 30 dB; nunca con el
+     cable en RX1.
+  Falta medirlo.
+
+EXP-21 / 05-10-2026 / Primera medicion  [EN CURSO]
+  Capturas del peine sin calibrar, banda completa (45 a 1005 MHz, filtro de
+  300 kHz, 450 puntos, un punto cada 2,14 MHz), MAX HOLD, ganancia 65. Estan
+  en la carpeta del flujo con el nombre original de la tinySA; se renombran
+  cuando el usuario termine de usarlas:
+    SA_261005_020559.bmp / 020601.csv   (primera)
+    SA_261005_021132.bmp / 021134.csv   (segunda)
+  Lineas leidas: de -7,5 a -1,9 dBm en la primera y de -7,6 a -1,0 dBm en la
+  segunda; media -4,58 dBm en las dos. Hasta unos 420 MHz estan cerca de
+  -3 dBm, como en el EXP-20; de ahi para arriba la salida cae, con el minimo
+  en 860 MHz (-7,5 dBm), y se recupera algo hacia 950 MHz (-5,9 dBm). No se
+  sabe cuanto de esa caida es de la placa y cuanto del cable o de la tinySA.
+  Picos momentaneos otra vez: las dos capturas difieren mas de 1 dB en
+  cuatro lineas. En la primera sobresalen 430 MHz (+1,5 dB) y 520 MHz
+  (+2,0 dB); en la segunda, 310 MHz (+2,5 dB) y 500 MHz (+1,5 dB). Son de
+  las portadoras de 435, 515, 315 y 495 MHz: ninguna es una donde el chip
+  recalibraria (55, 175, 295, 415, 535... MHz), asi que esa hipotesis no
+  explica estos picos.
+  El usuario genero la calibracion con el boton, usando solo la primera
+  captura (02:12). El archivo coincide con esa captura en las 96 lineas.
+   - Compensacion pedida: de +1,9 a +7,5 dB. El tope es 5,48 dB: 30 lineas
+     piden mas de lo que hay, casi todas de 640 MHz para arriba. Quedarian
+     entre -2,0 y 0 dBm; las otras 66, en 0 dBm.
+   - Las lineas de 430 y 520 MHz quedarian 1,5 y 2 dB bajas, por los picos.
+     Se le recomendo generar de nuevo eligiendo las dos capturas.
+  Duda del usuario antes de transmitir: los contadores muestran cerca de -23
+  y esperaba cerca de -3. Es la referencia a ganancia 45 (valor leido menos
+  20 dB); no se lo habia aclarado en el instructivo. Con sus valores el
+  nivel previsto es de -2,0 a 0 dBm por linea, +6 dBm de pico. Peor caso
+  absoluto del flujo, con todos los tonos en el tope: +3,6 dBm por linea.
+  Pendiente de decision del usuario: bajar el nivel calibrado a -3 dBm por
+  linea para que las 96 queden parejas, o mantener 0 dBm y aceptar la caida.
+  No llego a verificar el peine calibrado: ver el incidente que sigue.
+
+INCIDENTE / 05-10-2026 / Corte de USB con la xA9 durante el EXP-21
+  El programa se cerro solo unos 15 minutos despues de arrancar (arranco a
+  las 01:58; el corte fue poco despues de las 02:12). Estaba en PAUSA
+  (ganancia 0 y amplitud 0), 24 s despues de la captura de pantalla que
+  mando el usuario. Antes habia transmitido unos 10 minutos con ganancia 65.
+  Consola: "Hit stall for buffer" (libusb), despues "Failed to send NIOS II
+  request: File or device I/O failure" al saltar a 915 MHz (paso 44), tres
+  "Timed out waiting for buf_ready after 3000 ms", "Consecutive error limit
+  hit. Shutting down" y codigo de salida 3221226505 (0xC0000409: el programa
+  aborto al cerrar).
+  Lectura: se corto la comunicacion USB entre la PC y la placa; todo lo
+  demas es consecuencia. No hay ningun error del codigo Python del flujo
+  antes del corte. Causa sin identificar: cable o conector, puerto USB,
+  temperatura de la placa o firmware viejo (2.4.0 / FPGA 0.14.0). Un solo
+  caso no alcanza para decidir.
+  Verificado despues: no quedo ningun proceso con la placa tomada (el unico
+  Python abierto era GNU Radio Companion).
+  Indicado al usuario: desenchufar la placa, esperar, volver a enchufar,
+  fijarse si esta caliente y probar primero un par de minutos en PAUSA.
+
+EXP-21 / 05-10-2026 / Peine calibrado, informado por el usuario
+  Despues del corte de USB volvio a conectar la placa y corrio el peine con
+  la calibracion. En sus palabras: "claramente mejoro bastante. No es
+  perfecto, algunos bajan o suben 1 dB, pero ya no se va a -7 dBm como
+  antes"; cree que el metodo funciono bastante bien. No dejo captura del
+  peine calibrado ni dijo si genero con una o con las dos capturas.
+  Dato del usuario: el cable USB es el que vino con la placa, de medio metro.
+
+CONSULTA / 05-10-2026 / Limite de 30 MSPS y actualizacion de firmware
+  El usuario pregunto por que no se pudo transmitir con 40 MHz de ancho
+  (EXP-16), y despues ofrecio actualizar el firmware de la xA9 antes de un
+  experimento nuevo con el doble de ancho de banda por portadora.
+  Lo que se sabe del EXP-16: a 40 y 50 MSPS a la placa le faltaban muestras
+  (LED que titila) aunque la PC las generaba de sobra: el limite esta en el
+  envio por USB. Arriba de 30 MSPS el comportamiento era irregular.
+  Revisado ahora, sin tocar la placa:
+   - El aviso de "tamano de mensaje antiguo" es justamente de rendimiento
+     por USB: con firmware 2.5.0 o mayor y FPGA 0.16.0 o mayor los mensajes
+     entre la PC y la FPGA pasan de 2048 a 8192 bytes (usb.h de libbladeRF).
+     Actualizar podria ser la solucion del limite de 30 MSPS; antes se la
+     habia puesto como la causa menos probable.
+   - No es un solo cambio. La tabla de compatibilidad de libbladeRF dice que
+     el firmware 2.5.0 o mayor exige FPGA 0.16.0 o mayor, y la placa carga la
+     0.14.0 desde su memoria: son dos escrituras en la flash.
+   - GNU Radio usa su propia copia de la biblioteca (radioconda, paquete
+     libbladerf2 2024.05, bladeRF-2.dll), que no trae el codigo del mensaje
+     grande. La que si lo trae es la de bladeRF-cli en Program Files (de
+     noviembre de 2025). Habria que actualizar tambien la de radioconda, o no
+     se sabe como se comportaria GNU Radio con la placa actualizada.
+   - Los archivos ya estan en la PC: C:\Program Files\bladeRF\fx3_images\
+     bladeRF_fw_v2.6.0.img y C:\Program Files\bladeRF\hostedxA9.rbf.
+   - Procedimiento de Nuand: bladeRF-cli -f <firmware>, y reconectar. Dice
+     que en general no se puede inutilizar la placa; si la escritura falla se
+     recupera por el cargador de arranque, puenteando los pines 1 y 2 de J6
+     (que puede no estar soldado) y, en Windows, cambiando un controlador con
+     Zadig.
+   - gr-osmosdr acepta en los argumentos de la placa buffers, buflen (multiplo
+     de 1024), transfers y stream_timeout: se puede agrandar el bloque que se
+     manda por USB sin tocar la placa. Con 4096 muestras por bloque, a 40 MSPS
+     son unos 9800 envios por segundo.
+  Recomendacion dada: no actualizar esa noche ni sin el visto bueno del
+  profesor (cambio permanente en una placa prestada, hubo un corte de USB una
+  hora antes y el montaje que funciona podria dejar de andar). Probar primero
+  40 MSPS con bloques de USB mas grandes, que no tiene riesgo. Queda a
+  decision del usuario.
+
+EXP-22 / diseno 05-10-2026 / xA9: peine a 40 MSPS, linea cada 20 MHz [MEDIDO]
+  Flujo: SDR\A9_16_EXP22_Peine_40MSPS\exp22_a9_peine_40MSPS.grc
+  Pedido del usuario: copia del EXP-21 con el doble de ancho de banda por
+  portadora, la mitad de portadoras y la mitad de lineas: dos tonos por
+  portadora y lineas equiespaciadas. Quiere ver como reacciona la placa (si
+  aparecen las faldas del EXP-16) y dice que no necesita tantas lineas.
+  Decidio probar esto antes de hablar de actualizar el firmware.
+  Lo que cambia respecto del EXP-21:
+   - 40 MSPS, filtro de 36 MHz, tonos en +/-10 MHz.
+   - 24 portadoras, de 60 a 980 MHz cada 40 MHz: 48 lineas, de 50 a 990 MHz
+     cada 20 MHz. Pasada completa: 2 min 24 s con 6 s por portadora.
+   - Bloques de USB mas grandes, desde los argumentos del osmocom Sink:
+     buflen=16384 y buffers=128 (variables muestras_por_bloque y
+     bloques_usb). Son 2400 envios por segundo en vez de 9800. Para comparar
+     con lo habitual: 4096 y 512.
+   - 48 contadores en 4 filas de 12. El boton Generar calibracion busca
+     lineas cada 20 MHz. Archivo de 48 renglones, propio de este flujo: las
+     calibraciones del EXP-21 no sirven (los tonos estan a otra distancia de
+     la portadora).
+   - Amplitudes, ganancias y topes iguales al EXP-21: mismos niveles.
+  Probado con la placa simulada: abre la placa con los argumentos nuevos,
+  40 MSPS y 36 MHz; recorre 24 frecuencias de 60 a 980 MHz en saltos de
+  40 MHz; el boton carga 48 lineas; amplitud maxima 0,47 por tono. Lienzo:
+  112 bloques, ninguno pisado.
+  Que mirar: el LED de la placa (fijo = bien; titila = faltan muestras) y si
+  las lineas tienen faldas o la portadora sube. Si falla, probar 30e6 en
+  samp_rate (los tonos de +/-10 MHz entran).
+  Estimacion dada al usuario sobre actualizar el firmware: unos 15 a 20
+  minutos las dos escrituras con sus verificaciones, mas un tiempo incierto
+  para la biblioteca de GNU Radio.
+
+EXP-22 / 05-10-2026 / Resultado a 40 MSPS  [MEDIDO]
+  Informado por el usuario: sin faldas; el LED titilo apenas al principio y
+  despues quedo fijo. O sea que 40 MSPS anduvo con bloques de USB de 16384
+  muestras (no se probo con 4096, asi que no se sabe si fue por eso).
+  Capturas en la carpeta del flujo, con el nombre original de la tinySA:
+    SA_261005_025858.bmp / 025901.csv   sin calibrar, ganancia 65
+    SA_261005_030257.bmp / 030259.csv   calibrado
+  Picos de las 48 lineas: sin calibrar de -7,1 a -2,4 dBm (planitud 4,7 dB,
+  desvio 1,30); calibrado de -2,0 a +0,3 dBm (planitud 2,3 dB, desvio 0,46).
+  41 de 48 lineas dentro de +/-1 dB. Las bajas: 530 MHz (-1,3) y de 810 a
+  910 MHz (hasta -2,0 en 850 MHz), por falta de margen con dos tonos.
+  Grafico: EXP22_picos_antes_y_despues.png, en la misma carpeta.
+  El profesor indico no actualizar el firmware por ahora.
+
+EXP-23 / diseno 05-10-2026 / xA9: un tono por portadora, cada 50 MHz [MEDIDO]
+  Flujo: SDR\A9_17_EXP23_Peine_un_tono\exp23_a9_peine_un_tono.grc
+  Idea del usuario: un solo tono por portadora, con la imagen a la vista.
+  Asi el tono puede usar casi toda la escala y llegar a +3 dBm, y las lineas
+  se ubican donde se quiera. Pidio: lineas cada 50 MHz (cada 20 MHz "no
+  aporta nada" para verificar emision radiada y es mas lento); un selector
+  de la distancia entre la linea y la portadora, para ver faldas, imagen e
+  intermodulacion; que la tasa de muestreo baje sola al minimo que alcance;
+  calibracion siempre a 0 dBm y un selector para sumarle 3 dB a todo. No
+  acepto bajar el nivel calibrado a -3 dBm en el peine de dos tonos.
+   - 20 lineas, de 50 a 1000 MHz. Pasada de 2 minutos con 6 s por linea.
+   - Portadora por ENCIMA de la linea (tono negativo), a 2, 5 o 10 MHz. Si
+     fuera por debajo, la linea de 50 MHz pediria sintonizar en 45 o 40 MHz
+     y la placa arranca en 47. Fuga en linea + separacion; imagen en linea
+     + 2 x separacion. La ventana las indica.
+   - Tasa = 3 x separacion (6, 15 o 30 MSPS); filtro = 0,9 x tasa. Cambia
+     en marcha al mover el selector; conviene hacerlo en PAUSA. No probado
+     en la placa.
+   - Amplitud base 0,25 y tope 0,95: hasta 11,6 dB sobre la base.
+   - Selector de nivel: calibrado, o calibrado + 3 dB. Los 3 dB se suman
+     solo a las lineas con valor cargado, asi el peine sin calibrar no
+     cambia y Generar calibracion sigue valiendo.
+   - Bloques de USB: 128 x 4096, para que el retardo de la amplitud sea
+     corto con tasas bajas (0,09 s a 6 MSPS; 0,035 s a 15).
+   - Resto igual al EXP-22: pausa, tres ganancias, dos ordenes, botones de
+     generar, guardar e importar, 20 contadores.
+  Probado con la placa simulada: 20 lineas; calibrado da 0 dBm y con la
+  subida +3 dBm, con amplitud maxima 0,89 para una caida inventada de
+  4,5 dB; cambia tasa y filtro al mover el selector. Lienzo: 87 bloques,
+  ninguno pisado.
+  A tener en cuenta: la calibracion vale para la separacion con que se
+  hizo; con +3 dBm y ganancia 65 la placa trabaja cerca de su maximo y puede
+  comprimir (subirian los armonicos); menor tasa no reduce la
+  intermodulacion, pero el filtro mas angosto limpia lo que este lejos.
+
+EXP-23 / 05-10-2026 / Resultado: donde caen las lineas de mas  [MEDIDO]
+  El usuario no hizo MAX HOLD: capturo portadoras sueltas para ver que
+  aporta cada una (11 capturas en la carpeta del flujo, con el nombre
+  original de la tinySA, SA_261005_100946 a 103338). Vio muchas lineas de
+  mas y que no cambian al bajar la tasa. A 30 MSPS el LED titilaba un poco.
+  No son intermodulacion: son armonicos del oscilador que llevan el tono.
+  Con L = linea, S = separacion y portadora C = L + S (medido hasta 1 GHz):
+    orden 3: 3C + S = 3L + 4S     -9 a -10 dBc
+    orden 5: 5C - S = 5L + 4S     -12 a -17 dBc
+    orden 7: 7C + S = 7L + 8S;  orden 9: 9C - S = 9L + 8S; siguen hasta el
+    orden 17, de -17 a -28 dBc
+    triple de la portadora, 3C: -33 dBc
+    imagen del muestreo, L + tasa: -32 a -33 dBc con tasa = 3 S (culpa del
+    diseno: el tono quedaba a un tercio de la tasa)
+    fuga, L + S: -37 a -51 dBc;  imagen de IQ, L + 2S: -48 a -51 dBc
+  Ejemplo: linea de 50 MHz con S = 5: 170, 270, 390, 490, 610, 710, 830 y
+  930 MHz, tal cual la formula.
+  Sin explicar: dos capturas tienen picos que corresponden al tercer armonico
+  de otra portadora (se habrian guardado a mitad de un barrido), y la de la
+  linea de 350 MHz tiene un pico en 360 MHz a -17 dBc.
+  El .csv de la tinySA guarda solo la traza actual, no el waterfall.
+  Regla que sale de ahi: los armonicos fuertes caen sobre el propio peine si
+  la separacion entre lineas divide a 4 S y la primera linea es multiplo de
+  la mitad de esa separacion. Cada 50 MHz pide S = 12,5; cada 40 MHz, S = 10
+  (y arrancar en 60 u 80, no en 50); cada 100 MHz, S = 25 (inalcanzable);
+  cada 20 MHz, S = 5. Una lista despareja de lineas con S = 5 sirve hasta
+  1 GHz (20 lineas) pero hasta 3 GHz pide 83 lineas: descartada, porque el
+  usuario quiere llegar a 2 o 3 GHz.
+  Criterio del usuario para la permanencia: mas de 2 barridos del analizador,
+  para que siempre haya un barrido entero dentro de una sola portadora.
+
+EXP-24 / diseno 05-10-2026 / xA9: lineas cada 40 MHz, S = 10 MHz  [PENDIENTE]
+  Carpeta: SDR\A9_18_EXP24_Peine_cada_40MHz\
+    exp24_a9_peine_40MHz_desde60.grc   lineas de 60 a 980 MHz
+    exp24_a9_peine_40MHz_desde50.grc   lineas de 50 a 970 MHz
+  Un tono por portadora, portadora 10 MHz por encima de la linea, 40 MSPS,
+  filtro de 36 MHz, bloques de USB de 16384 muestras (128 bloques), 24
+  lineas, 6 s por linea (2 min 24 s por pasada). Calibracion a 0 dBm con
+  selector de +3 dB, como el EXP-23. Cada flujo usa su propio archivo de
+  calibracion (calibracion_peine_desde60.txt o _desde50.txt).
+  Desde 60 MHz los armonicos caen sobre lineas del peine (60 -> 220, 340...)
+  y con 40 MSPS la imagen del muestreo cae en la linea siguiente. El usuario
+  pidio arrancar en 50 MHz: asi los armonicos caen justo en el medio entre
+  dos lineas (50 -> 190, 290...). Se hicieron las dos versiones para que lo
+  compare. Fuera del peine quedan la fuga (L + 10), la imagen de IQ (L + 20)
+  y el triple de la portadora (3L + 30).
+  Probado con la placa simulada (version desde 60): 24 sintonias de 70 a
+  990 MHz en saltos de 40; 40 MSPS; guardar con 24 renglones. Lienzos sin
+  bloques pisados.
+
+EXP-24 / 05-10-2026 / Resultado (version desde 60 MHz)  [MEDIDO]
+  Capturas en la carpeta del flujo, nombre original de la tinySA:
+    SA_261005_110227 / 110230   una portadora, linea de 60 MHz
+    SA_261005_110304 / 110306   una portadora, linea de 340 MHz
+    SA_261005_110634 / 110637   peine sin calibrar, MAX HOLD
+    SA_261005_110957 / 110959   peine calibrado
+    SA_261005_111408 / 111411   peine calibrado + 3 dB
+  Las tres de MAX HOLD parecen tomadas sin reiniciarlo: lo que aparecio una
+  vez queda en las siguientes. Grafico:
+  EXP24_peine_sin_calibrar_calibrado_y_mas3dB.png.
+  Lineas: sin calibrar de -7,2 a -1,8 dBm; calibrado de -0,8 a +0,3 dBm sin
+  contar la de 580 MHz (23 lineas, planitud 1,1 dB); con +3 dB, de +1,9 a
+  +3,0 dBm, media +2,3: sube 2,6 dB en vez de 3 (algo de compresion).
+  Ninguna linea se quedo sin margen. La de 580 MHz quedo unos 2,5 dB baja:
+  al calibrar se leyo 3 dB de mas por un pico momentaneo (una sola captura).
+  Fuera de las lineas, parejo en toda la banda: fuga en L + 10 a -37 a
+  -40 dBm; imagen de IQ en L + 20 a 40 dB bajo la linea; triple de la
+  portadora (210, 330, 450...) a -46 a -49 dBm. Los armonicos del oscilador
+  y la imagen del muestreo no se ven: caen sobre las lineas, como se queria.
+  Portadora de 60 MHz sola: picos en 340, 500, 620, 780 y 900 MHz (ordenes
+  5 a 13), todos sobre lineas. Raro: falta el orden 3 (220 MHz) y hay un
+  pico de -10 dBm en 70 MHz. En la de 340 MHz aparece 940 MHz, que es el
+  orden 3 de la linea anterior (300 MHz): la pantalla se guardo a mitad de
+  un barrido.
+  HALLAZGO: picos sueltos fuera de las lineas, de nivel fijo: 751 MHz a
+  -7,2 dBm (en las tres capturas), y en la ultima 734 MHz a +1,7 dBm,
+  690 MHz a -18, 351 MHz a -22 y 631 MHz a -30 dBm. Todos caen entre una
+  linea y la siguiente (700-740, 740-780, 660-700, 340-380, 620-660): es el
+  propio tono emitido mientras el oscilador se mueve de una portadora a la
+  otra. Los mas fuertes estan donde el oscilador cruza 750 y 375 MHz, que
+  son limites de division del sintetizador del AD9361 (dato de memoria, sin
+  verificar). Explica los "picos momentaneos" de MAX HOLD de los EXP-17 a 22.
+  Remedio propuesto: silenciar el tono justo antes de cada salto y volver a
+  encenderlo despues.
+
+ORDEN / 05-10-2026 / Capturas sueltas en SDR
+  El usuario encontro capturas viejas en la tinySA y las dejo sueltas en SDR.
+  Se identificaron por el contenido y la hora, y se movieron (no se borro
+  nada):
+   - Seis del 02-10 a las 05:02-05:06: version 2 del EXP-16 (portadora en
+     100 MHz, 75 a 125 MHz). A EXP16\Capturas como T1 a T6:
+       T1, T2, T3  <- SA_261002_050208/211, 050222/225, 050242/245
+                      (una sola linea en 100 MHz, atenuacion 0)
+       T4          <- SA_261002_050459/501 (seis tonos, 85 a 115 MHz)
+       T5, T6      <- SA_261002_050545/548, 050608/610 (tonos en 95 y 105)
+   - Una del 05-10 00:34 (peine de 65 a 245 MHz, antes de C1): a
+     EXP20\Capturas como C0  <- SA_261005_003421/423
+   - Una del 05-10 02:30 (una portadora de 275 MHz calibrada, lineas en 270 y
+     280 MHz a +0,2 dBm): a la carpeta del EXP-21, con su nombre original
+     mas una descripcion.
+
+EXP-25 / diseno 05-10-2026 / xA9: silencio en cada salto  [MEDIDO]
+  Flujo: SDR\A9_19_EXP25_Peine_con_silencio\
+         exp25_a9_peine_con_silencio_desde60.grc
+  Es el EXP-24 desde 60 MHz, con el tono apagado durante cada salto para ver
+  si desaparecen los picos sueltos. Pedido del usuario: apagado el mismo
+  tiempo que encendido.
+   - Cada linea: 6 s encendida y 6 s apagada. El salto de frecuencia se hace
+     en la mitad del silencio: 3 s despues de apagar y 3 s antes de encender.
+     Pasada completa: 4 min 48 s.
+   - Como se hizo: el Function Probe saca un paso cada media permanencia;
+     fase = paso % 4 (0 y 1 encendido, 2 y 3 apagado) y la linea avanza al
+     empezar la fase 3.
+   - Problema visto en simulacion: como el paso cambia 4 veces por linea,
+     GNU Radio le mandaba la frecuencia a la placa unas 8 veces por segundo
+     aunque no cambiara, y gr-osmosdr resintoniza siempre. Se agrego al
+     Python Snippet una guarda de 5 lineas: set_freq solo actua si la
+     frecuencia cambio. Con eso hay un solo salto por linea.
+   - Mismo formato de archivo de calibracion que el EXP-24
+     (calibracion_peine_desde60.txt): se puede copiar de una carpeta a otra.
+  Probado con la placa simulada: un salto cada 12 s; tono encendido 6 s;
+  salto 3 s despues de apagarse y 3 s antes de encenderse.
+  Que mirar: si con MAX HOLD siguen apareciendo picos entre las lineas (como
+  751 y 734 MHz en el EXP-24). La fuga de portadora sigue saliendo durante
+  el salto, a unos -37 dBm.
+
+EXP-25 / 05-10-2026 / Resultado con silencio en cada salto  [MEDIDO]
+  Captura en la carpeta del flujo: SA_261005_113604.bmp / 113606.csv (peine
+  calibrado, ganancia 65, MAX HOLD). Una sola captura. Grafico:
+  EXP25_con_silencio_contra_EXP24.png.
+  El usuario copio la calibracion del EXP-24 y corrigio a mano el contador
+  de 580 MHz, que habia quedado mal por un pico momentaneo. Comentario suyo:
+  la placa si llega a 0 dBm en esa frecuencia; el problema era la
+  calibracion, y tener calibracion automatica y ajuste manual aporta mucho.
+  El archivo de la carpeta no tiene guardado ese ajuste (sigue con -21,8).
+  Lineas: de -0,8 a +0,3 dBm, media -0,24, planitud 1,1 dB, desvio 0,28 dB,
+  las 24.
+  Entre lineas: fuga de -36 a -40 dBm, imagen de IQ de -39 a -41 dBm y
+  triple de la portadora de -46 a -49 dBm, como en el EXP-24. Ya no aparece
+  ningun pico suelto en la posicion de un tono (en el EXP-24: 734 MHz a
+  +1,7 dBm). Queda UNO: 390 MHz a -15,3 dBm, que es justo la frecuencia de
+  la portadora de la linea de 380 MHz: la fuga, 22 dB mas alta que lo
+  normal por un instante.
+  Releyendo el EXP-24 con esto: tres de sus picos sueltos tambien estaban en
+  frecuencias de portadora (750, 350 y 630 MHz) y uno solo en posicion de
+  tono (734 MHz). O sea que hay dos fenomenos: el tono durante el salto, que
+  el silencio saco, y saltos momentaneos de la fuga de portadora, que
+  siguen. Sospecha sin probar para lo segundo: la recalibracion automatica
+  del chip. Una sola pasada no alcanza para afirmar nada.
+
+PROCEDIMIENTO / 05-10-2026 / Test Procedure de emisiones radiadas (RE-TP-001)
+  El usuario dio por cerrados los experimentos por ahora: el EXP-25 sirve
+  para una primera medicion en el CETEM. El profesor le paso un esquema
+  (SDR\Test Procedure de RE (Emisiones Radiadas).pdf) y pidio escribir el
+  procedimiento. Se discutio seccion por seccion antes de escribir.
+  Decisiones del usuario:
+   - Objetivo: verificar la cadena del CETEM y asegurar continuidad, no
+     comparar el peine contra limites de CISPR 32.
+   - Rango inicial de 60 a 980 MHz (el peine del EXP-25).
+   - Antena transmisora: probablemente la que viene con la SDR. No importa su
+     factor: la curva que se ve en el analizador es repetible.
+   - PC afuera de la camara, con un USB largo ya instalado en el CETEM. La
+     SDR iria blindada, pero no para la primera medicion.
+   - Geometria fija en vez de girar la mesa y barrer altura (no le ve
+     sentido a maximizar; el profesor si lo queria). Se dejo una
+     "exploracion inicial" de unica vez para elegir la geometria.
+   - Lo ejecutan el y Federico Martinez (CETEM). Docentes: Pablo Marino
+     Belcaguy y Walter Gustavo Fano.
+   - Formato: LaTeX en un solo .tex, para Overleaf, con el logo de la
+     materia en la caratula.
+  Definido por el asistente, a pedido: criterio de continuidad de +/-3 dB
+  conforme, 3 a 6 dB revisar y repetir, mas de 6 dB no conforme; a confirmar
+  con una medicion de repetibilidad en la primera visita.
+  Archivos: SDR\Test_Procedure_RE\procedimiento_RE_peine_SDR.tex, el PDF
+  compilado (10 paginas) y logo_materia.png. Lo que falta completar esta en
+  rojo en el documento: modelo del receptor y de las antenas, si el USB del
+  CETEM es USB 3, fecha de la calibracion y geometria usada.
+  Alertas dadas: el flujo necesita USB 3 (40 MSPS) y la placa se alimenta
+  por ese cable; conviene probar con un cable largo antes de ir.
+
+EXP-26 / diseno 11-10-2026 / xA9: ensayo radiado en casa  [PENDIENTE]
+  Flujo: SDR\A9_20_EXP26_Peine_radiado\exp26_a9_peine_radiado_desde60.grc
+  Pedido del usuario: un experimento radiado antes de ir al CETEM (la visita
+  es el martes 13-10-2026). Sus respuestas:
+   - Objetivo: probar si la calibracion por cable sirve al irradiar, sin
+     blindaje, y ensayar la repetibilidad.
+   - En su casa, con las antenas a 2 m.
+   - Antenas: las que vinieron con la SDR y con la tinySA.
+   - Nivel: 0 dBm, igual que por cable (se le habia propuesto -20 dBm por
+     emitir fuera de una camara; eligio 0 dBm).
+   - No tiene un cable USB largo para probar.
+  El flujo es el EXP-25 con dos cambios, sin tocar la senal:
+   - Ventana reordenada en tres columnas de 4: en el EXP-24 y el EXP-25 tres
+     etiquetas quedaban tapadas.
+   - Selector "Modo": barrido completo, o una linea fija emitida en forma
+     continua (24 opciones), para orientar las antenas o mirar una linea.
+  Se armo modificando el .grc del EXP-25. La carpeta trae una copia de la
+  calibracion del EXP-25 (calibracion_peine_desde60.txt, del 05-10).
+  Probado con la placa simulada: importa las 24 lineas, barre, pasa a linea
+  fija (580 MHz, portadora en 590) y vuelve al barrido. Lienzo: 94 bloques,
+  ninguno pisado.
+  Plan de capturas: ambiente (SDR desenchufada), SDR en pausa, peine sin
+  calibrar, peine calibrado dos veces sin tocar nada, y otra vez despues de
+  desmontar y volver a montar. Con eso se calcula: margen sobre el ruido,
+  si calibrado menos sin calibrar coincide con la compensacion del archivo,
+  y la repetibilidad con y sin remontar.
+  Nota: la carpeta temporal de trabajo del asistente se vacio entre el 05 y
+  el 11-10; se rehicieron la placa simulada y los verificadores.
+
+EXP-26 / 12-10-2026 / Cambios pedidos durante el ensayo radiado
+  El usuario no pudo hacerlo el 11; lo empezo el 12. Antenas: una fija de
+  unos 10 cm y una telescopica de 30 cm. Se le recomendo la de 10 cm en la
+  SDR (es parte de la fuente y va al CETEM: mejor sin nada ajustable) y la
+  telescopica al maximo en la tinySA. Pregunto si una antena mal adaptada
+  puede danar la SDR: a 0 dBm lo reflejado es 1 mW como mucho; no se ve
+  riesgo. El selector de ganancia (45, 55, 65 dB) ya existia.
+  Pidio dos controles porque el silencio le dificultaba ver las lineas:
+   - Casilla "Silencio en cada salto" (tildada por defecto). Destildada, cada
+     linea dura 6 s siempre encendida y la pasada baja a 2 min 24 s, como en
+     el EXP-24; vuelven a ser posibles los picos del tono durante el salto.
+   - Casilla "CONGELAR en la linea actual (sigue emitiendo)": el barrido se
+     detiene en la linea que esta saliendo y la deja en emision continua. Al
+     destildar sigue desde ahi. Se hizo con 7 lineas mas en el Python
+     Snippet: mientras esta tildada, set_paso no avanza y devuelve el numero
+     a la lista de pasos.
+  La ventana gano una fila: PAUSA, CONGELAR y Silencio arriba; ganancia,
+  nivel, modo y orden debajo. Se modifico el mismo .grc del EXP-26.
+  Probado con la placa simulada: con silencio el tono esta encendido la
+  mitad del tiempo; sin silencio, siempre; congelado no hay saltos y al
+  descongelar sigue en la linea siguiente. Lienzo sin bloques pisados.
+
+EXP-26 / 12-10-2026 / Primer intento radiado  [MEDIDO, a repetir]
+  En casa, antenas a 2 m: la fija de 10 cm en la SDR y la telescopica en la
+  tinySA. Capturas en la carpeta del flujo (falto la 5):
+    SA_261012_182628 / 182630   1 ambiente, SDR desenchufada
+    SA_261012_182757 / 182800   2 SDR en pausa
+    SA_261012_183245 / 183248   3 peine sin calibrar
+    SA_261012_184003 / 184006   4 peine calibrado
+    SA_261012_184420 / 184422   6 calibrado, remontado
+  Grafico: EXP26_radiado_resultado.png.
+  El piso de las cinco capturas esta en -60 a -62 dBm, igual que en las
+  mediciones por cable con 30 dB de atenuacion: todo indica que la tinySA
+  quedo con la atenuacion fija en 30 dB. Con eso solo 6 de las 24 lineas
+  (580 a 780 MHz) superan el piso por 10 dB; la mas fuerte, 740 MHz, llega
+  a -42 dBm. Por debajo de 540 MHz y por encima de 800 MHz no se distinguen.
+  Con esas 6 lineas: calibrado menos sin calibrar difiere de la compensacion
+  del archivo entre -1,7 y +1,0 dB (medio -0,75); remontado menos calibrado,
+  entre -2,5 y +0,5 dB (desvio 1,07). Pocas lineas y poca resolucion para
+  concluir.
+  La SDR en pausa no agrega nada visible sobre el ambiente a este piso. En
+  el ambiente se ve FM (96 y 105 MHz, unos -55 dBm).
+  Lectura del usuario: problema de adaptacion de la antena de la SDR; quiere
+  pasar la telescopica a la SDR, como prueba de concepto. Respuesta: primero
+  repetir con la atenuacion en automatico, que deberia bajar el piso unos
+  30 dB; intercambiar las dos antenas entre si no cambia el enlace de hoy.
+
+EXP-26 / 12-10-2026 / Segundo intento radiado  [MEDIDO, parcial]
+  El usuario confirmo que la tinySA habia quedado con 30 dB de atenuacion.
+  Repitio con atenuacion automatica y con la telescopica (30 cm, al tope) en
+  la SDR y la de 10 cm en la tinySA, a 2 m. Motivo del cambio de antena: en
+  el CETEM la antena de medicion es la del laboratorio, asi que la unica que
+  viaja es la de la SDR y conviene la que mas irradia. Por falta de tiempo
+  hizo solo tres capturas:
+    SA_261012_190516 / 190519   peine calibrado
+    SA_261012_190559 / 190602   SDR conectada, sin transmitir
+    SA_261012_190651 / 190654   ambiente, SDR desconectada
+  Grafico: EXP26_radiado_resultado_2.png.
+  El piso bajo a -91 dBm. Lineas recibidas: de -52 a -75 dBm entre 220 y
+  980 MHz. 20 de las 24 superan al ruido por 10 dB o mas, y 18 por 20 dB o
+  mas (hasta 38 dB en 660 MHz). No sirven a 2 m con la tinySA: 60 y 140 MHz
+  (no se ven), 100 MHz (tapada por FM, -79 dBm) y 180 MHz (6 dB).
+  Ambiente: FM cerca de 100 MHz y celular entre 718 y 772 MHz (-71 a
+  -79 dBm). La SDR conectada sin transmitir no agrega nada claro sobre el
+  ambiente a este nivel; las diferencias que se ven estan en bandas de
+  celular y varian solas.
+  Con el peine aparece otra vez un pico suelto en 751 MHz (-60,7 dBm, 3 dB
+  bajo la linea de 740 MHz): es la frecuencia de la portadora de esa linea,
+  la misma que dio -7,2 dBm por cable en el EXP-24. Ya es sistematico en
+  750 MHz.
+  No se midio el peine sin calibrar ni se repitio: no se pudo comprobar si
+  la calibracion se traslada al aire ni la repetibilidad. Lo que si queda
+  mostrado es que el peine se irradia y se recibe con margen en casi toda
+  la banda.
+
+CETEM / 13-10-2026 / Primera medicion en la camara  [MEDIDO]
+  Datos en CETEM\Mediciones (23 trazas del receptor R&S ESR-7, 30 MHz a
+  1 GHz, RBW 120 kHz, detector de pico, MAX HOLD, en dBuV/m con antena y
+  cable incluidos) y fotos en CETEM\Fotos. Se midio tambien el Comb
+  generator de la tesis de otro alumno. Antena de medicion bilog en mastil;
+  se interpreto "1 M, 2 M, 3 M" como su altura y "cara" como la posicion de
+  la mesa. La notebook estuvo dentro de la camara, sobre la misma mesa que
+  la SDR, con un USB corto (el procedimiento la preveia afuera).
+  SDR (telescopica de 30 cm, vertical): las 24 lineas se vieron a las tres
+  alturas, entre 69 y 96 dBuV/m, de 30 a 46 dB sobre la SDR en pausa. Sin
+  antena la placa igual irradia de 30 a 57 dBuV/m. Al cambiar la altura,
+  cada linea varia una mediana de 7,9 dB (hasta 15,8): reflejo en el piso.
+  Respuesta de la cadena (radiado menos conducido) muy despareja en la
+  banda, unos 20 dB.
+  Problemas: con la antena a 1 y 2 m, varias frecuencias de portadora (linea
+  + 10 MHz) aparecen a menos de 6 dB de su linea (9 a 1 m, 6 a 2 m); a 3 m
+  quedan 31 a 36 dB abajo, como por cable. Ademas hay picos sueltos casi al
+  nivel de las lineas (265, 885, 944 MHz y otros). No aparecen en pausa.
+  Causa sin confirmar; falta saber si el silencio entre saltos estaba
+  tildado.
+  Comb generator (latigo vertical, linea cada 10 MHz): de 75 a 87 de las 98
+  lineas se ven (50 a 990 MHz), entre 39 y 69 dBuV/m. Casi no cambia al
+  girar la mesa (mediana 1 dB). En horizontal practicamente no se ve.
+  La SDR emite 33 dB mas que el Comb generator en las mismas frecuencias
+  (mediana sobre las 24 lineas, vertical a 1 m, mesa en 0 grados).
+  Segun el encabezado, el receptor uso paso de 30 kHz y 50 ms por punto: un
+  barrido completo duraria unos 27 minutos. A confirmar con el laboratorio.
+  Dashboard con todas las comparaciones, como archivo que se abre sin
+  internet: CETEM\Dashboard_CETEM_13-10.html. Copia en claude.ai:
+  https://claude.ai/artifact/2ATQtjSDgYLKkjxZKb1Xur (esta copia NO tiene
+  el ajuste de atenuacion de abajo).
+  Ajuste de atenuacion (pedido del usuario, 15-10-2026): el Comb generator
+  y la SDR en pausa se midieron con 10 dB de atenuacion en el receptor, y
+  la SDR emitiendo y sin antena con 20 dB. Con 20 dB el piso de ruido sale
+  10 dB mas alto (se ve comparando SDR en pausa con SDR sin antena). Para
+  que las mediciones queden comparables, a todas las de 10 dB se les
+  sumaron 10 dB en el dashboard. Las cifras de esta entrada ya incluyen
+  ese ajuste. Sin el ajuste: SDR 43 dB sobre el Comb generator, Comb
+  generator entre 29 y 59 dBuV/m, SDR de 40 a 56 dB sobre la pausa.
+
+CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
+  Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
+  investigar la calibracion de la xA9, porque leyo que las "portadoras
+  repetidas" pueden deberse a la calibracion de continua (DC) y de IQ.
+  Que arregla cada calibracion:
+   - Continua: la fuga de portadora, una linea en la frecuencia del
+     oscilador (en el peine, en el medio de cada par de lineas).
+   - IQ: la imagen, una copia de cada tono del otro lado de la portadora
+     (en el peine cae justo sobre la otra linea del par, por diseno).
+  Como se calibra la xA9 (AD9361):
+   - Sola. El controlador del chip corre las calibraciones al iniciar y
+     vuelve a correr la de cuadratura de TX (fuga e imagen) cada vez que el
+     oscilador de TX queda a mas de 100 MHz de la ultima calibracion
+     (cal_threshold_freq = 100000000 en ad9361.c). Mientras calibra pone el
+     chip en estado ALERT: la transmision se interrumpe un instante.
+     Con saltos de 20 MHz eso pasaria cada 6 portadoras: en el EXP-21, en
+     55, 175, 295, 415, 535, 655, 775 y 895 MHz; en el EXP-20, en 75, 195 y
+     315 MHz. Deducido del codigo, no medido.
+   - Los comandos "calibrate" de bladeRF-cli (lms, dc, iq, table) son de la
+     bladeRF de primera generacion (LMS6002D). La pagina de Nuand sobre
+     correccion de continua e IQ habla solo de ese chip.
+   - libbladeRF si permite corregir a mano en la bladeRF 2: la funcion
+     bladerf_set_correction escribe los registros de correccion del AD9361
+     (continua I y Q, fase y ganancia, en TX y RX) y marca los bits de
+     forzado. En gr-osmosdr eso se llama con set_dc_offset y set_iq_balance
+     del sumidero, solo desde Python: el bloque osmocom Sink de GRC no tiene
+     esos parametros. No se probo, ni se sabe si la calibracion automatica
+     pisa los valores manuales en el siguiente salto de mas de 100 MHz.
+  Que dicen las capturas (C1, C2, N1, N2, M1 y M2, revisadas de nuevo):
+   - Fuga de portadora muy pareja entre portadoras: -80,7 dBm con ganancia
+     30, -39,0 con 63 y -36,0 con 65 (medianas; +/- 1 dB). Respecto de las
+     lineas: 47 a 50 dB abajo con ganancia 30, 38 a 40 con 63 (lineas en
+     0 dBm) y 32 a 36 con 65 sin calibrar. Respecto del fondo de escala
+     digital: unos 55 dB abajo con ganancia 30 y unos 45 con 63 y 65.
+     Analog Devices da como tipico 50 dB: la calibracion automatica esta
+     funcionando.
+   - A 2,5 y 7,5 MHz de cada portadora no hay nada sobre el piso (salvo los
+     armonicos del reloj): no se ve el tono de calibracion del chip.
+   - Imagen: 38 a 40 dB abajo (EXP-15 y EXP-18). Queda bajo la otra linea
+     del par; le cambia el nivel a lo sumo 0,1 dB.
+  Lo que NO arregla ninguna calibracion: las copias de cada par en 3, 5,
+  7... veces la frecuencia de la portadora (10 a 25 dB abajo). Son armonicos
+  del oscilador y solo se sacan con filtros pasabajos. Mirando toda la banda
+  de 45 a 1005 MHz son las "repetidas" mas visibles: con la portadora en
+  55 MHz aparecen pares en 165, 275, 385 MHz, etc. Con MAX HOLD quedan
+  tapadas porque caen sobre otras lineas del peine.
+  Conclusion: recalibrar no saca las lineas repetidas. Lo unico mejorable
+  con calibracion manual es la fuga (quizas 15 a 20 dB; estimacion por lo
+  logrado en la x40), con una tabla por portadora y un ajuste de dos numeros
+  en cada una de las 48. No se justifica por ahora.
+  Hipotesis sin probar: la recalibracion automatica cada 6 portadoras
+  podria ser el origen de algunos picos momentaneos de MAX HOLD. La linea de
+  320 MHz, de la portadora de 315 MHz donde el EXP-20 recalibraria,
+  sobresalio en dos series; las otras lineas con picos (210, 280, 380 y
+  390 MHz) no son de portadoras donde recalibra. Prueba posible: zero span
+  en una linea de una portadora donde recalibra.
+  Fuentes: codigo de libbladeRF (bladerf2.c y rfic_host.c), controlador
+  no-OS del AD9361 de Analog Devices (ad9361.c), pagina "DC offset and IQ
+  Imbalance Correction" de la wiki de Nuand, manual de bladeRF-cli y el
+  foro EngineerZone de Analog Devices (de este ultimo solo se vieron los
+  resumenes del buscador: las paginas no abrieron).
+  No se toco la placa: el usuario estaba midiendo.
+
+EXP-12 / PLAN ACORDADO 28-09-2026 / Primer generador peine
+  Decision del usuario: pasar directamente al primer peine con la x40,
+  siguiendo la consigna del TP como guia aunque no al pie de la letra. El
+  EXP-11 queda postergado.
+
+  Lo que pide la consigna (Actividad 1.3, Generador Peine): varios tonos
+  simultaneos (ejemplo: 100, 150, 200, 250 y 300 MHz), flujo en GNU Radio,
+  verificar la presencia de todos los tonos y analizar la ocupacion espectral.
+  Limitacion: ninguna de las dos placas puede emitir tonos separados 50 MHz a
+  la vez, porque todo lo simultaneo tiene que caber en el ancho de banda
+  instantaneo (28 MHz en la x40, 56 MHz en la xA9). Como las lineas van de un
+  solo lado del oscilador, en la practica se usa la mitad.
+  Se descarto la propuesta inicial de lineas cada 10 MHz: en los unos 14 MHz
+  utiles de la x40 entrarian solo una o dos lineas.
+
+  Propuesta aprobada, en dos etapas:
+   1. Peine en una sola ventana: 5 tonos simultaneos, como los 5 del ejemplo
+      de la consigna, todos del lado positivo del oscilador y separados entre
+      0,5 y 1 MHz. La separacion se elige para que las imagenes y las replicas
+      de -937,7 kHz caigan entre las lineas y nunca encima. Medir la presencia
+      de todas las lineas, la planitud entre ellas y la ocupacion espectral.
+   2. Peine por tandas: mover el oscilador ventana por ventana para cubrir el
+      rango. Cubre tambien la Actividad 1.2 (barrido de 100 MHz a 1 GHz en
+      pasos de 50 MHz): desde 250 MHz con la x40, completo con la xA9.
+
+  A tener en cuenta en el diseno:
+   - Nivel por linea: con 5 tonos, cada uno queda cerca de 0,2 de amplitud para
+     no recortar, o sea unos -49 dBm con ganancia 30. La fuga de portadora, en
+     -40 dBm, queda por encima de las lineas. Se puede mejorar con fases de
+     Schroeder, que bajan el factor de cresta.
+   - Una ventana de varios MHz necesita 8 MSPS o mas. Por USB 2 esas tasas
+     pueden quedar al limite.
+
+  DISENO DEFINIDO EL 01-10-2026 (reemplaza la etapa 1 de arriba)
+  El usuario descarto el peine dentro de una sola ventana por demasiado basico
+  y pidio ir directo al peine por tandas. Objetivo de fondo: un peine
+  repetible para que el CETEM verifique su cadena una vez por dia, en menos de
+  30 minutos, mirandolo con sus propias antenas y analizador, sin lazo cerrado
+  entre la SDR y el analizador.
+   - Rango: 300 a 510 MHz, lineas cada 10 MHz, 22 lineas.
+   - 11 portadoras, de 305 a 505 MHz en pasos de 20 MHz. Dos tonos por
+     portadora, en +5 y -5 MHz.
+   - Simetria a proposito (idea del usuario): la imagen de cada tono cae sobre
+     el otro, asi no quedan imagenes sueltas en el espectro. Como la imagen
+     esta 34 dB abajo, modifica cada linea +/-0,17 dB como maximo, y es fija
+     mientras el desbalance no cambie. Ajustando la suma de las fases de los
+     dos tonos se la puede dejar constructiva en las dos lineas a la vez; el
+     maximo es plano, o sea poco sensible a la deriva.
+   - Se transmite un tono y no la portadora porque la fuga (-40 dBm) es del
+     mismo orden que la senal: sumada con fase desconocida daria desde +6 dB
+     hasta casi anularse.
+   - La placa esta conectada por USB 3 (SuperSpeed, verificado con
+     bladeRF-cli -e info), necesario para los 20 MSPS.
+   - Medicion con la tinySA en MAX HOLD, no con promediado: cada salto tiene
+     que durar mas que un barrido.
+  Flujo: SDR\X40_06_EXP12_Peine_por_tandas\exp12_peine_tandas.grc
+    Senal: Signal Source (+5 MHz) -> Add; Signal Source -> Complex Conjugate
+      -> Multiply Const (fase del tono inferior) -> Add -> osmocom Sink
+      (20 MSPS, filtro de 14 MHz).
+    Barrido, solo con bloques estandar a pedido del usuario: Vector Source
+      (0 a 10) -> Repeat (permanencia) -> Throttle -> Probe Signal, y un
+      Function Probe que lee el paso dos veces por segundo y fija la frecuencia
+      del osmocom Sink. Probado sin la placa: los pasos avanzan cada 1,0 s y,
+      al cambiar la permanencia a 2 s, cada 2,0 s.
+    Controles: modo automatico o manual, portadora manual, ganancia,
+      permanencia, amplitud de cada tono (0,4 por defecto) y fase del tono
+      inferior.
+  Limitacion conocida del barrido con bloques: el Function Probe reenvia la
+  frecuencia al osmocom Sink en cada lectura, aunque no haya cambiado. Si la
+  placa resintoniza cada vez, habra un corte breve dos veces por segundo,
+  tambien en modo manual. Falta verlo en la tinySA. La solucion limpia seria un
+  bloque de Python de unas 10 lineas que solo resintonice cuando cambia el
+  paso.
+
+  Calibracion de la placa (01-10-2026): calibrate lms show devolvio 31 en los
+  diez registros, el valor medio, o sea que el chip no esta calibrado. Coincide
+  con una fuga tan alta. Calibraciones disponibles en bladeRF-cli: calibrate
+  lms (interna, no depende de la frecuencia), calibrate dc tx (fuga, para la
+  frecuencia y ganancia actuales), calibrate iq tx (imagen, solo manual) y
+  calibrate table dc tx (tabla de fuga por frecuencia, que la biblioteca
+  carga sola). Pendiente: probar si la calibracion sobrevive al cierre y la
+  reapertura de la placa. Idea aprobada por el usuario: un Python Snippet en
+  la seccion Init - Before Blocks que llame a bladeRF-cli antes de transmitir.
+  No se usan los comandos de flash.
+
+  PREGUNTAS ABIERTAS, para resolver al arrancar:
+   a) Confirmar que la x40 este conectada por USB 3 antes de subir la tasa de
+      muestreo, con bladeRF-cli.
+   b) Arrancar por el peine de 5 tonos en una sola ventana: el usuario dijo que
+      le gusta; confirmar al disenar el flujo.
+   c) Separacion exacta entre lineas, entre 0,5 y 1 MHz, y tasa de muestreo.
+   d) Usar o no fases de Schroeder desde el primer peine.
+   e) Pregunta pendiente de antes: si mas adelante el EXP-11 se hace corto con
+      la x40, solo para validar el metodo de tres lecturas, y la tabla completa
+      directamente con la xA9. Motivo: el AD9361 de la xA9 calibra solo la
+      cuadratura y la fuga, lo que puede volver menos util una tabla de
+      correccion detallada de la x40.
+
+  Expectativas con la xA9 (AD9361), conversadas el 27-09-2026:
+   - Rango de 47 MHz a 6 GHz: cubre casi todo el ensayo de emisiones radiadas,
+     de 30 MHz a 1 GHz. La x40 no baja de 237 MHz.
+   - 56 MHz de ancho de banda: la mitad de sintonias para el mismo rango.
+   - Calibracion automatica de cuadratura y fuga: probablemente menos imagen
+     y menos fuga de entrada, pero el residuo puede cambiar en cada
+     resintonia. Hay que ver que es mas repetible entre sesiones.
+   - Espurias distintas: la de -937 kHz es propia del LMS6002D. Los armonicos
+     del reloj de 38,4 MHz probablemente sigan. Hay que repetir la
+     caracterizacion de los EXP-04 a 08 con el mismo metodo.
+   - Dos canales de TX y dos de RX: permiten monitorear la propia salida para
+     separar la deriva de la fuente de la deriva del sistema.
+
+-------------------------------------------------------------------------------
+7. FIGURAS DE MERITO OBTENIDAS PARA LA bladeRF x40
+-------------------------------------------------------------------------------
+  - Rechazo de imagen: aprox. 34 dB, constante con la amplitud. Medido 36,5 dB
+    con corrimiento de 300 kHz, o sea que depende levemente de la frecuencia
+  - Fuga de portadora: -40,1 dBm a la salida, con ganancia de transmision 30,
+    independiente de la senal transmitida
+  - Emisiones conducidas propias: armonicos del oscilador de 38,4 MHz, con
+    -80,3 dBm medidos en 384,0 MHz
+  - Linealidad del control de ganancia: 12,5 dB medidos para 13 dB comandados
+  - Espuria del oscilador local a -937,2 kHz de la portadora, unos -52 dBc.
+    Aparece como replica de cada linea que sale por el mezclador: la fuga y
+    cada tono (EXP-08 y EXP-09). Origen fisico todavia no identificado
+  - Rechazo de imagen con correccion digital c*conj(x): unos 52 dB, contra 34 dB
+    sin correccion. c depende de la portadora (sobre todo su fase) y no del
+    corrimiento del tono hasta 600 kHz (EXP-09)
+  - Repetibilidad de una sesion: 0,1 a 0,3 dB (EXP-08)
+  - Linealidad de la amplitud digital: +/-0,3 dB en 17 dB de rango (EXP-08)
+
+Para la bladeRF 2.0 micro xA9, sin ninguna calibracion nuestra:
+  - Peine por tandas de 70 a 420 MHz, 36 lineas (EXP-17): planitud de 2,2 dB
+    de punta a punta, desvio estandar de 0,43 dB, medido con la tinySA
+  - Fuga de portadora 47 a 49 dB bajo las lineas con dos tonos de amplitud
+    0,45 (EXP-17); 44,5 dB bajo un tono de amplitud 1,0 (EXP-15)
+  - Rechazo de imagen: unos 40 dB (EXP-15 y 16)
+  - Nivel de salida: -33 dBm por linea con ganancia 30 y amplitud 0,45, o
+    sea unos +4 dBm a fondo de escala con ganancia 60. Con ganancia 63 las
+    lineas quedan en 0 dBm, sin compresion medible y con la misma planitud
+  - Con lineas de 0 dBm la fuga queda 38 dB abajo, y el tercer armonico del
+    oscilador (triple de la portadora) sale solo 9 dB bajo la fuga: la placa
+    no filtra los armonicos de su salida
+  - Armonicos de las lineas, medidos con lineas de 0 dBm: el triple a -10 a
+    -14 dBm, el quintuple a -14 a -20 dBm, y siguen hasta once veces
+    (-25 dBm). Fuera de la banda del peine se ven como lineas de mas
+  - Emisiones propias: armonicos del reloj de 38,4 MHz, entre -74 y -78 dBm
+    (192,0, 345,6 y 422,4 MHz medidos)
+  - Limite de tasa en la PC del usuario: 30 MSPS (EXP-16)
+
+-------------------------------------------------------------------------------
+8. CONSECUENCIAS PARA EL DISENO DEL GENERADOR PEINE
+-------------------------------------------------------------------------------
+  - Las lineas del peine nunca deben caer sobre la frecuencia del oscilador. La
+    fuga de portadora esta ahi, es fuerte y no se controla desde el software.
+    Por eso las lineas se desplazan medio paso respecto del centro
+  - Para cada linea del peine habra una imagen espejada respecto del oscilador,
+    unos 34 dB por debajo. Hay que preverlas en el plan de frecuencias para no
+    confundirlas con lineas reales
+  - Los armonicos del reloj de 38,4 MHz forman de hecho un peine no deseado. Hay
+    que catalogarlos y evitar que coincidan con las lineas del plan
+  - Al repartir la potencia entre varias lineas, el nivel por linea cae respecto
+    del tono unico. Con muchas lineas la fuga de portadora puede superar a cada
+    linea individual, lo que obliga a evaluar la correccion de continua del
+    transmisor
+  - Cada linea del peine tendra ademas una replica a -937,2 kHz y -52 dBc, por
+    la espuria del oscilador local. Hay que preverla en el plan de frecuencias
+  - Poner todas las lineas de un solo lado del oscilador: las imagenes caen del
+    otro lado sobre espectro vacio. Si ademas se corrigen, la correccion de una
+    linea nunca cae sobre otra linea real
+  - La correccion de imagen funciona, pero necesita un c por sintonia del
+    oscilador y deriva. Se decide su uso con el EXP-11
+  - Al terminar cada tanda hay que deshabilitar el transmisor en forma explicita:
+    cerrar el flujo no alcanza si el cierre se cuelga
+
+-------------------------------------------------------------------------------
+9. ARQUITECTURA PREVISTA PARA EL ENSAYO EN EL CETEM
+-------------------------------------------------------------------------------
+  - Analizador de espectro Rohde & Schwarz de tiempo real del CETEM, capaz de
+    capturar todo el espectro simultaneamente. Es intocable: no se reconfigura ni
+    se reemplaza. Graba en forma continua
+  - Antenas disponibles: lazo para baja frecuencia, semilog y bowtie
+  - Fuente: bladeRF xA9 dentro de la camara, con su computadora de apoyo, sin
+    cables coaxiales hacia afuera. La camara dispone de paso de cables
+  - Sincronizacion: la fuente emite un canal de control que anuncia el paso
+    siguiente, con tiempos de guarda. El analisis se hace despues, fuera de
+    linea, contra la lista de frecuencias conocida
+  - Punto abierto: todo conductor que entre a la camara altera sus modos
+    resonantes, segun el trabajo de Mullner. Conviene evaluar un convertidor de
+    Ethernet a fibra optica
+
+-------------------------------------------------------------------------------
+10. PENDIENTES
+-------------------------------------------------------------------------------
+  - PROXIMO: medir el EXP-21 (peine de 50 MHz a 1 GHz): captura del peine
+    sin calibrar, generar la calibracion con el boton y verificar que las
+    96 lineas queden en 0 dBm. Ver cuantas lineas piden mas de lo que hay
+  - Picos momentaneos de MAX HOLD: causa sin identificar. Prueba posible:
+    mirar una linea en zero span mientras el peine salta de portadora
+  - EXP-20: quedo sin comparar los dos ordenes de recorrido
+  - Lazo TX-RX de la xA9: en pausa. Si se retoma, falta ver si con el
+    receptor corrido la lectura se repite al volver a una portadora
+  - Banda del peine: el EXP-21 la lleva de 50 MHz a 1 GHz. Falta decidir
+    si hace falta ir mas arriba
+  - Conseguir un atenuador y un divisor para que el receptor muestree la
+    salida durante la transmision
+  - EXP-10 en pausa: retomar con mejor analizador y con la xA9. Verificar
+    primero la lectura de -107 dBm en zero span
+  - EXP-11 postergado: decidir si se hace corto con la x40 y completo con la
+    xA9
+  - Repetir el punto B2 con amplitud 0,4 del EXP-08
+  - Medir el rechazo de imagen con corrimientos mayores a 1,5 MHz (parte del
+    EXP-11 si se usa una tasa mayor)
+  - Evaluar la correccion de continua del transmisor para reducir la fuga de
+    portadora
+  - Generar el primer peine real de varias lineas y medir su planitud
+  - Caracterizar las emisiones propias de la Raspberry Pi 4 antes de integrarla
+  - Repetir las mediciones con la xA9 y comparar ambas placas
+  - Repetir la busqueda bibliografica en IEEE Xplore
+  - Consultar al INTI el alcance real de su servicio de calibracion en CEM
+
+-------------------------------------------------------------------------------
+11. UBICACION DE LOS ARCHIVOS
+-------------------------------------------------------------------------------
+  Raiz del proyecto:
+    D:\Docs\FIUBA\6to ano\Compatibilidad Electromagnetica\
+  Convencion de carpetas desde el 02-10-2026: cada carpeta de experimento
+  empieza con la placa usada, X40_ o A9_, y sigue con el numero de orden y
+  el experimento. Las ocho carpetas anteriores se renombraron con X40_.
+  Este historial:
+    SDR\Historial_Proyecto_SDR.txt
+  Presentacion de avances para el profesor (01-10-2026, 19 diapositivas):
+    SDR\Presentacion_avances_SDR.pptx
+  SDR\X40_01_Pruebas_iniciales\
+    sdr_test_1.grc (flujo base: un tono hacia el osmocom Sink) y su respaldo
+  SDR\X40_02_EXP04-07_Conducida_tinySA\
+    Capturas de los EXP-04 a EXP-07, renombradas por experimento
+  SDR\X40_03_EXP08_Matriz_amplitud\
+    exp08_matriz_amplitud.grc, EXP08_planilla_datos.xlsx y Capturas\
+  SDR\X40_04_EXP09_Cancelacion_imagen\
+    exp09_cancelacion_imagen.grc y Capturas\ (E1 a E3)
+  SDR\X40_05_EXP10_Cancelacion_espuria\
+    exp10_cancelacion_espuria.grc y EXP10_planilla_datos.xlsx (hojas Datos,
+    Parametros, Busqueda y Resumen)
+  SDR\X40_06_EXP12_Peine_por_tandas\
+    exp12_peine_tandas.grc (peine por tandas, 300 a 510 MHz)
+  SDR\X40_07_EXP13_Peine_con_calibracion\
+    exp13_peine_calibrado.grc (EXP-12 mas calibracion con bladeRF-cli)
+  SDR\X40_08_EXP14_Peine_ecualizado\
+    exp14_peine_ecualizado.grc (300 a 510 MHz, calibracion y ecualizador)
+  SDR\A9_09_EXP15_Ganancia_y_amplitud\
+    exp15_a9_ganancia_amplitud.grc (primer flujo con la xA9)
+  SDR\A9_10_EXP16_Cuatro_tonos_banda_ancha\
+    exp16_a9_cuatro_tonos.grc (cuatro tonos, 50 MSPS)
+    exp16_a9_seis_tonos_tasa.grc (seis tonos, selector de tasa) y Capturas\
+  SDR\A9_11_EXP17_Peine_manual\
+    exp17_a9_peine_manual.grc (peine de 70 a 420 MHz, calibracion manual),
+    exp17_a9_peine_manual_niveles.grc (igual, con selector de nivel) y
+    Capturas\
+  SDR\A9_12_EXP18_Lazo_TX_RX\
+    exp18_a9_lazo_tx_rx.grc (TX1 a RX1 por cable, una portadora) y
+    exp18_a9_lazo_rx_corrido.grc (version 2, receptor corrido 1 MHz)
+  SDR\A9_13_EXP19_Peine_automatico\
+    exp19_a9_peine_automatico.grc (peine con calibracion automatica)
+  SDR\A9_14_EXP20_Peine_calibracion_manual\
+    exp20_a9_peine_calibracion_manual.grc (calibracion por valor medido,
+    con guardar e importar). Al guardar crea calibracion_peine.txt
+  SDR\A9_15_EXP21_Peine_50MHz_1GHz\
+    exp21_a9_peine_50MHz_1GHz.grc (peine de 50 MHz a 1 GHz; genera la
+    calibracion desde la captura .csv del analizador). Crea
+    calibracion_peine.txt, de 96 renglones
+  SDR\A9_16_EXP22_Peine_40MSPS\
+    exp22_a9_peine_40MSPS.grc (como el EXP-21 pero a 40 MSPS: 24 portadoras,
+    48 lineas cada 20 MHz, bloques de USB mas grandes)
+  SDR\A9_17_EXP23_Peine_un_tono\
+    exp23_a9_peine_un_tono.grc (un tono por portadora, 20 lineas cada
+    50 MHz, selector de separacion y de nivel)
+  SDR\A9_18_EXP24_Peine_cada_40MHz\
+    exp24_a9_peine_40MHz_desde60.grc y _desde50.grc (un tono, lineas cada
+    40 MHz, portadora a 10 MHz, 40 MSPS)
+  SDR\A9_19_EXP25_Peine_con_silencio\
+    exp25_a9_peine_con_silencio_desde60.grc (EXP-24 con el tono apagado
+    durante cada salto)
+  SDR\A9_20_EXP26_Peine_radiado\
+    exp26_a9_peine_radiado_desde60.grc (EXP-25 con la ventana corregida y
+    modo de linea fija, para el ensayo radiado)
+  SDR\Test_Procedure_RE\
+    main.tex y figuras (procedimiento RE-TP-001 para el CETEM)
+
+  Nombres originales de la tinySA (fecha y hora de captura), por si hace falta
+  rastrearlos. Las del EXP-04 salieron con la fecha del equipo sin configurar:
+    EXP04_1_referencia_sin_SDR                <- SA_000627_202516
+    EXP04_2_SDR_alimentada_sin_TX             <- SA_000627_202625
+    EXP04_3_TX_ganancia17                     <- SA_000627_202803
+    EXP04_4_TX_ganancia30                     <- SA_000627_202828
+    EXP05_1_detalle_398.5-400.5MHz_RBW10k     <- SA_000627_202935
+    EXP05_2_cuatro_marcadores                 <- SA_260926_181651
+    EXP06_tono_300kHz                         <- SA_260926_183047
+    EXP07_amplitud_0.1                        <- SA_260926_183407
+    EXP07_amplitud_0.5                        <- SA_260926_183813
+    F01_A_400MHz_200k_amp0.1                  <- SA_260926_200525
+    F07_A_400MHz_200k_amp0.7                  <- SA_260926_202223
+    INVALIDA_B1_400MHz_600k_amp0.7_duplicado  <- SA_260926_202504
+    F08_B1_400MHz_600k_amp0.1                 <- SA_260926_202705 / 202708
+    F10_B1_400MHz_600k_amp0.7                 <- SA_260926_203005 / 203008
+    F12_B2_600MHz_200k_amp0.1                 <- SA_260926_203650 / 203653
+    F14_B2_600MHz_200k_amp0.7                 <- SA_260926_203915 / 203918
+    F15_B3_600MHz_600k_amp0.1                 <- SA_260926_204147 / 204149
+    F17_B3_600MHz_600k_amp0.7                 <- SA_260926_204806 / 204809
+    EXP-09 E1_400MHz_200k_sin_correccion_vista_ancha      <- SA_260926_214138 / 214141
+    EXP-09 E2_400MHz_200k_imagen_corregida_-34.5dB_15grados <- SA_260926_221819 / 221822
+    EXP-09 E3_400MHz_600k_imagen_sin_correccion           <- SA_260926_222433 / 222436
+  Los CSV del EXP-08 se verificaron contra la planilla: el nivel del tono en
+  cada archivo coincide con el de su fila.
+===============================================================================

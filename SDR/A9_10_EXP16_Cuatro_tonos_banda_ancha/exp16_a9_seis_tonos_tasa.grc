@@ -1,0 +1,1399 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: 'bladeRF 2.0 micro xA9: seis tonos en +/-5, +/-10 y +/-20 MHz con
+      habilitacion y amplitud propias, y selector de tasa de muestreo para encontrar
+      la maxima sin cortes'
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: exp16_a9_seis_tonos_tasa
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: 'EXP-16 xA9: seis tonos y tasa de muestreo'
+    window_size: (2500,1900)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 16
+    rotation: 0
+    state: enabled
+blocks:
+- name: suma_max
+  id: variable
+  parameters:
+    comment: La suma de amplitudes nunca pasa de este valor (evita el desborde)
+    value: '0.95'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 16
+    rotation: 0
+    state: enabled
+- name: fraccion_util
+  id: variable
+  parameters:
+    comment: Un tono entra si su frecuencia no supera esta fraccion de la tasa de
+      muestreo
+    value: '0.4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 16
+    rotation: 0
+    state: enabled
+- name: ancho_banda
+  id: variable
+  parameters:
+    comment: Filtro analogico de la placa, segun la tasa
+    value: min(0.9 * samp_rate, 56e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1106
+    - 16
+    rotation: 0
+    state: enabled
+- name: freq
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 0,0,1,6
+    label: Portadora
+    labels: '[''100 MHz'', ''500 MHz'', ''1 GHz'', ''1,5 GHz'', ''2 GHz'', ''3 GHz'',
+      ''4 GHz'', ''5 GHz'']'
+    options: '[100000000, 500000000, 1000000000, 1500000000, 2000000000, 3000000000,
+      4000000000, 5000000000]'
+    num_opts: '0'
+    orient: Qt.QHBoxLayout
+    type: real
+    value: '100000000'
+    widget: radio_buttons
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 180
+    rotation: 0
+    state: enabled
+- name: tx_gain
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 1,0,1,6
+    label: Ganancia de transmision (dB)
+    labels: '[''0 dB'', ''15 dB'', ''30 dB'', ''45 dB'', ''55 dB'', ''60 dB'']'
+    options: '[0, 15, 30, 45, 55, 60]'
+    num_opts: '0'
+    orient: Qt.QHBoxLayout
+    type: real
+    value: '0'
+    widget: radio_buttons
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 180
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 2,0,1,6
+    label: Tasa de muestreo
+    labels: '[''15 MSPS'', ''20 MSPS'', ''25 MSPS'', ''30 MSPS'', ''40 MSPS'', ''50
+      MSPS'']'
+    options: '[15e6, 20e6, 25e6, 30e6, 40e6, 50e6]'
+    num_opts: '0'
+    orient: Qt.QHBoxLayout
+    type: real
+    value: 25e6
+    widget: radio_buttons
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 180
+    rotation: 0
+    state: enabled
+- name: hab_m20
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    gui_hint: 5,0,1,1
+    label: Habilitar -20 MHz
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 440
+    rotation: 0
+    state: enabled
+- name: amp_m20
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 7,0,1,1
+    label: Amplitud -20 MHz
+    labels: '[''0.005'', ''0.01'', ''0.02'', ''0.05'', ''0.1'', ''0.2'', ''0.3'',
+      ''0.4'', ''0.5'', ''0.6'', ''0.7'', ''0.8'', ''0.9'']'
+    options: '[0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.5'
+    widget: radio_buttons
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 600
+    rotation: 0
+    state: enabled
+- name: hab_m10
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    gui_hint: 5,1,1,1
+    label: Habilitar -10 MHz
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 440
+    rotation: 0
+    state: enabled
+- name: amp_m10
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 7,1,1,1
+    label: Amplitud -10 MHz
+    labels: '[''0.005'', ''0.01'', ''0.02'', ''0.05'', ''0.1'', ''0.2'', ''0.3'',
+      ''0.4'', ''0.5'', ''0.6'', ''0.7'', ''0.8'', ''0.9'']'
+    options: '[0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.5'
+    widget: radio_buttons
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 600
+    rotation: 0
+    state: enabled
+- name: hab_m5
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    gui_hint: 5,2,1,1
+    label: Habilitar -5 MHz
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 440
+    rotation: 0
+    state: enabled
+- name: amp_m5
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 7,2,1,1
+    label: Amplitud -5 MHz
+    labels: '[''0.005'', ''0.01'', ''0.02'', ''0.05'', ''0.1'', ''0.2'', ''0.3'',
+      ''0.4'', ''0.5'', ''0.6'', ''0.7'', ''0.8'', ''0.9'']'
+    options: '[0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.5'
+    widget: radio_buttons
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 600
+    rotation: 0
+    state: enabled
+- name: hab_p5
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    gui_hint: 5,3,1,1
+    label: Habilitar +5 MHz
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 440
+    rotation: 0
+    state: enabled
+- name: amp_p5
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 7,3,1,1
+    label: Amplitud +5 MHz
+    labels: '[''0.005'', ''0.01'', ''0.02'', ''0.05'', ''0.1'', ''0.2'', ''0.3'',
+      ''0.4'', ''0.5'', ''0.6'', ''0.7'', ''0.8'', ''0.9'']'
+    options: '[0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.5'
+    widget: radio_buttons
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 600
+    rotation: 0
+    state: enabled
+- name: hab_p10
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    gui_hint: 5,4,1,1
+    label: Habilitar +10 MHz
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 440
+    rotation: 0
+    state: enabled
+- name: amp_p10
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 7,4,1,1
+    label: Amplitud +10 MHz
+    labels: '[''0.005'', ''0.01'', ''0.02'', ''0.05'', ''0.1'', ''0.2'', ''0.3'',
+      ''0.4'', ''0.5'', ''0.6'', ''0.7'', ''0.8'', ''0.9'']'
+    options: '[0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.5'
+    widget: radio_buttons
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 600
+    rotation: 0
+    state: enabled
+- name: hab_p20
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    gui_hint: 5,5,1,1
+    label: Habilitar +20 MHz
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 440
+    rotation: 0
+    state: enabled
+- name: amp_p20
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 7,5,1,1
+    label: Amplitud +20 MHz
+    labels: '[''0.005'', ''0.01'', ''0.02'', ''0.05'', ''0.1'', ''0.2'', ''0.3'',
+      ''0.4'', ''0.5'', ''0.6'', ''0.7'', ''0.8'', ''0.9'']'
+    options: '[0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '0.5'
+    widget: radio_buttons
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 600
+    rotation: 0
+    state: enabled
+- name: et_suma
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''%.3f'' % x'
+    gui_hint: 3,0,1,3
+    label: 'Suma de amplitudes: '
+    type: real
+    value: suma
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 860
+    rotation: 0
+    state: enabled
+- name: et_escala
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''x1 (sin cambios)'' if x >= 1 else (''x%.2f (REDUCIDA)''
+      % x)'
+    gui_hint: 3,3,1,3
+    label: 'Escala aplicada: '
+    type: real
+    value: escala
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 860
+    rotation: 0
+    state: enabled
+- name: sale_m20
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''%.0f MHz'' % x'
+    gui_hint: 4,0,1,1
+    label: '-20 MHz sale en '
+    type: real
+    value: (freq + (-20000000)) / 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1000
+    rotation: 0
+    state: enabled
+- name: est_m20
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''disponible'' if x else ''NO ENTRA con esta tasa'''
+    gui_hint: 6,0,1,1
+    label: ' '
+    type: real
+    value: cabe_m20
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1110
+    rotation: 0
+    state: enabled
+- name: sale_m10
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''%.0f MHz'' % x'
+    gui_hint: 4,1,1,1
+    label: '-10 MHz sale en '
+    type: real
+    value: (freq + (-10000000)) / 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 1000
+    rotation: 0
+    state: enabled
+- name: est_m10
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''disponible'' if x else ''NO ENTRA con esta tasa'''
+    gui_hint: 6,1,1,1
+    label: ' '
+    type: real
+    value: cabe_m10
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 1110
+    rotation: 0
+    state: enabled
+- name: sale_m5
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''%.0f MHz'' % x'
+    gui_hint: 4,2,1,1
+    label: '-5 MHz sale en '
+    type: real
+    value: (freq + (-5000000)) / 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 1000
+    rotation: 0
+    state: enabled
+- name: est_m5
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''disponible'' if x else ''NO ENTRA con esta tasa'''
+    gui_hint: 6,2,1,1
+    label: ' '
+    type: real
+    value: cabe_m5
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 1110
+    rotation: 0
+    state: enabled
+- name: sale_p5
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''%.0f MHz'' % x'
+    gui_hint: 4,3,1,1
+    label: '+5 MHz sale en '
+    type: real
+    value: (freq + (5000000)) / 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 1000
+    rotation: 0
+    state: enabled
+- name: est_p5
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''disponible'' if x else ''NO ENTRA con esta tasa'''
+    gui_hint: 6,3,1,1
+    label: ' '
+    type: real
+    value: cabe_p5
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 1110
+    rotation: 0
+    state: enabled
+- name: sale_p10
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''%.0f MHz'' % x'
+    gui_hint: 4,4,1,1
+    label: '+10 MHz sale en '
+    type: real
+    value: (freq + (10000000)) / 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 1000
+    rotation: 0
+    state: enabled
+- name: est_p10
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''disponible'' if x else ''NO ENTRA con esta tasa'''
+    gui_hint: 6,4,1,1
+    label: ' '
+    type: real
+    value: cabe_p10
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 1110
+    rotation: 0
+    state: enabled
+- name: sale_p20
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''%.0f MHz'' % x'
+    gui_hint: 4,5,1,1
+    label: '+20 MHz sale en '
+    type: real
+    value: (freq + (20000000)) / 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 1000
+    rotation: 0
+    state: enabled
+- name: est_p20
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: ''disponible'' if x else ''NO ENTRA con esta tasa'''
+    gui_hint: 6,5,1,1
+    label: ' '
+    type: real
+    value: cabe_p20
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 1110
+    rotation: 0
+    state: enabled
+- name: cabe_m20
+  id: variable
+  parameters:
+    comment: 1 si el tono de -20 MHz entra en la tasa elegida
+    value: 1 if 20000000 <= fraccion_util * samp_rate else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1140
+    rotation: 0
+    state: enabled
+- name: act_m20
+  id: variable
+  parameters:
+    comment: Tono de -20 MHz activo
+    value: hab_m20 * cabe_m20
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1300
+    rotation: 0
+    state: enabled
+- name: k_m20
+  id: variable
+  parameters:
+    comment: Amplitud final del tono de -20 MHz
+    value: act_m20 * amp_m20 * escala
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1440
+    rotation: 0
+    state: enabled
+- name: cabe_m10
+  id: variable
+  parameters:
+    comment: 1 si el tono de -10 MHz entra en la tasa elegida
+    value: 1 if 10000000 <= fraccion_util * samp_rate else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 406
+    - 1140
+    rotation: 0
+    state: enabled
+- name: act_m10
+  id: variable
+  parameters:
+    comment: Tono de -10 MHz activo
+    value: hab_m10 * cabe_m10
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 1300
+    rotation: 0
+    state: enabled
+- name: k_m10
+  id: variable
+  parameters:
+    comment: Amplitud final del tono de -10 MHz
+    value: act_m10 * amp_m10 * escala
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 346
+    - 1440
+    rotation: 0
+    state: enabled
+- name: cabe_m5
+  id: variable
+  parameters:
+    comment: 1 si el tono de -5 MHz entra en la tasa elegida
+    value: 1 if 5000000 <= fraccion_util * samp_rate else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 796
+    - 1140
+    rotation: 0
+    state: enabled
+- name: act_m5
+  id: variable
+  parameters:
+    comment: Tono de -5 MHz activo
+    value: hab_m5 * cabe_m5
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 1300
+    rotation: 0
+    state: enabled
+- name: k_m5
+  id: variable
+  parameters:
+    comment: Amplitud final del tono de -5 MHz
+    value: act_m5 * amp_m5 * escala
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 1440
+    rotation: 0
+    state: enabled
+- name: cabe_p5
+  id: variable
+  parameters:
+    comment: 1 si el tono de +5 MHz entra en la tasa elegida
+    value: 1 if 5000000 <= fraccion_util * samp_rate else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1186
+    - 1140
+    rotation: 0
+    state: enabled
+- name: act_p5
+  id: variable
+  parameters:
+    comment: Tono de +5 MHz activo
+    value: hab_p5 * cabe_p5
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 1300
+    rotation: 0
+    state: enabled
+- name: k_p5
+  id: variable
+  parameters:
+    comment: Amplitud final del tono de +5 MHz
+    value: act_p5 * amp_p5 * escala
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1006
+    - 1440
+    rotation: 0
+    state: enabled
+- name: cabe_p10
+  id: variable
+  parameters:
+    comment: 1 si el tono de +10 MHz entra en la tasa elegida
+    value: 1 if 10000000 <= fraccion_util * samp_rate else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1576
+    - 1140
+    rotation: 0
+    state: enabled
+- name: act_p10
+  id: variable
+  parameters:
+    comment: Tono de +10 MHz activo
+    value: hab_p10 * cabe_p10
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 1300
+    rotation: 0
+    state: enabled
+- name: k_p10
+  id: variable
+  parameters:
+    comment: Amplitud final del tono de +10 MHz
+    value: act_p10 * amp_p10 * escala
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 1440
+    rotation: 0
+    state: enabled
+- name: cabe_p20
+  id: variable
+  parameters:
+    comment: 1 si el tono de +20 MHz entra en la tasa elegida
+    value: 1 if 20000000 <= fraccion_util * samp_rate else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1966
+    - 1140
+    rotation: 0
+    state: enabled
+- name: act_p20
+  id: variable
+  parameters:
+    comment: Tono de +20 MHz activo
+    value: hab_p20 * cabe_p20
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 1300
+    rotation: 0
+    state: enabled
+- name: k_p20
+  id: variable
+  parameters:
+    comment: Amplitud final del tono de +20 MHz
+    value: act_p20 * amp_p20 * escala
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 1440
+    rotation: 0
+    state: enabled
+- name: suma
+  id: variable
+  parameters:
+    comment: Suma de las amplitudes activas
+    value: act_m20*amp_m20 + act_m10*amp_m10 + act_m5*amp_m5 + act_p5*amp_p5 + act_p10*amp_p10
+      + act_p20*amp_p20
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1570
+    rotation: 0
+    state: enabled
+- name: escala
+  id: variable
+  parameters:
+    comment: Factor comun que evita el desborde
+    value: min(1.0, suma_max / suma) if suma > 0 else 1.0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1336
+    - 1570
+    rotation: 0
+    state: enabled
+- name: aspecto
+  id: snippet
+  parameters:
+    alias: ''
+    comment: Letra grande, y controles en gris cuando un tono no entra en la tasa
+    priority: '0'
+    section: main_after_init
+    code: "# Ajustes de aspecto que los bloques de GNU Radio no permiten configurar.\n\
+      # 1) Etiquetas de estado con letra grande.\nfor nombre in ('et_suma', 'et_escala'):\n\
+      \    barra = getattr(self, '_%s_tool_bar' % nombre)\n    ancho = 120\n    for\
+      \ accion in barra.actions():\n        etiqueta = barra.widgetForAction(accion)\n\
+      \        etiqueta.setStyleSheet('font-size: 15pt; font-weight: bold')\n    \
+      \    ancho += etiqueta.sizeHint().width()\n    barra.setMinimumWidth(ancho)\n\
+      \n# 2) Si un tono no entra en la tasa elegida, su casilla y su amplitud quedan\
+      \ en gris y no se pueden tocar.\n#    (El flujo igual lo deja apagado por su\
+      \ cuenta: esto es solo para que se vea.)\ntonos = ('m20', 'm10', 'm5', 'p5',\
+      \ 'p10', 'p20')\ndef actualizar_disponibles():\n    for columna, t in enumerate(tonos):\n\
+      \        entra = bool(getattr(self, 'cabe_' + t))\n        self.top_grid_layout.itemAtPosition(5,\
+      \ columna).widget().setEnabled(entra)   # casilla de habilitar\n        getattr(self,\
+      \ '_amp_%s_group_box' % t).setEnabled(entra)                     # botones de\
+      \ amplitud\ncambiar_tasa = self.set_samp_rate\ndef cambiar_tasa_y_actualizar(valor):\n\
+      \    cambiar_tasa(valor)\n    actualizar_disponibles()\nself.set_samp_rate =\
+      \ cambiar_tasa_y_actualizar\nactualizar_disponibles()\n\n# 3) Tamano inicial\
+      \ de la ventana segun su contenido.\nself.resize(self.top_widget.minimumSizeHint().width()\
+      \ + 60, self.top_widget.minimumSizeHint().height() + 70)\n"
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1996
+    - 1570
+    rotation: 0
+    state: enabled
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import numpy as np
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1666
+    - 16
+    rotation: 0
+    state: enabled
+- name: n_tabla
+  id: variable
+  parameters:
+    comment: 'Indices de la tabla: 1000 periodos de 5 MHz'
+    value: np.arange(int(round(samp_rate / 5e6)) * 1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1620
+    rotation: 0
+    state: enabled
+- name: tabla
+  id: variable
+  parameters:
+    comment: Suma de los seis tonos, lista para repetir
+    value: (k_m20*np.exp(2j*np.pi*(-20000000)*n_tabla/samp_rate) + k_m10*np.exp(2j*np.pi*(-10000000)*n_tabla/samp_rate)
+      + k_m5*np.exp(2j*np.pi*(-5000000)*n_tabla/samp_rate) + k_p5*np.exp(2j*np.pi*(5000000)*n_tabla/samp_rate)
+      + k_p10*np.exp(2j*np.pi*(10000000)*n_tabla/samp_rate) + k_p20*np.exp(2j*np.pi*(20000000)*n_tabla/samp_rate)
+      + 0j*n_tabla).tolist()
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 1620
+    rotation: 0
+    state: enabled
+- name: fuente_tabla
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: complex
+    vector: tabla
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1800
+    rotation: 0
+    state: enabled
+- name: osmosdr_sink_0
+  id: osmosdr_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    ant0: ''
+    ant1: ''
+    ant10: ''
+    ant11: ''
+    ant12: ''
+    ant13: ''
+    ant14: ''
+    ant15: ''
+    ant16: ''
+    ant17: ''
+    ant18: ''
+    ant19: ''
+    ant2: ''
+    ant20: ''
+    ant21: ''
+    ant22: ''
+    ant23: ''
+    ant24: ''
+    ant25: ''
+    ant26: ''
+    ant27: ''
+    ant28: ''
+    ant29: ''
+    ant3: ''
+    ant30: ''
+    ant31: ''
+    ant4: ''
+    ant5: ''
+    ant6: ''
+    ant7: ''
+    ant8: ''
+    ant9: ''
+    args: bladerf=321e0fa5875945d99b11070bb0a76d31
+    bb_gain0: '0'
+    bb_gain1: '20'
+    bb_gain10: '20'
+    bb_gain11: '20'
+    bb_gain12: '20'
+    bb_gain13: '20'
+    bb_gain14: '20'
+    bb_gain15: '20'
+    bb_gain16: '20'
+    bb_gain17: '20'
+    bb_gain18: '20'
+    bb_gain19: '20'
+    bb_gain2: '20'
+    bb_gain20: '20'
+    bb_gain21: '20'
+    bb_gain22: '20'
+    bb_gain23: '20'
+    bb_gain24: '20'
+    bb_gain25: '20'
+    bb_gain26: '20'
+    bb_gain27: '20'
+    bb_gain28: '20'
+    bb_gain29: '20'
+    bb_gain3: '20'
+    bb_gain30: '20'
+    bb_gain31: '20'
+    bb_gain4: '20'
+    bb_gain5: '20'
+    bb_gain6: '20'
+    bb_gain7: '20'
+    bb_gain8: '20'
+    bb_gain9: '20'
+    bw0: ancho_banda
+    bw1: '0'
+    bw10: '0'
+    bw11: '0'
+    bw12: '0'
+    bw13: '0'
+    bw14: '0'
+    bw15: '0'
+    bw16: '0'
+    bw17: '0'
+    bw18: '0'
+    bw19: '0'
+    bw2: '0'
+    bw20: '0'
+    bw21: '0'
+    bw22: '0'
+    bw23: '0'
+    bw24: '0'
+    bw25: '0'
+    bw26: '0'
+    bw27: '0'
+    bw28: '0'
+    bw29: '0'
+    bw3: '0'
+    bw30: '0'
+    bw31: '0'
+    bw4: '0'
+    bw5: '0'
+    bw6: '0'
+    bw7: '0'
+    bw8: '0'
+    bw9: '0'
+    clock_source0: ''
+    clock_source1: ''
+    clock_source2: ''
+    clock_source3: ''
+    clock_source4: ''
+    clock_source5: ''
+    clock_source6: ''
+    clock_source7: ''
+    comment: ''
+    corr0: '0'
+    corr1: '0'
+    corr10: '0'
+    corr11: '0'
+    corr12: '0'
+    corr13: '0'
+    corr14: '0'
+    corr15: '0'
+    corr16: '0'
+    corr17: '0'
+    corr18: '0'
+    corr19: '0'
+    corr2: '0'
+    corr20: '0'
+    corr21: '0'
+    corr22: '0'
+    corr23: '0'
+    corr24: '0'
+    corr25: '0'
+    corr26: '0'
+    corr27: '0'
+    corr28: '0'
+    corr29: '0'
+    corr3: '0'
+    corr30: '0'
+    corr31: '0'
+    corr4: '0'
+    corr5: '0'
+    corr6: '0'
+    corr7: '0'
+    corr8: '0'
+    corr9: '0'
+    freq0: freq
+    freq1: 100e6
+    freq10: 100e6
+    freq11: 100e6
+    freq12: 100e6
+    freq13: 100e6
+    freq14: 100e6
+    freq15: 100e6
+    freq16: 100e6
+    freq17: 100e6
+    freq18: 100e6
+    freq19: 100e6
+    freq2: 100e6
+    freq20: 100e6
+    freq21: 100e6
+    freq22: 100e6
+    freq23: 100e6
+    freq24: 100e6
+    freq25: 100e6
+    freq26: 100e6
+    freq27: 100e6
+    freq28: 100e6
+    freq29: 100e6
+    freq3: 100e6
+    freq30: 100e6
+    freq31: 100e6
+    freq4: 100e6
+    freq5: 100e6
+    freq6: 100e6
+    freq7: 100e6
+    freq8: 100e6
+    freq9: 100e6
+    gain0: tx_gain
+    gain1: '10'
+    gain10: '10'
+    gain11: '10'
+    gain12: '10'
+    gain13: '10'
+    gain14: '10'
+    gain15: '10'
+    gain16: '10'
+    gain17: '10'
+    gain18: '10'
+    gain19: '10'
+    gain2: '10'
+    gain20: '10'
+    gain21: '10'
+    gain22: '10'
+    gain23: '10'
+    gain24: '10'
+    gain25: '10'
+    gain26: '10'
+    gain27: '10'
+    gain28: '10'
+    gain29: '10'
+    gain3: '10'
+    gain30: '10'
+    gain31: '10'
+    gain4: '10'
+    gain5: '10'
+    gain6: '10'
+    gain7: '10'
+    gain8: '10'
+    gain9: '10'
+    if_gain0: '0'
+    if_gain1: '20'
+    if_gain10: '20'
+    if_gain11: '20'
+    if_gain12: '20'
+    if_gain13: '20'
+    if_gain14: '20'
+    if_gain15: '20'
+    if_gain16: '20'
+    if_gain17: '20'
+    if_gain18: '20'
+    if_gain19: '20'
+    if_gain2: '20'
+    if_gain20: '20'
+    if_gain21: '20'
+    if_gain22: '20'
+    if_gain23: '20'
+    if_gain24: '20'
+    if_gain25: '20'
+    if_gain26: '20'
+    if_gain27: '20'
+    if_gain28: '20'
+    if_gain29: '20'
+    if_gain3: '20'
+    if_gain30: '20'
+    if_gain31: '20'
+    if_gain4: '20'
+    if_gain5: '20'
+    if_gain6: '20'
+    if_gain7: '20'
+    if_gain8: '20'
+    if_gain9: '20'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    nchan: '1'
+    num_mboards: '1'
+    sample_rate: samp_rate
+    sync: sync
+    time_source0: ''
+    time_source1: ''
+    time_source2: ''
+    time_source3: ''
+    time_source4: ''
+    time_source5: ''
+    time_source6: ''
+    time_source7: ''
+    type: fc32
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 676
+    - 1780
+    rotation: 0
+    state: enabled
+connections:
+- - fuente_tabla
+  - '0'
+  - osmosdr_sink_0
+  - '0'
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0
