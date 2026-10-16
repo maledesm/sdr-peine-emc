@@ -33,7 +33,6 @@ Trabajos encontrados para el estado del arte (punto 1 del [roadmap](roadmap.md),
 | "Characterization of EM Fields in a GTEM Cell Using a KSQ1000 Comb Generator and Analysis of Comb Generator Technologies", CPEE 2024 | [sí](../bibliografia/2024_Olczyk_ksq1000-comb-generator-gtem-resumen.pdf) (solo el resumen de 1 página) | Compara peines con diodo SRD y con línea no lineal (NLTL). |
 | Rodwell et al., "GaAs Nonlinear Transmission Lines for Picosecond Pulse Generation and Millimeter-Wave Sampling", IEEE T-MTT 1991, DOI 10.1109/22.85387 | [sí](../bibliografia/1991_Rodwell_gaas-nltl-picosecond-pulse-generation.pdf) | Base de los peines NLTL. |
 | Osabe et al., "Correlation test among EMI measurement sites using a comb generator", IEEE ISEMC 2000, DOI 10.1109/ISEMC.2000.874750 | [sí](../bibliografia/2000_Osabe_correlation-test-emi-sites-comb-generator.pdf) | Comparación entre sitios con un peine. |
-| Prapuchanay et al., "Design and implementation of a low cost BJTs comb generator", ISPACS 2011, DOI 10.1109/ISPACS.2011.6146072 | a mano (IEEE) | Peine de bajo costo con transistores. |
 
 ## C. Fuentes de referencia, comparaciones entre laboratorios e incertidumbre
 
@@ -54,7 +53,7 @@ Trabajos encontrados para el estado del arte (punto 1 del [roadmap](roadmap.md),
 | Koepke y Randa, "Screened-Room Measurements on the NIST Spherical-Dipole Standard Radiator", J. Res. NIST 99(6), 1994, DOI 10.6028/jres.099.066 | [sí](../bibliografia/1994_Koepke_nist-spherical-dipole-screened-room.pdf) | Diferencias grandes entre laboratorios y entre días en un mismo laboratorio (P11). |
 | Aipu et al., "Interlaboratory Comparison of Radiated Emissions in Automotive EMC", EMC Europe 2018, DOI 10.1109/EMCEurope.2018.8485018 | [sí](../bibliografia/2018_Aipu_interlaboratory-comparison-re-automotive-emc.pdf) | Comparación entre laboratorios (Timișoara y Craiova). |
 | Tas et al., "An Improved Reference Device for Radiated Immunity Interlaboratory Comparison", EMC Europe 2020, DOI 10.1109/EMCEurope48519.2020.9245638 | [sí](../bibliografia/2020_Tas_reference-device-radiated-immunity-interlaboratory.pdf) | Para la etapa de susceptibilidad radiada. |
-| METAS, informe 2007-218-630, peine con monopolo vertical y distintas conexiones al plano de tierra | [a mano](https://www.sem.admin.ch/dam/metas/en/data/fachbereiche/emv/metas_report_nr._2007-218-630-e.pdf.download.pdf/metas_report_nr._2007-218-630-e.pdf) | **Directo para P9.** |
+| METAS, informe 2007-218-630, peine con monopolo vertical y distintas conexiones al plano de tierra | [a mano](https://www.sem.admin.ch/dam/metas/en/data/fachbereiche/emv/metas_report_nr._2007-218-630-e.pdf.download.pdf/metas_report_nr._2007-218-630-e.pdf) (acceso bloqueado) | **Directo para P9.** |
 | Seibersdorf, "Analysis of the CISPR 25 Component Test Setup", 2003 | el enlace da error 404 | Peine con monopolo: milímetros de diferencia en el cableado arruinan la repetibilidad. |
 
 ## D. Lazos cerrados y autocalibración con SDR
@@ -66,7 +65,7 @@ Trabajos encontrados para el estado del arte (punto 1 del [roadmap](roadmap.md),
 | Jovanović y Milenković, "IQ Imbalance Correction in Wideband Software Defined Radio Transceivers", Radioengineering 32(4), 2023 | [sí](../bibliografia/2023_Jovanovic_iq-imbalance-wideband-sdr.pdf) | Corrección digital de imagen y fuga en TX y RX (P3). |
 | Li, Zhang, Huang et al., "Self-IQ-Demodulation Based Compensation Scheme of Frequency-Dependent IQ Imbalance for Wideband Direct-Conversion Transmitters", IEEE Trans. Broadcasting 2015 | [sí](../bibliografia/2015_Li_self-iq-demodulation-iq-imbalance-tx.pdf) | Lazo con el oscilador del TX y un detector de potencia. |
 | Xiong, Tian, Chen et al., "An Adaptive software defined radio design based on a standard space telecommunication radio system API", arXiv 1711.09311 | [sí](../bibliografia/2017_Xiong_adaptive-sdr-strs-power-feedback.pdf) | Lazo cerrado de potencia de TX en GNU Radio. |
-| Tesis de Oulu, "Design and demonstration of digital pre-distortion using software defined radio" | [a mano](https://oulurepo.oulu.fi/handle/10024/13639) | Una USRP X300 que transmite y se recibe a sí misma, como el EXP-18. |
+| Tesis de Oulu, "Design and demonstration of digital pre-distortion using software defined radio" | [a mano](https://oulurepo.oulu.fi/handle/10024/13639) (acceso bloqueado) | Una USRP X300 que transmite y se recibe a sí misma, como el EXP-18. |
 | Maršálek y Pospíšil, predistorsión con tabla en una USRP N200, NORCHIP 2014, DOI 10.1109/NORCHIP.2014.7004715 | [sí](../bibliografia/2014_Marsalek_digital-predistortion-usrp-n200.pdf) | Lazo TX→RX con poca FPGA. |
 | Dixe et al., "Metrological Evaluation of Software-Defined Radios (Adalm-Pluto and LimeSDR usb) in Radio Frequency Signal Generation", Procedia Computer Science 232, 2024, pp. 1248–1258, DOI 10.1016/j.procs.2024.01.123 | [sí](../bibliografia/2024_Dixe_metrological-evaluation-sdr-rf-signal-generation.pdf) | **SDR caracterizada como generador:** 0,5 dB de incertidumbre (P20). |
 
@@ -91,7 +90,7 @@ Trabajos encontrados para el estado del arte (punto 1 del [roadmap](roadmap.md),
 ## G. Otros
 
 - AR, Application Note 71, "Multi-Tone: Testing, Theory and Practice", y "Benefits of multitone EMC immunity testing" (ResearchGate): para la etapa de susceptibilidad radiada.
-- Braun y Russer, "A low-noise multiresolution high-dynamic ultra-broad-band time-domain EMI measurement system", IEEE T-MTT 53(11), 2005, DOI 10.1109/TMTT.2005.855745 (no está en la carpeta).
+- Braun y Russer, "A low-noise multiresolution high-dynamic ultra-broad-band time-domain EMI measurement system", IEEE T-MTT 53(11), 2005, DOI 10.1109/TMTT.2005.855745. [PDF](../bibliografia/2005_Braun_time-domain-emi-measurement-system.pdf).
 - Fuentes comerciales: Com-Power (CGO, CGC), York EMC (CGE01), Seibersdorf (RefRad), Schwarzbeck (SG 9302), AET (dipolo esférico USDS), TekBox (TBCG). Com-Power desaconseja acostar el peine para medir en vertical, por el efecto del plano de tierra: tenerlo en cuenta para P16.
 - El INTI tiene servicio de EMC y la red SAC de calibración: verificar su alcance antes de afirmar que nadie calibra en Argentina.
 
