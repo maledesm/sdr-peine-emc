@@ -20,7 +20,7 @@ Resumen cronológico de lo hecho: visitas, reuniones, experimentos y decisiones.
 | 11-10-2026 | Diseño del EXP-26, ensayo radiado en casa. |
 | 12-10-2026 | Ensayo radiado en casa a 2 m (EXP-26): 20 de 24 líneas con 10 dB o más sobre el ruido. **Reunión con el profesor** previa al CETEM ([resumen](../SDR/Reunion_2026-10-12/resumen_reunion.pdf)). |
 | **13-10-2026** | **Segunda visita al CETEM: primera medición en la cámara semianecoica**, con ayuda de Federico Martinez. Se mide el peine de la SDR y el Comb generator de la tesis de otro alumno ([datos](../CETEM/Mediciones), [fotos](../CETEM/Fotos)). |
-| 15-10-2026 | Dashboard de las mediciones del CETEM ([`CETEM/Dashboard_CETEM_13-10.html`](../CETEM/Dashboard_CETEM_13-10.html)). |
+| 15-10-2026 | Dashboard de las mediciones del CETEM ([`CETEM/Visita CETEM.html`](../CETEM/Visita%20CETEM.html)). |
 | **16-10-2026** | **Reunión con el profesor:** le gusta el trabajo; se acuerdan 20 puntos y una hoja de ruta ([acuerdos](acuerdos_2026-10-16.md), [roadmap](roadmap.md)). Se crea este repositorio. |
 
 ## Etapas

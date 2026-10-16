@@ -11,7 +11,8 @@ Búsqueda del 17-09-2026, en web abierta y sin acceso completo a IEEE Xplore: no
   - Un peine a batería es más repetible que un generador con cable, porque el cable altera los modos de la cámara. Una antena acopladora es más repetible que un monopolo.
   - El RBW tiene que estar entre el ancho de línea y la separación del peine. La potencia total del peine puede saturar al analizador.
 - "Interlaboratory Comparison of Radiated Emissions in Automotive EMC", IEEE Xplore 8485018. Peine como artefacto viajero; métricas z-score y En.
-- En la carpeta local, sin subir al repositorio todavía: "Design and Experimental Validation of a Portable RF Comb Generator for EMC Laboratory Applications" e "Interlaboratory Evaluation of Radiated and Conducted EMC Measurements Using Portable Calibrated Comb Generators".
+- Romero Espinoza, Marino Belcaguy, Fano, Cribari (FIUBA), "Interlaboratory Evaluation of Radiated and Conducted EMC Measurements Using Portable Calibrated Comb Generators". Borrador. Comparación entre dos laboratorios con peines portátiles calibrados: RE de 30 MHz a 1 GHz a 3 m y CE de 150 kHz a 30 MHz. [PDF](../bibliografia/borrador_RomeroEspinoza_interlaboratory-emc-comb-generators.pdf).
+- Anónimo (envío a revisión doble ciego), "Design and Experimental Validation of a Portable RF Comb Generator for EMC Laboratory Applications". Borrador. Peine portátil a batería con flancos de 244 ps y control embebido, proyecto de grado de Ingeniería Electrónica. [PDF](../bibliografia/borrador_Anonimo_portable-rf-comb-generator-emc.pdf).
 
 ## SDR en EMC
 

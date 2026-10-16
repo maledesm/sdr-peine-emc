@@ -33,7 +33,7 @@ Generador peine hecho con una **bladeRF 2.0 micro xA9** y GNU Radio, para verifi
 | Carpeta | Contenido |
 |---|---|
 | `SDR/` | Un subdirectorio por experimento: `X40_` o `A9_` (placa usada) + número de orden + experimento. Cada uno tiene su flujo `.grc` y sus capturas. También el procedimiento RE-TP-001 (`Test_Procedure_RE/`, LaTeX para Overleaf) y el material de la reunión del 12-10 (`Reunion_2026-10-12/`). |
-| `CETEM/` | Medición del 13-10-2026: trazas del receptor (`Mediciones/`), fotos del laboratorio (`Fotos/`) y propias (`Fotos mias/`), y el dashboard `Dashboard_CETEM_13-10.html` (se abre sin internet). |
+| `CETEM/` | Medición del 13-10-2026: trazas del receptor (`Mediciones/`), fotos del laboratorio (`Fotos/`) y propias (`Fotos mias/`), y el dashboard `Visita CETEM.html` (se abre sin internet). |
 | `bibliografia/` | PDF de los papers. |
 | `docs/` | Documentación del proyecto. |
 | raíz | Consigna del TP, Test Procedure de RE del profesor, notas de clase. |

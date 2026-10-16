@@ -41,6 +41,6 @@ Lo que se sabe de los equipos y del peine, verificado midiendo o leyendo el cód
 
 ## Medición en el CETEM (13-10-2026)
 
-Ver [historial.md](historial.md#4-primera-medición-en-el-cetem-13-10) y el dashboard [`CETEM/Dashboard_CETEM_13-10.html`](../CETEM/Dashboard_CETEM_13-10.html).
+Ver [historial.md](historial.md#4-primera-medición-en-el-cetem-13-10) y el dashboard [`CETEM/Visita CETEM.html`](../CETEM/Visita%20CETEM.html).
 - Archivos .DAT del R&S ESR-7: encabezado `Clave;valor;`, después `Values;N;` y filas `frecuencia_Hz;nivel;` en dBµV/m. Transductor "08- (ER) 2 CBL;10- BL 01" (cable y bilog ya incluidos). Detector MAX PEAK, traza MAX HOLD, RBW 120 kHz, paso 30 kHz, 50 ms por punto, preamplificador 20 dB.
 - El atenuador interno del receptor está compensado en los niveles mostrados: con 20 dB el piso sale unos 10 dB más alto que con 10 dB. Para comparar mediciones tomadas con distinta atenuación, en el dashboard todo se llevó a 20 dB.

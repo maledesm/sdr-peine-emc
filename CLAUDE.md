@@ -28,7 +28,7 @@ Proyecto de Martín Ledesma (FIUBA, Compatibilidad Electromagnética): generador
 - **Lienzos de GRC prolijos:** sin bloques superpuestos.
 - **Carpetas de experimentos:** `A9_` o `X40_` + número de orden + nombre del EXP (por ejemplo `A9_20_EXP26_Peine_radiado`).
 - **Capturas:** renombrarlas por experimento y anotar el nombre original en la sección 11 del historial.
-- **`SDR/Historial_Proyecto_SDR.txt`:** ASCII puro (sin acentos) y fin de línea CRLF. Agregar una entrada por cada diseño, resultado o decisión.
+- **`SDR/Historial_Proyecto_SDR.txt`:** ASCII puro (sin acentos) y fin de línea CRLF. Agregar una entrada por cada diseño, resultado o decisión. No editarlo con `sed -i` de Git Bash: le saca el CRLF.
 - **LaTeX** (se edita en Overleaf): un solo `.tex`, cada párrafo en un solo renglón, figuras con `[H]` y el paquete `float`.
 - Al cerrar un tema, actualizar `docs/historial.md` y, si cambia el plan, el estado en `docs/roadmap.md` y `docs/acuerdos_2026-10-16.md`.
 
@@ -37,3 +37,4 @@ Proyecto de Martín Ledesma (FIUBA, Compatibilidad Electromagnética): generador
 - GitHub privado `maledesm/sdr-peine-emc`. Lo que se sube se elige en `.gitignore` (lista blanca).
 - No se sube: la carpeta `CONAE/`, nada de la tesis de radar ni de las tesis que pasó el profesor, normas pagas (CISPR 11) ni el `.rar` de CombGenerators.
 - Antes de hacer `git push`, confirmar con Martín.
+- Antes de borrar un archivo, verificar qué es (el dashboard del CETEM se llama `CETEM/Visita CETEM.html`).

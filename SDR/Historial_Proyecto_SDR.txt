@@ -2102,7 +2102,8 @@ CETEM / 13-10-2026 / Primera medicion en la camara  [MEDIDO]
   Segun el encabezado, el receptor uso paso de 30 kHz y 50 ms por punto: un
   barrido completo duraria unos 27 minutos. A confirmar con el laboratorio.
   Dashboard con todas las comparaciones, como archivo que se abre sin
-  internet: CETEM\Dashboard_CETEM_13-10.html. Copia en claude.ai:
+  internet: CETEM\Visita CETEM.html (antes Dashboard_CETEM_13-10.html).
+  Copia en claude.ai:
   https://claude.ai/artifact/2ATQtjSDgYLKkjxZKb1Xur (esta copia NO tiene
   el ajuste de atenuacion de abajo).
   Ajuste de atenuacion (pedido del usuario, 15-10-2026): el Comb generator
