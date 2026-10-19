@@ -1,6 +1,6 @@
 # Calibrador de emisiones radiadas con SDR
 
-Generador peine con una bladeRF 2.0 micro xA9 y GNU Radio para preverificar la cadena de medición de emisiones radiadas (RE) de un laboratorio de EMC y seguir su continuidad en el tiempo. Compatibilidad Electromagnética (8664 y TB074), FIUBA, 2C2026. Metodología: Aprendizaje Basado en Proyectos (ABP).
+Generador peine con una bladeRF 2.0 micro xA9 y GNU Radio para preverificar la cadena de medición de emisiones radiadas (RE) de un laboratorio de EMC y seguir su continuidad en el tiempo. Compatibilidad Electromagnética (8664 y TB074), FIUBA, 2C2026. 
 
 En el CETEM nadie les calibra todos los equipos de EMC ni siguen un estándar de calibración, así que no saben cuándo algo se descalibró. Este proyecto busca una referencia barata para comprobarlo seguido.
 
@@ -16,20 +16,6 @@ La SDR emite una línea por vez y el receptor las junta con MAX HOLD. El peine n
 La antena de medición se pone en tres alturas (1, 2 y 3 m, o las que permita la cámara). La calibración usa la polarización vertical y el mayor nivel de las tres alturas. La horizontal se mide con la antena transmisora acostada, solo para comprobar que esa polarización funciona, sin compararla con el límite.
 
 Después, cada verificación se compara contra el límite. Si el mismo peine, montado igual, se recibe distinto, lo que cambió es la cadena de medición.
-
-## Estado (19-10-2026)
-
-- El peine anterior (24 líneas de 60 a 980 MHz, calibradas por cable a 0 dBm, de −0,8 a +0,3 dBm) se midió en el CETEM el 13-10-2026. En vertical, el mayor nivel de las tres alturas quedó entre 36 y 49 dB por encima del límite.
-- El TP1, procedimiento de ensayo de RE (RE-TP-001 versión 2.0), está listo para la revisión de los docentes, con su [PDF](TPs/TP1_OE1_Procedimiento_RE/TP1_OE1_Procedimiento_RE.pdf).
-- Siguen el EXP-27 y los TP2 a TP5.
-
-| Entrega | Fecha |
-|---|---|
-| Fase 1: TP1 a TP5, juntos, como primer parcial | semana del 26-10-2026 |
-| Visita al CETEM | principios de diciembre de 2026, a coordinar |
-| TP7: paper para EMC Europe 2027 | 22-02-2027 |
-
-El plan de TPs está pendiente de la confirmación de Walter Gustavo Fano. El detalle de cada tarea está en el [plan](docs/plan.md).
 
 ## TPs
 
