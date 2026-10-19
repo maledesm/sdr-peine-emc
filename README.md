@@ -35,15 +35,15 @@ El plan de TPs está pendiente de la confirmación de Walter Gustavo Fano. El de
 
 Los TP1 a TP5 forman la fase 1 y los TP6 y TP7, la fase 2. TP1 a TP4 van en español, TP5 y TP7 en inglés.
 
-| TP | Código | Tema |
-|---|---|---|
-| [TP1](TPs/TP1_OE1_Procedimiento_RE/) | OE1 | Procedimiento de ensayo de RE |
-| [TP2](TPs/TP2_OE2_Manual_SDR/) | OE2 | Manual y procedimiento funcional de la SDR |
-| [TP3](TPs/TP3_OR3_Reporte_RE/) | OR3 | Reporte de mediciones de RE |
-| [TP4](TPs/TP4_OE4_Calibracion_RS/) | OE4 | Procedimiento de calibración de RS |
-| [TP5](TPs/TP5_OE5_Paper_v1/) | OE5 | Paper, versión 1 |
-| [TP6](TPs/TP6_OE7_Punta_de_Corriente/) | OE7 | Medición con punta de corriente (en pausa) |
-| [TP7](TPs/TP7_Integrador_EMC_Europe/) | - | Integrador, el paper para EMC Europe 2027 |
+| TP | Código | Tema | Terminado | Corregido |
+|---|---|---|:---:|:---:|
+| [TP1](TPs/TP1_OE1_Procedimiento_RE/) | OE1 | Procedimiento de ensayo de RE | ✅ | ❌ |
+| [TP2](TPs/TP2_OE2_Manual_SDR/) | OE2 | Manual y procedimiento funcional de la SDR | ❌ | ❌ |
+| [TP3](TPs/TP3_OR3_Reporte_RE/) | OR3 | Reporte de mediciones de RE | ❌ | ❌ |
+| [TP4](TPs/TP4_OE4_Calibracion_RS/) | OE4 | Procedimiento de calibración de RS | ❌ | ❌ |
+| [TP5](TPs/TP5_OE5_Paper_v1/) | OE5 | Paper, versión 1 | ❌ | ❌ |
+| [TP6](TPs/TP6_OE7_Punta_de_Corriente/) | OE7 | Medición con punta de corriente (en pausa) | ❌ | ❌ |
+| [TP7](TPs/TP7_Integrador_EMC_Europe/) | - | Integrador, el paper para EMC Europe 2027 | ❌ | ❌ |
 
 ## Carpetas
 
