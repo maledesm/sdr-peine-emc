@@ -1,7 +1,7 @@
 ===============================================================================
 HISTORIAL DEL PROYECTO - SDR COMO GENERADOR PEINE PARA ENSAYOS DE CEM
 Trabajo Practico Integrador 2C2026 - Compatibilidad Electromagnetica - FIUBA
-Ultima actualizacion: 16/10/2026
+Ultima actualizacion: 19/10/2026
 ===============================================================================
 
 -------------------------------------------------------------------------------
@@ -47,6 +47,7 @@ Trabajos cercanos mas relevantes:
     unidades (arXiv 2604.09859), ECHO (arXiv 1610.02607).
   - Comparaciones interlaboratorio que usan un peine como artefacto viajero, con
     evaluacion por z-score.
+Busqueda ampliada el 16-10-2026 (47 papers): docs\bibliografia.md.
 
 -------------------------------------------------------------------------------
 3. EQUIPAMIENTO
@@ -1943,7 +1944,7 @@ EXP-25 / 05-10-2026 / Resultado con silencio en cada salto  [MEDIDO]
 PROCEDIMIENTO / 05-10-2026 / Test Procedure de emisiones radiadas (RE-TP-001)
   El usuario dio por cerrados los experimentos por ahora: el EXP-25 sirve
   para una primera medicion en el CETEM. El profesor le paso un esquema
-  (SDR\Test Procedure de RE (Emisiones Radiadas).pdf) y pidio escribir el
+  (hoy en TPs\TP1_OE1_Procedimiento_RE\) y pidio escribir el
   procedimiento. Se discutio seccion por seccion antes de escribir.
   Decisiones del usuario:
    - Objetivo: verificar la cadena del CETEM y asegurar continuidad, no
@@ -1963,8 +1964,8 @@ PROCEDIMIENTO / 05-10-2026 / Test Procedure de emisiones radiadas (RE-TP-001)
   Definido por el asistente, a pedido: criterio de continuidad de +/-3 dB
   conforme, 3 a 6 dB revisar y repetir, mas de 6 dB no conforme; a confirmar
   con una medicion de repetibilidad en la primera visita.
-  Archivos: SDR\Test_Procedure_RE\procedimiento_RE_peine_SDR.tex, el PDF
-  compilado (10 paginas) y logo_materia.png. Lo que falta completar esta en
+  Archivos: hoy TPs\TP1_OE1_Procedimiento_RE\main.tex (el usuario renombro
+  el .tex), sus figuras y logos. Lo que falta completar esta en
   rojo en el documento: modelo del receptor y de las antenas, si el USB del
   CETEM es USB 3, fecha de la calibracion y geometria usada.
   Alertas dadas: el flujo necesita USB 3 (40 MSPS) y la placa se alimenta
@@ -2120,8 +2121,8 @@ REUNION / 16-10-2026 / Acuerdos con el profesor y repositorio
   gusto el trabajo. Se acordaron 20 puntos (P1 a P20) y una hoja de ruta
   (puntos 0 a 8) hacia el informe final y el paper: en espanol, formato
   IEEE primero y despues EMC Workshop. Queda una sola visita al CETEM,
-  probablemente en noviembre. Todo esta en docscuerdos_2026-10-16.md y
-  docsoadmap.md.
+  probablemente en noviembre. Los acuerdos y la hoja de ruta pasaron el
+  18-10-2026 a docs\plan.md.
   Se armo el repositorio privado https://github.com/maledesm/sdr-peine-emc
   con esta carpeta (sin CONAE, tesis ni normas pagas) y documentacion en
   docs\: historial.md (cronologia), conocimiento_tecnico.md y
@@ -2130,6 +2131,28 @@ REUNION / 16-10-2026 / Acuerdos con el profesor y repositorio
   Observacion: 24 lineas x 6 s = 2,4 min es la pasada SIN silencio; con
   silencio dura 4 min 48 s. Si en el CETEM la pasada duro unos 2,5 min, el
   silencio estaba destildado. A confirmar.
+
+PLAN / 18-10-2026 / Cinco TPs antes del primer parcial y paper para EMC Europe
+  Los docentes redefinen el plan con la metodologia de Aprendizaje Basado
+  en Proyectos (ABP); falta la confirmacion de Walter Gustavo Fano.
+  Primera parte: cinco TPs que se entregan juntos y valen como primer
+  parcial (semana del 26-10-2026), cada uno en Overleaf:
+   - TP1 (OE1): procedimiento de ensayo de RE, con la SDR como EUT en su
+     papel de calibrador.
+   - TP2 (OE2): manual y procedimiento funcional de la SDR.
+   - TP3 (OR3): reporte de las mediciones de RE, comparadas con CISPR 11
+     grupo 1 clase B (a 3 m: 40 dBuV/m hasta 230 MHz y 47 dBuV/m de 230 a
+     1000 MHz).
+   - TP4 (OE4): procedimiento de calibracion de RS con la SDR.
+   - TP5 (OE5): paper v1, en ingles, 8 carillas, al menos 20 referencias.
+  Segunda parte: TP6 (OE7), punta de corriente, y TP7, el integrador: el
+  paper para EMC Europe 2027 (entrega 22-02-2027). Visita al CETEM a
+  principios de diciembre. El EXP-27 (bajar el peine unos 15 dB y
+  ecualizar) entra en la primera parte. Plan completo: docs\plan.md.
+  El 19-10-2026 se reorganizo el repositorio: TPs\ (un proyecto de
+  Overleaf por TP; el procedimiento RE-TP-001 paso a TPs\TP1_...),
+  materia\ (consigna, notas y reuniones) y normas\ (CISPR 11 y
+  MIL-STD-461E, ahora en el repositorio).
 
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
@@ -2371,6 +2394,7 @@ Para la bladeRF 2.0 micro xA9, sin ninguna calibracion nuestra:
 -------------------------------------------------------------------------------
 9. ARQUITECTURA PREVISTA PARA EL ENSAYO EN EL CETEM
 -------------------------------------------------------------------------------
+  (Arquitectura pensada en septiembre. El plan vigente esta en docs\plan.md.)
   - Analizador de espectro Rohde & Schwarz de tiempo real del CETEM, capaz de
     capturar todo el espectro simultaneamente. Es intocable: no se reconfigura ni
     se reemplaza. Graba en forma continua
@@ -2387,32 +2411,9 @@ Para la bladeRF 2.0 micro xA9, sin ninguna calibracion nuestra:
 -------------------------------------------------------------------------------
 10. PENDIENTES
 -------------------------------------------------------------------------------
-  - PROXIMO: medir el EXP-21 (peine de 50 MHz a 1 GHz): captura del peine
-    sin calibrar, generar la calibracion con el boton y verificar que las
-    96 lineas queden en 0 dBm. Ver cuantas lineas piden mas de lo que hay
-  - Picos momentaneos de MAX HOLD: causa sin identificar. Prueba posible:
-    mirar una linea en zero span mientras el peine salta de portadora
-  - EXP-20: quedo sin comparar los dos ordenes de recorrido
-  - Lazo TX-RX de la xA9: en pausa. Si se retoma, falta ver si con el
-    receptor corrido la lectura se repite al volver a una portadora
-  - Banda del peine: el EXP-21 la lleva de 50 MHz a 1 GHz. Falta decidir
-    si hace falta ir mas arriba
-  - Conseguir un atenuador y un divisor para que el receptor muestree la
-    salida durante la transmision
-  - EXP-10 en pausa: retomar con mejor analizador y con la xA9. Verificar
-    primero la lectura de -107 dBm en zero span
-  - EXP-11 postergado: decidir si se hace corto con la x40 y completo con la
-    xA9
-  - Repetir el punto B2 con amplitud 0,4 del EXP-08
-  - Medir el rechazo de imagen con corrimientos mayores a 1,5 MHz (parte del
-    EXP-11 si se usa una tasa mayor)
-  - Evaluar la correccion de continua del transmisor para reducir la fuga de
-    portadora
-  - Generar el primer peine real de varias lineas y medir su planitud
-  - Caracterizar las emisiones propias de la Raspberry Pi 4 antes de integrarla
-  - Repetir las mediciones con la xA9 y comparar ambas placas
-  - Repetir la busqueda bibliografica en IEEE Xplore
-  - Consultar al INTI el alcance real de su servicio de calibracion en CEM
+  Desde el 18-10-2026 los pendientes estan en docs\plan.md. La lista
+  anterior (septiembre y principios de octubre) quedo superada; lo que
+  seguia vigente paso al plan.
 
 -------------------------------------------------------------------------------
 11. UBICACION DE LOS ARCHIVOS
@@ -2425,9 +2426,9 @@ Para la bladeRF 2.0 micro xA9, sin ninguna calibracion nuestra:
   Este historial:
     SDR\Historial_Proyecto_SDR.txt
   Presentacion de avances para el profesor (01-10-2026, 19 diapositivas):
-    SDR\Presentacion_avances_SDR.pptx
+    materia\reuniones\2026-10-01\Presentacion_avances_SDR.pptx
   SDR\X40_01_Pruebas_iniciales\
-    sdr_test_1.grc (flujo base: un tono hacia el osmocom Sink) y su respaldo
+    sdr_test_1.grc (flujo base: un tono hacia el osmocom Sink)
   SDR\X40_02_EXP04-07_Conducida_tinySA\
     Capturas de los EXP-04 a EXP-07, renombradas por experimento
   SDR\X40_03_EXP08_Matriz_amplitud\
@@ -2479,8 +2480,19 @@ Para la bladeRF 2.0 micro xA9, sin ninguna calibracion nuestra:
   SDR\A9_20_EXP26_Peine_radiado\
     exp26_a9_peine_radiado_desde60.grc (EXP-25 con la ventana corregida y
     modo de linea fija, para el ensayo radiado)
-  SDR\Test_Procedure_RE\
-    main.tex y figuras (procedimiento RE-TP-001 para el CETEM)
+  TPs\TP1_OE1_Procedimiento_RE\
+    main.tex y figuras (procedimiento RE-TP-001) y la guia del profesor
+  TPs\TP2_OE2_Manual_SDR\ a TPs\TP7_Integrador_EMC_Europe\
+    un proyecto de Overleaf por TP (ver docs\plan.md)
+  materia\
+    consigna original, notas de clase, guia de medicion de cables y
+    reuniones\ (2026-10-01: presentacion; 2026-10-12: resumen y figuras)
+  normas\
+    CISPR_11_2024.pdf y MIL-STD-461E.pdf
+  CETEM\
+    mediciones del 13-10-2026, fotos y dashboard (Visita CETEM.html)
+  bibliografia\
+    papers por tema (lista comentada en docs\bibliografia.md)
 
   Nombres originales de la tinySA (fecha y hora de captura), por si hace falta
   rastrearlos. Las del EXP-04 salieron con la fecha del equipo sin configurar:

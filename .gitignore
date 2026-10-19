@@ -1,17 +1,17 @@
 # Lista blanca: en la raiz solo se sube lo que figura con "!".
+# Quedan afuera privado/ (material del profesor) y CONAE/ (otro proyecto).
 /*
 !/.gitignore
 !/.gitattributes
 !/README.md
 !/CLAUDE.md
 !/docs/
-!/bibliografia/
+!/TPs/
 !/SDR/
 !/CETEM/
-!/Trabajo Práctico Integrador 2C2026-v1.pdf
-!/Test Procedure de RE (Emisiones Radiadas).pdf
-!/Notas clase EC 14092026..md
-!/ProcedimientoMedicionPuntaDeCorriente.pdf
+!/bibliografia/
+!/materia/
+!/normas/
 
 # Archivos generados
 __pycache__/
