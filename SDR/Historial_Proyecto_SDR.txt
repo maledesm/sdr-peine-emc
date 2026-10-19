@@ -2189,6 +2189,12 @@ PROCEDIMIENTO / 19-10-2026 / RE-TP-001 version 2.0 (TP1, OE1)
   y 7 s por linea con 7 s de silencio porque el analizador barre en unos
   3 s (pasada de 22 min 24 s). La incertidumbre queda con formulas
   (raiz de la suma de cuadrados, U = 2 uc) y una tabla para completar.
+  La incertidumbre de la fuente queda vacia en la tabla (a pedido del
+  usuario) y el texto explica como se calcula con tres partes: la
+  tolerancia de la calibracion (+/-a dB da a/raiz(3), unos 0,58 dB con
+  +/-1 dB), el analizador con que se calibro y la estabilidad de la
+  fuente (+/-d dB da d/raiz(3)). Antes figuraba 0,58 dB como si fuera
+  todo, y era solo la parte de la tolerancia.
   Consecuencias calculadas con las trazas del 13-10: con 0 dBm por cable,
   el maximo de las tres alturas quedo entre 36 y 49 dB sobre el limite,
   asi que el nivel conducido tiene que bajar unos 40 dB. El atenuador del

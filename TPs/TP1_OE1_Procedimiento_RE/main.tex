@@ -688,7 +688,7 @@ Se completa una tabla por polarización y por fecha. $L$ es el límite, $h_1$ a 
 
 Toda medición tiene un error. En este ensayo los que más pesan son los del receptor, el factor de antena, el cable, la cámara, la fuente y el montaje. El factor de antena es el más importante, porque la verificación habitual del laboratorio, que inyecta señal en el cable, no lo controla.
 
-Cada error se expresa en dB como una incertidumbre $u$. Los del receptor, la antena, el cable y la cámara salen de sus certificados de calibración. El de la fuente sale de la tolerancia de la calibración, $\pm 1$~dB, que equivale a $u_{fuente} = 1/\sqrt{3} \approx 0{,}58$~dB. El del montaje es la diferencia que dio el paso de repetibilidad (sección~\ref{sec:pasos}).
+Cada error se expresa en dB como una incertidumbre $u$. Los del receptor, la antena, el cable y la cámara salen de sus certificados de calibración. El del montaje es la diferencia que dio el paso de repetibilidad (sección~\ref{sec:pasos}). El de la fuente se calcula como se explica más abajo.
 
 Los errores no se suman directamente, porque es poco probable que todos se den a la vez y en el mismo sentido. Se suman sus cuadrados y se saca la raíz:
 \begin{equation}\label{eq:incertidumbre}
@@ -706,7 +706,7 @@ La incertidumbre que se informa es el doble, $U = 2\,u_c$, que cubre el 95~\% de
     Factor de antena & $u_{AF}$      & Certificado de calibración de la antena & \casilla \\
     Cable            & $u_{cable}$   & Medición del cable & \casilla \\
     Cámara           & $u_{sitio}$   & Validación de la cámara & \casilla \\
-    Fuente           & $u_{fuente}$  & Tolerancia de la calibración ($\pm 1$~dB) & \casilla 0,58 \\
+    Fuente           & $u_{fuente}$  & Ecuación~\eqref{eq:fuente} & \casilla \\
     Montaje          & $u_{montaje}$ & Paso de repetibilidad & \casilla \\
     \midrule
     Combinada        & $u_c$         & Ecuación~\eqref{eq:incertidumbre} & \casilla \\
@@ -715,6 +715,21 @@ La incertidumbre que se informa es el doble, $U = 2\,u_c$, que cubre el 95~\% de
   \end{tabular}
   \caption{Incertidumbre de la medición. Se completa con los datos de cada laboratorio.}
 \end{table}
+
+\subsection{Incertidumbre de la fuente}
+
+La incertidumbre de la fuente tiene tres partes, que se combinan con la misma regla.
+
+La primera es la tolerancia de la calibración. Una línea se acepta si queda a $\pm a$~dB de su objetivo, pero no se sabe en qué lugar de esa franja cae. Cuando ningún lugar es más probable que otro, la incertidumbre es $a/\sqrt{3}$. Con la tolerancia de $\pm 1$~dB de este procedimiento da unos 0,58~dB.
+
+La segunda es la del analizador con que se hizo la calibración, $u_{analizador}$, que sale de su hoja de datos o de su certificado.
+
+La tercera es la estabilidad de la fuente. Si al repetir la medición en distintos momentos (al encenderla, después de una hora, con otra temperatura) las líneas cambian hasta $\pm d$~dB, su incertidumbre es $d/\sqrt{3}$.
+
+Con las tres:
+\begin{equation}\label{eq:fuente}
+  u_{fuente} = \sqrt{\left(\frac{a}{\sqrt{3}}\right)^2 + u_{analizador}^2 + \left(\frac{d}{\sqrt{3}}\right)^2}
+\end{equation}
 
 \subsection{Errores sistemáticos}
 
