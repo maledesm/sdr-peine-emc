@@ -23,7 +23,7 @@ Resumen cronológico de lo hecho: visitas, reuniones, experimentos y decisiones.
 | 15-10-2026 | Dashboard de las mediciones del CETEM ([`CETEM/Visita CETEM.html`](../CETEM/Visita%20CETEM.html)). |
 | **16-10-2026** | **Reunión con el profesor:** le gusta el trabajo; se acuerdan mejoras técnicas, tres ejercicios y una hoja de ruta hacia el paper (hoy en [plan.md](plan.md)). Se crea este repositorio y se hace la búsqueda bibliográfica (47 papers). |
 | **18-10-2026** | **Se redefine el plan con los docentes:** cinco TPs para la primera parte (procedimiento de RE, manual de la SDR, reporte de RE, procedimiento de calibración de RS y paper v1), entregados juntos como primer parcial; para la segunda, la punta de corriente y el integrador, un paper para EMC Europe 2027 (entrega 22-02-2027). Se adopta el Aprendizaje Basado en Proyectos. Ver [plan.md](plan.md). |
-| 19-10-2026 | Repositorio reorganizado por TPs; normas y material de la materia en sus carpetas. |
+| 19-10-2026 | Repositorio reorganizado por TPs; normas y material de la materia en sus carpetas. TP1: versión 2.0 del procedimiento RE-TP-001 (CISPR 11, tres alturas, incertidumbre). |
 
 ## Etapas
 

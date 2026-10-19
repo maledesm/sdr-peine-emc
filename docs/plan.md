@@ -24,10 +24,10 @@ Cada TP es un proyecto de Overleaf (un solo `.tex`) en su carpeta de [`TPs/`](..
 
 ### TP1 · OE1 · Procedimiento de ensayo de RE
 Procedimiento normativo formal, paso a paso, para el ensayo de RE en laboratorio. La SDR es el EUT, en su papel de calibrador. Base: RE-TP-001 y la guía del profesor, ya en la carpeta.
-- [ ] Entorno de medición, instrumental y criterios de aceptación.
-- [ ] Tiempo por línea (6 s) y duración de la pasada: 2,4 min sin silencio, 4,8 min con silencio.
-- [ ] Alturas de antena adaptables a cada cámara (por ejemplo 1, 1,5 y 2 m en una de 2 m).
-- [ ] Incertidumbres y errores sistemáticos a registrar.
+- [x] Versión 2.0 del RE-TP-001 (19-10): la SDR como EUT, CISPR 11 grupo 1 clase B, tres alturas adaptables, tiempos de la pasada, criterios de aceptación, sección de incertidumbre y lo aprendido el 13-10. El manejo del software y la calibración pasaron al TP2.
+- [ ] Completar los pendientes en rojo con el CETEM: modelo de la antena, modo de barrido del receptor, si el USB del pasamuros es USB 3, geometría del 13-10 y certificados para la tabla de incertidumbre.
+- [ ] Definir la caja metálica y la orientación de la SDR; actualizar el nivel del peine con el EXP-27.
+- [ ] Revisión de los docentes.
 
 ### TP2 · OE2 · Manual y procedimiento funcional de la SDR
 - [ ] Parte general: programas, configuración, modos de TX y RX, cuidados del equipo.
