@@ -25,7 +25,7 @@ Cada TP es un proyecto de Overleaf (un solo `.tex`) en su carpeta de [`TPs/`](..
 ### TP1 · OE1 · Procedimiento de ensayo de RE
 Procedimiento normativo formal, paso a paso, para el ensayo de RE en laboratorio, con la SDR como EUT en su papel de calibrador.
 - [x] Versión 2.0 del RE-TP-001 (19-10). Dos calibraciones, una conducida a bajo nivel y otra irradiada que deja cada línea sobre el límite de CISPR 11 grupo 1 clase B, peine con una línea cada 10 MHz, tres alturas de antena, solo antena Bilog Hybrid, planilla y tablas con la medición del 13-10 e incertidumbre simplificada.
-- [ ] Confirmar la geometría de calibración (vertical, el mayor nivel de las tres alturas) y si la polarización horizontal se mide.
+- [x] Geometría de calibración en vertical, con el mayor nivel de las tres alturas. La horizontal se mide con la antena transmisora acostada, para comprobar que esa polarización funciona, sin compararla con el límite.
 - [ ] Completar los pendientes en rojo con el CETEM: modelo de la antena, modo de barrido del receptor, distancia del 13-10 y certificados para la incertidumbre.
 - [ ] Definir la conexión con la PC y la orientación de la SDR, y el nivel conducido con el EXP-27.
 - [ ] Revisión de los docentes.

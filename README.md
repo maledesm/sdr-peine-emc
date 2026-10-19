@@ -20,4 +20,6 @@ El peine funciona: 24 líneas de 60 a 980 MHz, calibradas por cable a 0 dBm ± 0
 | [`materia/`](materia/) | Consigna original, notas de clase, guía de medición de cables y reuniones. |
 | [`normas/`](normas/) | CISPR 11:2024 y MIL-STD-461E. |
 
+Las reglas para trabajar en el proyecto (seguridad de los equipos, forma de trabajo y estilo) están en [context.md](context.md).
+
 Herramientas: GNU Radio 3.10 (Radioconda) con gr-osmosdr, bladeRF-cli, tinySA Ultra+ como analizador de banco y Overleaf.

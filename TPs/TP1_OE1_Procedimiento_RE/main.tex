@@ -219,7 +219,7 @@ Configurar el script del SDR para emitir el patrón de peine deseado. En este pr
 
 \subsection{Geometría}
 
-La medición se hace sin girar la mesa y con la antena de medición en tres alturas fijas. Con tres alturas ninguna línea depende de una sola posición, que podría caer en un mínimo por el reflejo en el piso: el 13-10-2026, al cambiar la altura, cada línea varió una mediana de 7,9~dB. Las alturas se adaptan a cada cámara, por defecto 1, 2 y 3~m, y en una cámara con mástil de 2~m, 1~m, 1,5~m y 2~m. Una vez elegidas, son siempre las mismas en ese laboratorio. El ángulo de la mesa se elige una sola vez, en el barrido preliminar (sección~\ref{sec:prescan}).
+La medición se hace sin girar la mesa y con la antena de medición en tres alturas fijas. Con tres alturas ninguna línea depende de una sola posición, que podría caer en un mínimo por el reflejo en el piso: el 13-10-2026, al cambiar la altura, cada línea varió una mediana de 7,9~dB. Las alturas se adaptan a cada cámara, por defecto 1, 2 y 3~m, y en una cámara con mástil de 2~m, 1~m, 1,5~m y 2~m. Una vez elegidas, son siempre las mismas en ese laboratorio. La polarización vertical es la de la calibración. La horizontal, con la antena transmisora acostada, comprueba que la cadena también funcione en esa polarización. El ángulo de la mesa se elige una sola vez, en el barrido preliminar (sección~\ref{sec:prescan}).
 
 \begin{figure}[H]
   \centering
@@ -264,9 +264,9 @@ La medición se hace sin girar la mesa y con la antena de medición en tres altu
     Altura de la mesa                 & 0,8~m \\
     Ángulo de la mesa                 & 0\textdegree \\
     Alturas de la antena de medición  & 1, 2 y 3~m \\
-    Polarizaciones                    & H y V \\
+    Polarizaciones                    & V, y H con la antena transmisora acostada \\
     Orientación de la SDR             & conector TX hacia la antena \\
-    Geometría de calibración          & vertical, el mayor nivel de las tres alturas \pendiente{a confirmar} \\
+    Geometría de calibración          & vertical, el mayor nivel de las tres alturas \\
     \bottomrule
   \end{tabular}
   \caption{Geometría. En la primera medición de cada laboratorio se fijan los valores definitivos.}
@@ -355,7 +355,9 @@ Es la medición de rutina, la que se repite en los meses siguientes, con la geom
   \item Reiniciar MAX HOLD. Anotar el número de paso que muestra la ventana del software y esperar a que vuelva a ese mismo número, que es una pasada completa (19~min~12~s con silencio).
   \item Comprobar que se ven líneas cada 10~MHz, de 50~MHz a 1~GHz, y que cada una supera en al menos 10~dB al piso de ruido.
   \item Guardar la traza (imagen y datos).
-  \item Repetir los puntos 4 a 6 en las otras dos alturas. La polarización horizontal se mide igual y se registra como dato, sin criterio \pendiente{a confirmar}.
+  \item Repetir los puntos 4 a 6 en las otras dos alturas.
+  \item Acostar la antena transmisora, horizontal y perpendicular a la línea que une la SDR con la antena de medición, pasar la antena de medición a polarización horizontal y repetir los puntos 4 a 6 en las tres alturas. Sirve para comprobar que la cadena funciona también en esa polarización, así que no se compara con el límite.
+  \item Volver a poner la antena transmisora vertical. En total son seis trazas, casi dos horas.
   \item Leer el nivel de cada línea y completar las tablas de la sección~\ref{sec:registro}.
 \end{enumerate}
 
@@ -403,7 +405,7 @@ Tildar PAUSA, cerrar el programa y desenchufar la SDR. Guardar capturas, fotos y
 
 \subsection{Criterio de aceptación}\label{sec:criterio}
 
-Para cada línea se calcula la diferencia entre el nivel medido en la geometría de calibración y el límite de CISPR~11.
+Para cada línea se calcula la diferencia entre el nivel medido en la geometría de calibración y el límite de CISPR~11. En polarización horizontal solo se verifica que las líneas superen en 10~dB al piso de ruido.
 
 \begin{table}[H]
   \centering
@@ -570,7 +572,7 @@ Se completa una tabla por polarización y por fecha. $L$ es el límite, $h_1$ a 
 
 \newpage
 \begin{longtable}{|c|c|c|c|c|c|c|c|}
-  \caption{Niveles por línea en polarización horizontal, 13-10-2026.}\label{tab:niveles_h}\\
+  \caption{Niveles por línea en polarización horizontal, con la antena transmisora acostada, 13-10-2026.}\label{tab:niveles_h}\\
   \hline
   Frecuencia (MHz) & $L$ & $h_1$ & $h_2$ & $h_3$ & Máx. & $\Delta$ & Resultado \\
   \hline
