@@ -47,15 +47,13 @@ Los TP1 a TP5 forman la fase 1 y los TP6 y TP7, la fase 2. TP1 a TP4 van en espa
 
 ## Carpetas
 
-| Carpeta | Contenido |
-|---|---|
-| [`docs/`](docs/) | [plan.md](docs/plan.md) (objetivos, tareas y fechas), [historial.md](docs/historial.md), [conocimiento_tecnico.md](docs/conocimiento_tecnico.md) y [bibliografia.md](docs/bibliografia.md). |
-| [`TPs/`](TPs/) | Un proyecto de Overleaf por TP, con el PDF compilado junto al `.tex`. |
-| [`SDR/`](SDR/) | Un subdirectorio por experimento (`X40_` o `A9_` + orden + EXP) con su flujo `.grc` y sus capturas, y la bitácora [`Historial_Proyecto_SDR.txt`](SDR/Historial_Proyecto_SDR.txt). |
-| [`CETEM/`](CETEM/) | Medición del 13-10-2026: trazas, fotos y el dashboard `Visita CETEM.html`. |
-| [`bibliografia/`](bibliografia/) | 47 papers, los 20 principales en cinco carpetas por tema y el resto en `6_Extra`. |
-| [`materia/`](materia/) | Consigna original, notas de clase, guía de medición de cables y reuniones. |
-| [`normas/`](normas/) | CISPR 11:2024 y MIL-STD-461E. |
+- [`docs/`](docs/)
+- [`TPs/`](TPs/)
+- [`SDR/`](SDR/)
+- [`CETEM/`](CETEM/)
+- [`bibliografia/`](bibliografia/)
+- [`materia/`](materia/)
+- [`normas/`](normas/)
 
 Las reglas para trabajar en el proyecto (seguridad de los equipos, forma de trabajo y estilo) están en [context.md](context.md).
 

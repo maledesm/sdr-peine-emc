@@ -2104,9 +2104,6 @@ CETEM / 13-10-2026 / Primera medicion en la camara  [MEDIDO]
   barrido completo duraria unos 27 minutos. A confirmar con el laboratorio.
   Dashboard con todas las comparaciones, como archivo que se abre sin
   internet: CETEM\Visita CETEM.html (antes Dashboard_CETEM_13-10.html).
-  Copia en claude.ai:
-  https://claude.ai/artifact/2ATQtjSDgYLKkjxZKb1Xur (esta copia NO tiene
-  el ajuste de atenuacion de abajo).
   Ajuste de atenuacion (pedido del usuario, 15-10-2026): el Comb generator
   y la SDR en pausa se midieron con 10 dB de atenuacion en el receptor, y
   la SDR emitiendo y sin antena con 20 dB. Con 20 dB el piso de ruido sale
