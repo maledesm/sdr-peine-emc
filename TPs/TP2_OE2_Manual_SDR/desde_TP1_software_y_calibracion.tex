@@ -1,36 +1,37 @@
 % ============================================================================
 % Fragmento para el TP2 (OE2, Manual y procedimiento funcional de la SDR).
-% Viene de los anexos B y C del RE-TP-001 v1.1 (TP1). Se integra al main.tex
-% del TP2 cuando se arme; no compila solo.
+% Viene de los anexos B y C del RE-TP-001 v1.1 (TP1), con el peine de 24
+% lineas del EXP-25 y EXP-26. Se integra al main.tex del TP2 cuando se arme
+% y no compila solo. Hay que actualizarlo al peine cada 10 MHz.
 % ============================================================================
 
 \section{Manejo del software}\label{anexo:sw}
 
 La ventana del flujo muestra en todo momento la etapa, la línea que está saliendo, su portadora y el número de paso dentro de la pasada.
 
-\begin{description}
-  \item[PAUSA] Con la casilla tildada la salida queda en silencio. El programa arranca así.
-  \item[Ganancia de TX] 45, 55 o 65~dB: líneas calibradas en $-20$, $-10$ o 0~dBm. La calibración vale para las tres.
-  \item[Nivel] \emph{Calibrado} o \emph{Calibrado + 3~dB}. La segunda opción sube todas las líneas; en la medición por conducción dieron +2,3~dBm de media, porque la placa ya comprime un poco.
-  \item[Importar calibración previa] Carga en los 24 contadores los valores del archivo de calibración.
-  \item[Guardar calibración] Escribe en el archivo los valores que están en los contadores.
-  \item[Generar calibración] Arma la calibración a partir de una captura del analizador (anexo~\ref{anexo:cal}).
-  \item[Contadores] Uno por línea. Guardan el nivel leído con el peine sin calibrar, menos 20~dB. Para bajar una línea $x$~dB se le suma $x$ a su contador; para subirla, se le resta.
-\end{description}
+\begin{itemize}
+  \item La casilla PAUSA, tildada, deja la salida en silencio. El programa arranca así.
+  \item La ganancia de TX tiene tres valores, 45, 55 y 65~dB, que dejan las líneas calibradas en $-20$, $-10$ y 0~dBm. La calibración vale para los tres.
+  \item El nivel puede ser Calibrado o Calibrado + 3~dB. La segunda opción sube todas las líneas, y en la medición por conducción dieron +2,3~dBm de media porque la placa ya comprime un poco.
+  \item Importar calibración previa carga en los 24 contadores los valores del archivo de calibración.
+  \item Guardar calibración escribe en el archivo los valores que están en los contadores.
+  \item Generar calibración arma la calibración a partir de una captura del analizador (sección~\ref{anexo:cal}).
+  \item Hay un contador por línea, que guarda el nivel leído con el peine sin calibrar menos 20~dB. Para bajar una línea $x$~dB se le suma $x$ a su contador, y para subirla se le resta.
+\end{itemize}
 
-El 3er LED (de izquierda a derecha) de la SDR debe quedar encendido fijo mientras el flujo corre. Si titila, a la placa le están faltando muestras por el USB y la medición no es válida.
+El 3.\textsuperscript{er} LED de la SDR, contando de izquierda a derecha, debe quedar encendido fijo mientras el flujo corre. Si titila, a la placa le están faltando muestras por el USB y la medición no es válida.
 
 \section{Calibración de la fuente por conducción}\label{anexo:cal}
 
-Se hace con la SDR conectada por cable al analizador portátil (atenuación 30~dB, 45 a 1005~MHz, RBW 300~kHz, MAX HOLD).
+Se hace con la SDR conectada por cable al analizador portátil, con atenuación de 30~dB, de 45 a 1005~MHz, RBW de 300~kHz y MAX HOLD.
 
 \begin{enumerate}
-  \item Abrir el flujo y ejecutarlo \emph{sin importar ninguna calibración}: los 24 contadores deben estar en cero.
-  \item Elegir ganancia 65~dB y destildar \textsc{pausa}.
-  \item Reiniciar MAX HOLD, esperar una pasada completa y guardar la captura en formato \texttt{.csv}.
+  \item Abrir el flujo y ejecutarlo sin importar ninguna calibración. Los 24 contadores deben estar en cero.
+  \item Elegir ganancia 65~dB y destildar PAUSA.
+  \item Reiniciar MAX HOLD, esperar una pasada completa y guardar la captura en formato .csv.
   \item Reiniciar MAX HOLD y guardar una segunda captura de otra pasada. Con dos capturas el programa descarta los picos momentáneos.
-  \item Apretar \emph{Generar calibración} y elegir las dos capturas a la vez. El programa busca el pico de cada línea, carga los contadores y guarda el archivo de calibración.
-  \item Reiniciar MAX HOLD, esperar una pasada y verificar que las 24 líneas queden en 0~dBm~$\pm$~1~dB. Si alguna no lo cumple, corregir su contador a mano y apretar \emph{Guardar calibración}.
+  \item Apretar Generar calibración y elegir las dos capturas a la vez. El programa busca el pico de cada línea, carga los contadores y guarda el archivo de calibración.
+  \item Reiniciar MAX HOLD, esperar una pasada y verificar que las 24 líneas queden en 0~dBm~$\pm$~1~dB. Si alguna no lo cumple, corregir su contador a mano y apretar Guardar calibración.
 \end{enumerate}
 
 La calibración vale para el cable y el analizador con que se hizo. Lleva unos 20~minutos.

@@ -2155,26 +2155,38 @@ PLAN / 18-10-2026 / Cinco TPs antes del primer parcial y paper para EMC Europe
   MIL-STD-461E, ahora en el repositorio).
 
 PROCEDIMIENTO / 19-10-2026 / RE-TP-001 version 2.0 (TP1, OE1)
-  Archivo: TPs\TP1_OE1_Procedimiento_RE\main.tex (compila, 15 paginas).
+  Archivo: TPs\TP1_OE1_Procedimiento_RE\main.tex (compila, 18 paginas).
   Decisiones del usuario:
-   - CISPR 11 grupo 1 clase B reemplaza a CISPR 32 ("inicialmente"):
-     limites a 3 m de 40 dBuV/m hasta 230 MHz y 47 de 230 a 1000 MHz.
-     Se grafican y se informa el margen, pero no entran en el criterio.
-   - Tres alturas de antena fijas en vez de una, adaptables a la camara
-     (1, 2 y 3 m por defecto; 1, 1,5 y 2 m si el mastil llega a 2 m).
-   - El manejo del software y la calibracion de la fuente pasan al TP2
-     (TPs\TP2_OE2_Manual_SDR\desde_TP1_software_y_calibracion.tex).
-  Otros cambios: la SDR como EUT en su papel de calibrador; emision
-  propia en pausa y sin antena (con carga de 50 ohm); configuracion del
-  receptor como primer paso (transductor, atenuador y preamplificador
-  fijos y anotados); silencio activado como verificacion; tablas por
-  polarizacion con limite y margen; seccion de incertidumbre (CISPR
-  16-4-2, fuente +/-1 dB rectangular = 0,58 dB); los pasos del
-  "protocolo" se unificaron con el procedimiento.
-  Quedan 16 pendientes en rojo: modelo de la antena, modo de barrido del
-  receptor, USB 3 del pasamuros, geometria del 13-10, caja metalica,
-  orientacion de la SDR, valores de incertidumbre y el nivel del peine
-  (EXP-27).
+   - CISPR 11 grupo 1 clase B en lugar de CISPR 32 ("inicialmente"). A
+     3 m, 40 dBuV/m hasta 230 MHz y 47 dBuV/m de 230 a 1000 MHz.
+   - Dos calibraciones. La conducida, como la de antes pero a bajo nivel
+     (bajando la ganancia o la amplitud, lo que deje mejor relacion entre
+     lineas y espurias), para tener margen en la irradiada. La irradiada
+     parte de la conducida y deja cada linea justo sobre el limite de
+     CISPR 11, asi que en las verificaciones siguientes basta comparar
+     contra el limite.
+   - Peine con una linea cada 10 MHz (96 lineas de 50 MHz a 1 GHz), para
+     que todas las repeticiones caigan sobre lineas y quede comparable con
+     el Comb generator. Se elimino la seccion de espaciado por banda.
+   - Tres alturas de antena, adaptables a la camara. Solo antena Bilog
+     Hybrid. Sin caja metalica para RE.
+   - El manejo del software y la calibracion pasan al TP2. Se elimino el
+     anexo de verificacion previa por conduccion.
+   - Estilo: letra Source Sans Pro, sin negritas de entrada ni cursivas,
+     nunca punto y coma. Planilla con una columna por fecha y tablas por
+     linea, con la medicion del 13-10 cargada y un guion donde no se
+     midio. Incertidumbre explicada en forma simple.
+  Conexion con la PC en el CETEM: hay una sola conexion Ethernet hecha (se
+  podria usar un conversor de USB a Ethernet, a analizar) y el USB por
+  debajo de la puerta deja unos 10 m. No va en el TP hasta definirlo.
+  Propuesta a confirmar: geometria de calibracion en vertical, con el
+  mayor nivel de las tres alturas para cada linea.
+  Consecuencias calculadas con las trazas del 13-10: con 0 dBm por cable,
+  el maximo de las tres alturas quedo entre 36 y 49 dB sobre el limite,
+  asi que el nivel conducido tiene que bajar unos 40 dB. El atenuador del
+  receptor tiene que ir en 10 dB o menos (con 20 dB el piso estuvo en 37
+  a 39 dBuV/m, casi sobre el limite de 40). Con 96 lineas y silencio la
+  pasada dura 19 min 12 s.
 
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
