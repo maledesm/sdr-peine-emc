@@ -29,7 +29,7 @@ Este archivo reúne las reglas para trabajar en el proyecto. Conviene leerlo ant
 - Lienzos de GRC sin bloques superpuestos.
 - Cada experimento va en una carpeta `SDR/A9_` o `X40_` + número de orden + nombre del EXP. Las capturas se renombran por experimento y el nombre original se anota en la sección 11 de la bitácora.
 - La bitácora `SDR/Historial_Proyecto_SDR.txt` va en ASCII puro y CRLF, con una entrada por diseño, resultado o decisión. No editarla con `sed -i` de Git Bash (saca el CRLF) y, en Python, cuidar las barras invertidas (`\a`, `\r`).
-- Cada TP es un proyecto de Overleaf en `TPs/`, con un solo `.tex`, cada párrafo en un renglón y figuras con `[H]` y el paquete `float`. TP1 a TP4 van en español, TP5 y TP7 en inglés.
+- Cada TP es un proyecto de Overleaf en `TPs/`, con un solo `.tex`, cada párrafo en un renglón y figuras con `[H]` y el paquete `float`. TP1 a TP4 van en español, TP5 y TP7 en inglés. Junto al `.tex` va el PDF compilado, con el nombre de la carpeta del TP, y se recompila cada vez que cambia el `.tex` (compilar en otra carpeta para no subir los archivos auxiliares).
 - Los `.md` van cortos. Al cerrar un tema, actualizar `docs/historial.md` y tildar la tarea en `docs/plan.md`.
 
 ## Estilo de escritura
