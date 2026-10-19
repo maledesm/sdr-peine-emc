@@ -20,7 +20,7 @@ Lo verificado midiendo o leyendo código fuente. El detalle de cada medición es
 - La calibración por cable lee el .csv del analizador ("Generar calibración"), toma el máximo a ±4 MHz de cada línea y la lleva a 0 dBm. Se guarda en un archivo, se importa en la cámara y admite retoque manual.
 - Por cable, planitud de 1,1 dB (de −0,8 a +0,3 dBm) y desvío de 0,28 dB.
 - El EXP-26 suma selector de ganancia, línea fija, botón "Congelar" y casilla de silencio.
-- El próximo peine (EXP-27) va con una línea cada 10 MHz, de 50 MHz a 1 GHz, y una calibración irradiada contra el límite de CISPR 11 (ver el [plan](plan.md)).
+- El próximo peine (EXP-27) va con una línea cada 10 MHz, de 50 MHz a 1 GHz, 7 s por línea y 7 s de silencio, y una calibración irradiada contra el límite de CISPR 11 (ver el [plan](plan.md)).
 
 ## Hallazgos de la xA9
 

@@ -2155,7 +2155,7 @@ PLAN / 18-10-2026 / Cinco TPs antes del primer parcial y paper para EMC Europe
   MIL-STD-461E, ahora en el repositorio).
 
 PROCEDIMIENTO / 19-10-2026 / RE-TP-001 version 2.0 (TP1, OE1)
-  Archivo: TPs\TP1_OE1_Procedimiento_RE\main.tex (compila, 19 paginas).
+  Archivo: TPs\TP1_OE1_Procedimiento_RE\main.tex (compila, 18 paginas).
   Decisiones del usuario:
    - CISPR 11 grupo 1 clase B en lugar de CISPR 32 ("inicialmente"). A
      3 m, 40 dBuV/m hasta 230 MHz y 47 dBuV/m de 230 a 1000 MHz.
@@ -2183,12 +2183,18 @@ PROCEDIMIENTO / 19-10-2026 / RE-TP-001 version 2.0 (TP1, OE1)
   mayor nivel de las tres alturas para cada linea. La horizontal se mide
   con la antena transmisora acostada, para probar que esa polarizacion
   anda, sin compararla con el limite.
+  Ultimos ajustes del 19-10, sin pendientes en rojo: distancia del 13-10
+  confirmada en 3 m, sin el modelo de la antena (no se sabe), flujo
+  nombrado como EXP-27, conexion con la PC solo como requisito de USB 3,
+  y 7 s por linea con 7 s de silencio porque el analizador barre en unos
+  3 s (pasada de 22 min 24 s). La incertidumbre queda con formulas
+  (raiz de la suma de cuadrados, U = 2 uc) y una tabla para completar.
   Consecuencias calculadas con las trazas del 13-10: con 0 dBm por cable,
   el maximo de las tres alturas quedo entre 36 y 49 dB sobre el limite,
   asi que el nivel conducido tiene que bajar unos 40 dB. El atenuador del
   receptor tiene que ir en 10 dB o menos (con 20 dB el piso estuvo en 37
   a 39 dBuV/m, casi sobre el limite de 40). Con 96 lineas y silencio la
-  pasada dura 19 min 12 s.
+  pasada duraba 19 min 12 s con 6 s por linea (con 7 s, 22 min 24 s).
 
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a

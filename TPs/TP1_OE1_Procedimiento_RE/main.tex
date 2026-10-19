@@ -170,7 +170,7 @@ La verificación abarca la cadena completa: cámara, antena de medición, cables
   \item Cámara semianecoica (SAC) calibrada a 3 metros (o 10 metros).
   \item Receptor EMI que cumpla CISPR 16-1-1. En el CETEM, R\&S ESR-7.
   \item Detectores Quasi-Peak y Peak, con RBW de 120~kHz de 30~MHz a 1~GHz y de 1~MHz por encima de 1~GHz. En este procedimiento se usa el detector Peak con MAX HOLD (sección~\ref{sec:pasos}).
-  \item Antena de medición Bilog Hybrid (30~MHz a 1~GHz), con su factor de antena y la pérdida del cable cargados en el receptor como transductor. En el CETEM, \pendiente{modelo}.
+  \item Antena de medición Bilog Hybrid (30~MHz a 1~GHz), con su factor de antena y la pérdida del cable cargados en el receptor como transductor.
   \item Mástil de antena motorizado, de 1~m a 4~m de altura o hasta la altura máxima de la cámara.
   \item Mesa giratoria no metálica, a 0,8~m de altura respecto al plano de masa.
   \item Cables y atenuadores de baja pérdida, con la pérdida medida.
@@ -180,8 +180,8 @@ La verificación abarca la cadena completa: cámara, antena de medición, cables
           \item carga de 50~$\Omega$ para el conector TX1, para medir la emisión de la placa sin antena,
           \item cable USB 3.0, con una ferrita junto a la SDR.
         \end{itemize}
-  \item GNU Radio 3.10 con el flujo del peine \pendiente{flujo con líneas cada 10~MHz, a armar} y los archivos de las calibraciones conducida e irradiada. El manejo del software y la generación de las calibraciones se describen en el Manual y procedimiento funcional de la SDR (OE2).
-  \item Computadora para manejar la SDR. \pendiente{Definir cómo se conecta con la SDR en el CETEM.}
+  \item GNU Radio 3.10 con el flujo del peine del EXP-27 y los archivos de las calibraciones conducida e irradiada. El manejo del software y la generación de las calibraciones se describen en el Manual y procedimiento funcional de la SDR (OE2).
+  \item Computadora para manejar la SDR, conectada por el cable USB 3.
   \item Analizador de espectro portátil (tinySA Ultra) y cable coaxial, para la calibración conducida.
 \end{itemize}
 
@@ -278,7 +278,7 @@ La medición se hace sin girar la mesa y con la antena de medición en tres altu
 
 Se hace fuera de la cámara, con la SDR conectada por cable al analizador portátil. Deja todas las líneas del peine con el mismo nivel, $P_{cond}$, y es la base de la calibración irradiada.
 
-El nivel se elige bastante por debajo del máximo de la SDR, para que en la calibración irradiada quede margen para subir las líneas que lleguen más débiles a la antena de medición. Se baja con la ganancia de TX o con la amplitud digital, según cuál deje mejor relación entre las líneas y las espurias. \pendiente{Definir $P_{cond}$, la ganancia y la amplitud con el EXP-27.}
+El nivel se elige bastante por debajo del máximo de la SDR, para que en la calibración irradiada quede margen para subir las líneas que lleguen más débiles a la antena de medición. Se baja con la ganancia de TX o con la amplitud digital, según cuál deje mejor relación entre las líneas y las espurias. El nivel, la ganancia y la amplitud usados se anotan en la planilla.
 
 \begin{enumerate}
   \item Conectar la salida TX1 de la SDR al analizador portátil con el cable coaxial. Analizador de 45 a 1005~MHz, con RBW de 300~kHz, atenuación de 30~dB y MAX HOLD.
@@ -304,7 +304,7 @@ Ajustes en el analizador de espectro o receptor EMI, según CISPR 16-1-1:
   \item Detector Peak con MAX HOLD.
   \item Transductor cargado, con el factor de antena y la pérdida del cable. Anotar cuál.
   \item Atenuador interno en 10~dB o menos y preamplificador encendido, porque con las líneas sobre el límite el piso de ruido tiene que quedar al menos 10~dB más abajo. El 13-10-2026, con 20~dB de atenuación, el piso estaba entre 37 y 39~dB$\mu$V/m, casi sobre el límite. Una vez elegidos, no cambiarlos en toda la campaña y anotarlos.
-  \item Tiempo de barrido menor que la mitad del tiempo que cada línea está encendida (sección~\ref{sec:sdr}). \pendiente{Definir con el CETEM el modo de barrido. Según el encabezado de las trazas del 13-10-2026, se usó un paso de 30~kHz y 50~ms por punto, que daría unos 27~min por barrido.}
+  \item Tiempo de barrido de unos 3~s, menor que la mitad del tiempo que cada línea está encendida (sección~\ref{sec:sdr}).
 \end{enumerate}
 
 \subsection{Ruido de fondo (Ambient Noise)}
@@ -352,12 +352,12 @@ Es la medición de rutina, la que se repite en los meses siguientes, con la geom
   \item Importar la calibración irradiada.
   \item Mesa en el ángulo elegido y antena de medición en la primera altura, en polarización vertical.
   \item Verificar que el silencio entre saltos esté activado y que el 3.\textsuperscript{er} LED de la SDR quede encendido fijo.
-  \item Reiniciar MAX HOLD. Anotar el número de paso que muestra la ventana del software y esperar a que vuelva a ese mismo número, que es una pasada completa (19~min~12~s con silencio).
+  \item Reiniciar MAX HOLD. Anotar el número de paso que muestra la ventana del software y esperar a que vuelva a ese mismo número, que es una pasada completa (22~min~24~s con silencio).
   \item Comprobar que se ven líneas cada 10~MHz, de 50~MHz a 1~GHz, y que cada una supera en al menos 10~dB al piso de ruido.
   \item Guardar la traza (imagen y datos).
   \item Repetir los puntos 4 a 6 en las otras dos alturas.
   \item Acostar la antena transmisora, horizontal y perpendicular a la línea que une la SDR con la antena de medición, pasar la antena de medición a polarización horizontal y repetir los puntos 4 a 6 en las tres alturas. Sirve para comprobar que la cadena funciona también en esa polarización, así que no se compara con el límite.
-  \item Volver a poner la antena transmisora vertical. En total son seis trazas, casi dos horas.
+  \item Volver a poner la antena transmisora vertical. En total son seis trazas, unas dos horas y cuarto.
   \item Leer el nivel de cada línea y completar las tablas de la sección~\ref{sec:registro}.
 \end{enumerate}
 
@@ -372,7 +372,7 @@ El método normativo, para cada armónico o frecuencia crítica identificada en 
   \item Aplicar el detector Quasi-Peak (QP) con tiempo de integración de 1~segundo por punto.
 \end{enumerate}
 
-En esta versión no se aplica en la medición de rutina, por dos motivos. Para controlar continuidad interesa repetir siempre la misma geometría, y el generador emite una línea por vez (6~s cada 12~s), lo que no permite detenerse en una línea para maximizarla ni medirla en cuasi-pico. Queda como ampliación.
+En esta versión no se aplica en la medición de rutina, por dos motivos. Para controlar continuidad interesa repetir siempre la misma geometría, y el generador emite una línea por vez (7~s cada 14~s), lo que no permite detenerse en una línea para maximizarla ni medirla en cuasi-pico. Queda como ampliación.
 
 \subsection{Repetibilidad}
 
@@ -440,14 +440,14 @@ Una columna por fecha. La primera tiene cargada la medición del 13-10-2026. Un 
   Tipo de medición                       & Primera medición, sin calibración irradiada & & \\ \hline
   Receptor                               & R\&S ESR-7 & & \\ \hline
   Transductor cargado (antena y cable)   & 10- BL 01 y 08- (ER) 2 CBL & & \\ \hline
-  Distancia de medición                  & 3~m \pendiente{confirmar} & & \\ \hline
+  Distancia de medición                  & 3~m & & \\ \hline
   RBW y detector                         & 120~kHz, Peak con MAX HOLD & & \\ \hline
   Atenuador interno del receptor         & 20~dB (10~dB con la SDR en pausa) & & \\ \hline
   Preamplificador                        & Sí, 20~dB & & \\ \hline
   Ángulo de mesa y alturas de antena     & 0\textdegree, 1, 2 y 3~m & & \\ \hline
   Silencio entre saltos activado         & - & & \\ \hline
   PC dentro o fuera de la cámara         & Dentro, sobre la mesa & & \\ \hline
-  Calibración conducida (fecha y rango)  & 05-10-2026, de $-0{,}8$ a $+0{,}3$~dBm & & \\ \hline
+  Calibración conducida (fecha, nivel y rango) & 05-10-2026, 0~dBm, de $-0{,}8$ a $+0{,}3$~dBm & & \\ \hline
   Calibración irradiada (fecha)          & - & & \\ \hline
   Tiempo de barrido del receptor         & - & & \\ \hline
   Archivos guardados                     & 9 trazas de la SDR (.DAT y .PNG) & & \\ \hline
@@ -686,16 +686,35 @@ Se completa una tabla por polarización y por fecha. $L$ es el límite, $h_1$ a 
 \newpage
 \section{Incertidumbre de medición}\label{sec:incertidumbre}
 
-Toda medición tiene un error. En este ensayo, los que más pesan son:
+Toda medición tiene un error. En este ensayo los que más pesan son los del receptor, el factor de antena, el cable, la cámara, la fuente y el montaje. El factor de antena es el más importante, porque la verificación habitual del laboratorio, que inyecta señal en el cable, no lo controla.
 
-\begin{itemize}
-  \item El receptor, el cable y la antena de medición, que los da su calibración. El factor de antena es el más importante, porque la verificación habitual del laboratorio, que inyecta señal en el cable, no lo controla.
-  \item La cámara, según su validación.
-  \item La fuente, porque la calibración irradiada deja cada línea a $\pm$1~dB del límite.
-  \item El montaje, es decir, cuánto cambia la medición al desarmar y volver a armar (sección~\ref{sec:pasos}, repetibilidad).
-\end{itemize}
+Cada error se expresa en dB como una incertidumbre $u$. Los del receptor, la antena, el cable y la cámara salen de sus certificados de calibración. El de la fuente sale de la tolerancia de la calibración, $\pm 1$~dB, que equivale a $u_{fuente} = 1/\sqrt{3} \approx 0{,}58$~dB. El del montaje es la diferencia que dio el paso de repetibilidad (sección~\ref{sec:pasos}).
 
-Para estimar el error total se elevan al cuadrado los errores de cada parte, se suman y se saca la raíz cuadrada. Por ejemplo, errores de 1, 2 y 1,5~dB dan unos 2,7~dB en total. \pendiente{Completar con los certificados del CETEM.}
+Los errores no se suman directamente, porque es poco probable que todos se den a la vez y en el mismo sentido. Se suman sus cuadrados y se saca la raíz:
+\begin{equation}\label{eq:incertidumbre}
+  u_c = \sqrt{u_{rec}^2 + u_{AF}^2 + u_{cable}^2 + u_{sitio}^2 + u_{fuente}^2 + u_{montaje}^2}
+\end{equation}
+La incertidumbre que se informa es el doble, $U = 2\,u_c$, que cubre el 95~\% de los casos. Por ejemplo, con $u_{rec} = 1$~dB, $u_{AF} = 2$~dB y $u_{cable} = 1{,}5$~dB queda $u_c = \sqrt{1 + 4 + 2{,}25} \approx 2{,}7$~dB y $U \approx 5{,}4$~dB. Sumar los errores directamente, $u_{rec} + u_{AF} + u_{cable} + \dots$, da el peor caso, que es más pesimista.
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}llp{6.2cm}c@{}}
+    \toprule
+    Contribución & Símbolo & De dónde sale & Valor (dB) \\
+    \midrule
+    Receptor         & $u_{rec}$     & Certificado de calibración del receptor & \casilla \\
+    Factor de antena & $u_{AF}$      & Certificado de calibración de la antena & \casilla \\
+    Cable            & $u_{cable}$   & Medición del cable & \casilla \\
+    Cámara           & $u_{sitio}$   & Validación de la cámara & \casilla \\
+    Fuente           & $u_{fuente}$  & Tolerancia de la calibración ($\pm 1$~dB) & \casilla 0,58 \\
+    Montaje          & $u_{montaje}$ & Paso de repetibilidad & \casilla \\
+    \midrule
+    Combinada        & $u_c$         & Ecuación~\eqref{eq:incertidumbre} & \casilla \\
+    Expandida        & $U = 2\,u_c$  & Doble de la combinada & \casilla \\
+    \bottomrule
+  \end{tabular}
+  \caption{Incertidumbre de la medición. Se completa con los datos de cada laboratorio.}
+\end{table}
 
 \subsection{Errores sistemáticos}
 
@@ -716,14 +735,14 @@ La SDR no puede generar pulsos de 1~ns: su tasa de muestreo máxima es 61,44~MSP
     Separación entre líneas ($f_0$) & 10~MHz \\
     Portadora de cada línea         & línea + 10~MHz (60, 70, \dots, 1010~MHz) \\
     Tasa de muestreo                & 40~MSPS, filtro de 36~MHz \\
-    Tiempo por línea                & 6~s encendida + 6~s apagada \\
+    Tiempo por línea                & 7~s encendida + 7~s apagada \\
     Salto de frecuencia             & en la mitad del silencio \\
-    Pasada completa                 & 19~min~12~s con silencio, 9~min~36~s sin silencio \\
-    Nivel conducido                 & $P_{cond}$ \pendiente{a definir con el EXP-27} \\
+    Pasada completa                 & 22~min~24~s con silencio, 11~min~12~s sin silencio \\
+    Nivel conducido                 & $P_{cond}$, el de la calibración conducida (se anota en la planilla) \\
     Nivel irradiado                 & el límite de CISPR~11 en la geometría de calibración \\
     \bottomrule
   \end{tabular}
-  \caption{Parámetros del generador peine. \pendiente{Flujo con líneas cada 10~MHz, a armar.}}
+  \caption{Parámetros del generador peine (flujo del EXP-27).}
 \end{table}
 
 \subsection{Separación entre líneas}
@@ -732,7 +751,7 @@ Las líneas van cada 10~MHz. El mezclador de la SDR repite cada línea alrededor
 
 \subsection{Condición para el receptor}
 
-Cada línea está encendida 6~s. Para que al menos un barrido completo caiga dentro de ese tiempo, el barrido del receptor debe durar menos de 3~s (sección~\ref{sec:receptor}). Si dura más, hay que aumentar el tiempo por línea en el software (variable permanencia) a más del doble del tiempo de barrido.
+Cada línea está encendida 7~s y el barrido del receptor dura unos 3~s, así que al menos un barrido completo cae dentro de cada línea (sección~\ref{sec:receptor}). Si el barrido durara más, hay que aumentar el tiempo por línea en el software (variable permanencia) a más del doble del tiempo de barrido.
 
 El manejo del software y las dos calibraciones se describen en el manual de la SDR (OE2).
 

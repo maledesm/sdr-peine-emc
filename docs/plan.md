@@ -26,8 +26,8 @@ Cada TP es un proyecto de Overleaf (un solo `.tex`) en su carpeta de [`TPs/`](..
 Procedimiento normativo formal, paso a paso, para el ensayo de RE en laboratorio, con la SDR como EUT en su papel de calibrador.
 - [x] Versión 2.0 del RE-TP-001 (19-10). Dos calibraciones, una conducida a bajo nivel y otra irradiada que deja cada línea sobre el límite de CISPR 11 grupo 1 clase B, peine con una línea cada 10 MHz, tres alturas de antena, solo antena Bilog Hybrid, planilla y tablas con la medición del 13-10 e incertidumbre simplificada.
 - [x] Geometría de calibración en vertical, con el mayor nivel de las tres alturas. La horizontal se mide con la antena transmisora acostada, para comprobar que esa polarización funciona, sin compararla con el límite.
-- [ ] Completar los pendientes en rojo con el CETEM: modelo de la antena, modo de barrido del receptor, distancia del 13-10 y certificados para la incertidumbre.
-- [ ] Definir la conexión con la PC y la orientación de la SDR, y el nivel conducido con el EXP-27.
+- [x] Sin pendientes en rojo (19-10). Distancia del 13-10 confirmada en 3 m, 7 s por línea con un barrido de unos 3 s, e incertidumbre con fórmulas y una tabla para completar.
+- [ ] Confirmar con el CETEM que el receptor barra de 30 MHz a 1 GHz en unos 3 s (según el encabezado del 13-10 el barrido duraba unos 27 min) y pedir los certificados para la tabla de incertidumbre.
 - [ ] Revisión de los docentes.
 
 ### TP2 · OE2 · Manual y procedimiento funcional de la SDR
@@ -54,7 +54,7 @@ Título tentativo: "Preverificaciones de RE con comb generator a base de SDR". E
 - [ ] Confirmar en IEEE Xplore que no hay trabajos iguales y consultar al INTI el alcance de su calibración en EMC.
 
 ### EXP-27 · Peine cada 10 MHz y calibración conducida a bajo nivel
-- [ ] Flujo con 96 líneas de 50 MHz a 1 GHz, una cada 10 MHz, con la portadora 10 MHz arriba de cada línea.
+- [ ] Flujo con 96 líneas de 50 MHz a 1 GHz, una cada 10 MHz, con la portadora 10 MHz arriba de cada línea y 7 s por línea con 7 s de silencio (pasada de 22 min 24 s).
 - [ ] Elegir el nivel conducido y si se baja con la ganancia de TX o con la amplitud digital, según cuál deje mejor relación entre líneas y espurias. Con lo medido el 13-10, para llegar al límite las líneas tienen que bajar entre 36 y 49 dB respecto de 0 dBm.
 - [ ] Generar la calibración irradiada a partir de las trazas del receptor, con el límite de CISPR 11 como objetivo.
 - [ ] Verificar con el modo de línea fija que ninguna repetición de otra línea tape a una línea débil.
