@@ -570,14 +570,15 @@ function dibujarSelector(meds) {
   const grupos = [['SDR emitiendo', (m) => m.equipo === 'SDR' && m.condicion === 'peine'],
     ['SDR sin emitir', (m) => m.equipo === 'SDR' && m.condicion !== 'peine'],
     ['Comb generator', (m) => m.equipo !== 'SDR'],
-    ['Líneas ideales', null]];
+    ['Líneas ideales', IDEALES],
+    ['Máscaras CISPR 11 (3 m, cuasi-pico)', MASCARAS]];
   cont.replaceChildren(...grupos.map(([titulo, f]) => {
     const g = document.createElement('div');
     const t = document.createElement('span');
     t.className = 'cx-note';
     t.textContent = titulo;
     const fila = document.createElement('div');
-    const items = f ? meds.filter(f).map((m) => ({ id: m.id, nombre: corto(m) })) : IDEALES;
+    const items = typeof f === 'function' ? meds.filter(f).map((m) => ({ id: m.id, nombre: corto(m) })) : f;
     for (const m of items) {
       const b = document.createElement('button');
       b.type = 'button';
@@ -623,6 +624,31 @@ const IDEALES = [
   { id: 'ideal_cg_marcas', nombre: 'Comb gen. marcas', peine: 'cg', modo: 'marcas' },
 ];
 
+// Mascaras de CISPR 11:2024 a 3 m en OATS o SAC, cuasi-pico (tablas 8, 9, 14, 15 y 16).
+// Cada tramo es [desde MHz, hasta MHz, nivel al principio, nivel al final]. Si los dos niveles
+// son distintos, el limite baja en forma lineal con el logaritmo de la frecuencia.
+const MASCARAS = [
+  { id: 'cispr_g1a', nombre: 'Grupo 1 clase A (≤ 20 kVA)', tramos: [[30, 230, 50, 50], [230, 1000, 57, 57]] },
+  { id: 'cispr_g1a_grande', nombre: 'Grupo 1 clase A (> 20 kVA)', tramos: [[30, 1000, 60, 60]] },
+  { id: 'cispr_g1b', nombre: 'Grupo 1 clase B', tramos: [[30, 230, 40, 40], [230, 1000, 47, 47]] },
+  { id: 'cispr_g2a', nombre: 'Grupo 2 clase A', tramos: [[30, 47, 78, 78], [47, 68, 60, 60], [68, 80.872, 73, 73], [80.872, 81.848, 88, 88], [81.848, 87, 73, 73], [87, 134.786, 70, 70], [134.786, 136.414, 80, 80], [136.414, 156, 70, 70], [156, 174, 84, 84], [174, 188.7, 60, 60], [188.7, 190.979, 70, 70], [190.979, 230, 60, 60], [230, 400, 70, 70], [400, 470, 73, 73], [470, 1000, 70, 70]] },
+  { id: 'cispr_g2b', nombre: 'Grupo 2 clase B', tramos: [[30, 80.872, 40, 40], [80.872, 81.848, 60, 60], [81.848, 134.786, 40, 40], [134.786, 136.414, 60, 60], [136.414, 230, 40, 40], [230, 1000, 47, 47]] },
+  { id: 'cispr_edm', nombre: 'Clase A, electroerosión y soldadura', tramos: [[30, 230, 90, 70], [230, 1000, 70, 70]] },
+];
+
+// Serie de una mascara: un punto por MHz en cada tramo, para que el tooltip lea el limite en cualquier frecuencia
+function serieMascara(def, color) {
+  const puntos = [];
+  for (const [a, b, n1, n2] of def.tramos) {
+    const pasos = Math.max(1, Math.ceil(b - a));
+    for (let i = 0; i <= pasos; i++) {
+      const f = a + (b - a) * i / pasos;
+      puntos.push({ x: f, y: n1 + (n2 - n1) * Math.log10(f / a) / Math.log10(b / a) });
+    }
+  }
+  return { name: 'CISPR 11 ' + def.nombre, color, dash: true, width: 1.6, points: puntos };
+}
+
 // Serie de una linea ideal. Altura: mediana de las lineas vistas (10 dB sobre el piso) en vertical, 1 m, mesa 0
 function serieIdeal(def, color, porId) {
   const p = PEINES[def.peine];
@@ -661,6 +687,8 @@ function dibujarEspectro() {
   const series = elegidas.map((id) => {
     const ideal = IDEALES.find((d) => d.id === id);
     if (ideal) return serieIdeal(ideal, colorDe.get(id), porId);
+    const mascara = MASCARAS.find((d) => d.id === id);
+    if (mascara) return serieMascara(mascara, colorDe.get(id));
     return {
       name: corto(meds.find((m) => m.id === id)), color: colorDe.get(id), width: 1.4,
       points: (porId.get(id) || []).map((r) => ({ x: Number(r.f_mhz), y: Number(r.dbuv_m) })).sort((a, b) => a.x - b.x),
