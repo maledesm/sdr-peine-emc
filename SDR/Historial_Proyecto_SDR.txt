@@ -2315,6 +2315,24 @@ EXP-27 / diseno 20-10-2026 / xA9: peine cada 10 MHz calibrado hacia la mascara  
   EXP27_ventana_linea_fija.png y EXP27_ventana_sin_placa.png (las trazas
   del grafico irradiado son las del 13-10 corridas 36 dB, solo de prueba).
 
+PROCEDIMIENTO / 20-10-2026 / RE-TP-001 version 2.1 (TP1, OE1)
+  Archivo: TPs\TP1_OE1_Procedimiento_RE\main.tex (compila, 20 paginas).
+  Adaptado al esquema del EXP-27, punto por punto aprobado por el usuario:
+   - CISPR 11 grupo 1 clase A (hasta 20 kVA): a 3 m, 50 y 57 dBuV/m. Las
+     tablas por linea del 13-10 quedan de 26 a 39 dB sobre el limite.
+   - Tres pasos: calibracion conducida hacia un objetivo por linea (sin
+     nivel plano), calibracion irradiada con el boton del software y
+     pasada de verificacion obligatoria, y perfil de referencia por cable
+     el mismo dia. La verificacion de rutina empieza recalibrando por cable
+     hacia el perfil. Es relativa al dia de referencia.
+   - tinySA y cable siempre los mismos, sin atenuador, con tope de 55 dB de
+     ganancia de TX. Separacion de la portadora (6,25 o 10 MHz) anotada.
+   - Sin silencio obligatorio: 7 s por linea y 0,5 s de corte, pasada de
+     12 min, seis trazas en unos 72 min. Plan de la visita para 3 h.
+   - Planilla con filas nuevas (mascara, separacion, tiempo por linea,
+     tinySA y perfil) e incertidumbre con una propuesta sobre continuidad.
+  A pedido del usuario, todo el texto pasa a listas y tablas, sin prosa.
+
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
   investigar la calibracion de la xA9, porque leyo que las "portadoras
