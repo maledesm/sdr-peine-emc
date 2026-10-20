@@ -1,0 +1,2216 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: 'SIMULACION, sin la SDR: el tono va a un Null Sink. bladeRF 2.0 micro
+      xA9: 96 lineas cada 10 MHz de 50 a 1000 MHz, un tono por portadora, con la portadora
+      6,25 o 10 MHz por encima de la linea y 40 MSPS. Calibracion conducida con la
+      tinySA hacia un objetivo por linea, calibracion irradiada desde las trazas del
+      receptor hacia la mascara de CISPR 11 y perfil de referencia. Usa sus propios
+      archivos, con el prefijo simulacion_'
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: exp27_a9_peine_10MHz_sin_placa
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: 'EXP-27 SIN PLACA: simulacion del peine cada 10 MHz (no transmite nada)'
+    window_size: (4200,3600)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 16
+    rotation: 0
+    state: enabled
+blocks:
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: 'Tasa de muestreo. Con 40 MSPS la imagen del
+
+      muestreo cae 40 MHz arriba de la linea'
+    value: 40e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 16
+    rotation: 0
+    state: enabled
+- name: ancho_banda
+  id: variable
+  parameters:
+    comment: Filtro analogico de la placa
+    value: 0.9 * samp_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 16
+    rotation: 0
+    state: enabled
+- name: f_primera
+  id: variable
+  parameters:
+    comment: Primera linea del peine
+    value: 50e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 16
+    rotation: 0
+    state: enabled
+- name: paso_lineas
+  id: variable
+  parameters:
+    comment: Separacion entre lineas
+    value: 10e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 16
+    rotation: 0
+    state: enabled
+- name: n_lineas
+  id: variable
+  parameters:
+    comment: 'Cantidad de lineas: 96, de 50 a 1000 MHz'
+    value: '96'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1616
+    - 16
+    rotation: 0
+    state: enabled
+- name: muestras_por_bloque
+  id: variable
+  parameters:
+    comment: 'Muestras en cada envio por USB. Con bloques
+
+      grandes anduvieron los 40 MSPS en el EXP-22'
+    value: '16384'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 16
+    rotation: 0
+    state: enabled
+- name: bloques_usb
+  id: variable
+  parameters:
+    comment: 'Bloques en espera. Con 128 x 16384 la
+
+      amplitud tarda 0,05 s en llegar a la salida'
+    value: '128'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2416
+    - 16
+    rotation: 0
+    state: enabled
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: 'import os
+
+      import math'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2816
+    - 16
+    rotation: 0
+    state: enabled
+- name: ganancia_de_lectura
+  id: variable
+  parameters:
+    comment: 'Ganancia de TX a la que esta referida la
+
+      respuesta de la placa'
+    value: '45'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 216
+    rotation: 0
+    state: enabled
+- name: amp_base
+  id: variable
+  parameters:
+    comment: Amplitud del tono sin compensar
+    value: '0.25'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 216
+    rotation: 0
+    state: enabled
+- name: amp_max
+  id: variable
+  parameters:
+    comment: Amplitud maxima del tono. No debe llegar a 1
+    value: '0.95'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 216
+    rotation: 0
+    state: enabled
+- name: prefijo
+  id: variable
+  parameters:
+    comment: 'Los archivos de la simulacion empiezan con
+
+      esto, para no pisar los de la placa'
+    value: '''simulacion_'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 216
+    rotation: 0
+    state: enabled
+- name: texto_salida
+  id: variable
+  parameters:
+    comment: Se muestra en la ventana
+    value: '''SIN PLACA (simulacion)'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 326
+    rotation: 0
+    state: enabled
+- name: archivo_cal
+  id: variable
+  parameters:
+    comment: 'Archivo de la calibracion conducida, en la
+
+      carpeta del flujo'
+    value: prefijo + 'calibracion_conducida.txt'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1616
+    - 216
+    rotation: 0
+    state: enabled
+- name: archivo_obj
+  id: variable
+  parameters:
+    comment: 'Archivo del objetivo actual. Se carga solo
+
+      al abrir el programa'
+    value: prefijo + 'objetivo.txt'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 216
+    rotation: 0
+    state: enabled
+- name: archivo_irr
+  id: variable
+  parameters:
+    comment: 'Lo medido en la ultima calibracion
+
+      irradiada. Se carga solo al abrir'
+    value: prefijo + 'ultima_irradiada.txt'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2416
+    - 216
+    rotation: 0
+    state: enabled
+- name: objetivo
+  id: variable
+  parameters:
+    comment: 'Nivel por cable que tiene que tener cada
+
+      linea, en dBm. Lo cargan los botones'
+    value: '[-35.0] * n_lineas'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2816
+    - 216
+    rotation: 0
+    state: enabled
+- name: estado_cal
+  id: variable
+  parameters:
+    comment: 'Texto sobre la calibracion conducida. Lo
+
+      cambian los botones'
+    value: '''hay una guardada, sin importar'' if os.path.exists(archivo_cal) else
+      ''todavia no hay ninguna guardada'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 476
+    rotation: 0
+    state: enabled
+- name: estado_obj
+  id: variable
+  parameters:
+    comment: 'Texto sobre el objetivo. Lo cambian los
+
+      botones'
+    value: '''no hay objetivo guardado: todas las lineas en -35 dBm'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 476
+    rotation: 0
+    state: enabled
+- name: estado_irr
+  id: variable
+  parameters:
+    comment: Texto sobre la ultima calibracion irradiada
+    value: '''todavia no hay ninguna'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 476
+    rotation: 0
+    state: enabled
+- name: medido_irradiado
+  id: variable
+  parameters:
+    comment: 'Mayor nivel de las trazas en cada linea en la
+
+      ultima calibracion irradiada, en dBuV/m'
+    value: '[0.0] * n_lineas'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 476
+    rotation: 0
+    state: enabled
+- name: separacion_cal
+  id: variable
+  parameters:
+    comment: 'Separacion de la portadora con que se hizo la
+
+      calibracion conducida cargada. 0 es que no
+
+      se sabe. La ponen los botones'
+    value: '0.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1616
+    - 476
+    rotation: 0
+    state: enabled
+- name: pausa
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    gui_hint: 1,0,1,4
+    label: 'PAUSA: la salida queda en silencio. Destildar para transmitir'
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 676
+    rotation: 0
+    state: enabled
+- name: congelar
+  id: variable_qtgui_check_box
+  parameters:
+    comment: 'Detiene el barrido en la linea que esta
+
+      saliendo y la deja emitiendo. Al destildar,
+
+      el barrido sigue desde ahi'
+    gui_hint: 1,4,1,4
+    label: CONGELAR en la linea actual (sigue emitiendo)
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 676
+    rotation: 0
+    state: enabled
+- name: silencio
+  id: variable_qtgui_check_box
+  parameters:
+    comment: 'Tildada: despues de cada linea encendida
+
+      viene el mismo tiempo apagada'
+    gui_hint: 1,8,1,4
+    label: 'Silencio largo: cada linea queda apagada otro tanto'
+    type: int
+    'true': '1'
+    'false': '0'
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 676
+    rotation: 0
+    state: enabled
+- name: ganancia
+  id: variable_qtgui_range
+  parameters:
+    comment: 'Tope de 55 dB: la tinySA va sin atenuador
+
+      y aguanta +6 dBm'
+    gui_hint: 2,0,1,3
+    label: Ganancia de TX (dB)
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '1'
+    stop: '55'
+    value: '31'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 676
+    rotation: 0
+    state: enabled
+- name: separacion
+  id: variable_qtgui_chooser
+  parameters:
+    comment: MHz entre la linea y la portadora
+    gui_hint: 2,3,1,3
+    label: Portadora sobre la linea
+    labels: '[''6,25 MHz'', ''10 MHz'']'
+    options: '[6.25, 10]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: real
+    value: '6.25'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1616
+    - 676
+    rotation: 0
+    state: enabled
+- name: fijo
+  id: variable_qtgui_chooser
+  parameters:
+    comment: 'Barrido completo, o una sola linea emitida
+
+      en forma continua (para orientar las antenas
+
+      o mirar sus armonicos)'
+    gui_hint: 2,6,1,3
+    label: Modo
+    labels: '[''Barrido completo''] + [''Fija en %d MHz'' % (50 + 10 * k) for k in
+      range(96)]'
+    options: '[-1] + list(range(96))'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '-1'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 676
+    rotation: 0
+    state: enabled
+- name: mascara
+  id: variable_qtgui_chooser
+  parameters:
+    comment: Limite al que lleva la calibracion irradiada
+    gui_hint: 2,9,1,3
+    label: Mascara CISPR 11
+    labels: '[''G1 clase A (50 y 57)'', ''G1 clase B (40 y 47)'']'
+    options: '[0, 1]'
+    num_opts: '0'
+    orient: Qt.QVBoxLayout
+    type: int
+    value: '0'
+    widget: combo_box
+    option0: '0'
+    label0: '0'
+    option1: '1'
+    label1: '1'
+    option2: '2'
+    label2: '2'
+    option3: '3'
+    label3: '3'
+    option4: '4'
+    label4: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2416
+    - 676
+    rotation: 0
+    state: enabled
+- name: permanencia
+  id: variable_qtgui_range
+  parameters:
+    comment: 'Tiene que superar dos barridos del receptor.
+
+      Cambiarla en PAUSA: el barrido se reacomoda'
+    gui_hint: 3,0,1,3
+    label: Segundos encendida por linea
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '1'
+    step: '0.5'
+    stop: '30'
+    value: '7'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 876
+    rotation: 0
+    state: enabled
+- name: corte
+  id: variable_qtgui_range
+  parameters:
+    comment: 'Tono apagado alrededor de cada salto, para
+
+      que el MAX HOLD no tome el salto. Minimo 0,2 s:
+
+      la amplitud tarda 0,05 s en llegar'
+    gui_hint: 3,3,1,3
+    label: Corte en cada salto (s)
+    min_len: '50'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0.2'
+    step: '0.1'
+    stop: '3'
+    value: '0.5'
+    widget: counter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 876
+    rotation: 0
+    state: enabled
+- name: lista_de_pasos
+  id: variable
+  parameters:
+    comment: 'Los pasos del barrido. pop() saca el ultimo:
+
+      0, 1, 2, ... (alcanza para mas de 27 horas)'
+    value: list(range(1000000 - 1, -1, -1))
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 876
+    rotation: 0
+    state: enabled
+- name: paso
+  id: variable_function_probe
+  parameters:
+    block_id: lista_de_pasos
+    comment: 'Cada decima de segundo saca el ultimo numero
+
+      de la lista: cuenta decimas desde el arranque'
+    function_args: ''
+    function_name: pop
+    poll_rate: '10'
+    value: '-1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 876
+    rotation: 0
+    state: enabled
+- name: decima
+  id: variable
+  parameters:
+    comment: Decimas de segundo desde el arranque
+    value: max(paso, 0)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1096
+    rotation: 0
+    state: enabled
+- name: encendido
+  id: variable
+  parameters:
+    comment: Decimas con el tono encendido en cada linea
+    value: int(round(10 * permanencia))
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 1096
+    rotation: 0
+    state: enabled
+- name: apagado
+  id: variable
+  parameters:
+    comment: 'Decimas apagado entre dos lineas: el corte,
+
+      mas el silencio largo si esta tildado'
+    value: int(round(10 * (corte + (permanencia if silencio == 1 else 0))))
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 1096
+    rotation: 0
+    state: enabled
+- name: antes
+  id: variable
+  parameters:
+    comment: 'Decimas apagado al principio de cada linea.
+
+      El resto va al final: asi el salto queda en
+
+      el medio del apagado'
+    value: apagado // 2
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 1096
+    rotation: 0
+    state: enabled
+- name: por_linea
+  id: variable
+  parameters:
+    comment: 'Decimas por linea: apagado y encendido'
+    value: encendido + apagado
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1616
+    - 1096
+    rotation: 0
+    state: enabled
+- name: ciclo
+  id: variable
+  parameters:
+    comment: Numero de linea desde el arranque
+    value: decima // por_linea
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 1096
+    rotation: 0
+    state: enabled
+- name: dentro
+  id: variable
+  parameters:
+    comment: Decimas dentro de la linea actual
+    value: decima % por_linea
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2416
+    - 1096
+    rotation: 0
+    state: enabled
+- name: en_corte
+  id: variable
+  parameters:
+    comment: 1 mientras el tono esta apagado
+    value: 0 if antes <= dentro < antes + encendido else 1
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2816
+    - 1096
+    rotation: 0
+    state: enabled
+- name: posicion
+  id: variable
+  parameters:
+    comment: Lugar dentro de la pasada, desde 0
+    value: ciclo % n_lineas
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1296
+    rotation: 0
+    state: enabled
+- name: pasada
+  id: variable
+  parameters:
+    comment: Cuantas veces se recorrio el peine
+    value: ciclo // n_lineas + 1
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 1296
+    rotation: 0
+    state: enabled
+- name: indice
+  id: variable
+  parameters:
+    comment: Linea actual, de 0 a 95
+    value: fijo if fijo >= 0 else posicion
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 1296
+    rotation: 0
+    state: enabled
+- name: linea
+  id: variable
+  parameters:
+    comment: Frecuencia de la linea actual
+    value: f_primera + paso_lineas * indice
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 1296
+    rotation: 0
+    state: enabled
+- name: f_tono
+  id: variable
+  parameters:
+    comment: 'El tono va por debajo de la portadora: asi
+
+      la linea de 50 MHz no obliga a sintonizar
+
+      por debajo de 47 MHz'
+    value: -separacion * 1e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1616
+    - 1296
+    rotation: 0
+    state: enabled
+- name: freq
+  id: variable
+  parameters:
+    comment: Frecuencia de la portadora
+    value: linea - f_tono
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 1296
+    rotation: 0
+    state: enabled
+- name: emite
+  id: variable
+  parameters:
+    comment: 1 cuando el tono esta encendido
+    value: 1 if (pausa == 0 and paso >= 0 and (fijo >= 0 or congelar == 1 or en_corte
+      == 0)) else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2416
+    - 1296
+    rotation: 0
+    state: enabled
+- name: medidos
+  id: variable
+  parameters:
+    comment: 'Lo que entrega la placa en cada linea con la
+
+      amplitud base y la ganancia de lectura, en
+
+      dBm. 0 es sin dato. Lo cargan los botones'
+    value: '[0.0] * n_lineas'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1516
+    rotation: 0
+    state: enabled
+- name: pedido
+  id: variable
+  parameters:
+    comment: 'Cuanto hay que subir (o bajar) la amplitud de
+
+      cada linea, en dB, para llegar a su objetivo.
+
+      Sin dato, sale con la amplitud base'
+    value: '[((objetivo[k] - (medidos[k] + ganancia - ganancia_de_lectura)) if medidos[k]
+      != 0 else 0.0) for k in range(n_lineas)]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 1516
+    rotation: 0
+    state: enabled
+- name: amp_tabla
+  id: variable
+  parameters:
+    comment: 'Amplitud del tono para cada linea, con tope
+
+      en amp_max'
+    value: '[min(amp_base * 10 ** (db / 20.0), amp_max) for db in pedido]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 1516
+    rotation: 0
+    state: enabled
+- name: sin_margen
+  id: variable
+  parameters:
+    comment: Lineas que piden mas amplitud de la que hay
+    value: sum(1 for db in pedido if amp_base * 10 ** (db / 20.0) > amp_max)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 1516
+    rotation: 0
+    state: enabled
+- name: cargadas
+  id: variable
+  parameters:
+    comment: Lineas que ya tienen un valor cargado
+    value: sum(1 for leido in medidos if leido != 0)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1616
+    - 1516
+    rotation: 0
+    state: enabled
+- name: ganancia_minima
+  id: variable
+  parameters:
+    comment: 'La menor ganancia con la que ninguna linea
+
+      pide mas de amp_max. Con la base de 0,25 y el
+
+      tope de 0,95 se puede subir hasta 11,6 dB'
+    value: int(math.ceil(ganancia_de_lectura + max([objetivo[k] - medidos[k] for k
+      in range(n_lineas) if medidos[k] != 0]) - 20 * math.log10(amp_max / amp_base)))
+      if cargadas > 0 else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 1516
+    rotation: 0
+    state: enabled
+- name: nivel_sin_calibrar
+  id: variable
+  parameters:
+    comment: 'Nivel aproximado de una linea sin calibrar,
+
+      en dBm, segun la ganancia elegida'
+    value: ganancia - 68
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2416
+    - 1516
+    rotation: 0
+    state: enabled
+- name: tx_gain
+  id: variable
+  parameters:
+    comment: 'Ganancia que recibe la placa: en pausa baja
+
+      al minimo'
+    value: ganancia if pausa == 0 else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1736
+    rotation: 0
+    state: enabled
+- name: amp_tx
+  id: variable
+  parameters:
+    comment: Amplitud del tono de esta linea
+    value: amp_tabla[indice] if emite == 1 else 0
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 1736
+    rotation: 0
+    state: enabled
+- name: nivel_estimado
+  id: variable
+  parameters:
+    comment: 'Lo que deberia salir por cable en cada linea
+
+      con la ganancia y la amplitud actuales'
+    value: '[((medidos[k] + ganancia - ganancia_de_lectura) + 20 * math.log10(amp_tabla[k]
+      / amp_base)) if medidos[k] != 0 else -100 for k in range(n_lineas)]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 1736
+    rotation: 0
+    state: enabled
+- name: etapa
+  id: variable
+  parameters:
+    comment: Texto de la etapa actual
+    value: '''PAUSA (sin emitir)'' if pausa == 1 else (''INICIACION'' if paso < 0
+      else (''LINEA FIJA, emision continua'' if fijo >= 0 else (''LINEA CONGELADA,
+      emision continua'' if congelar == 1 else (''CORTE (salto de linea)'' if en_corte
+      == 1 else ''EMITIENDO''))))'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 1736
+    rotation: 0
+    state: enabled
+- name: limite_lineas
+  id: variable
+  parameters:
+    comment: 'Limite de la mascara en cada linea, en
+
+      dBuV/m. En 230 MHz vale el mas bajo'
+    value: '[((50.0 if f_primera / 1e6 + 10 * k <= 230 else 57.0) if mascara == 0
+      else (40.0 if f_primera / 1e6 + 10 * k <= 230 else 47.0)) for k in range(n_lineas)]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1616
+    - 1736
+    rotation: 0
+    state: enabled
+- name: et_etapa
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:15pt; color:" + (''#c0392b'' if
+      ''PAUSA'' in str(x) else (''#d68910'' if ''CORTE'' in str(x) else (''#2e86c1''
+      if ''LINEA'' in str(x) else (''#1e8449'' if ''EMITIENDO'' in str(x) else ''gray''))))
+      + "''><b>" + str(x) + "</b></span>"'
+    gui_hint: 0,0,1,4
+    label: '<span style=''font-size:15pt''>Etapa: </span>'
+    type: string
+    value: etapa
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 1956
+    rotation: 0
+    state: enabled
+- name: et_linea
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:15pt; color:" + (''black'') + "''><b>"
+      + str(x) + "</b></span>"'
+    gui_hint: 0,4,1,4
+    label: '<span style=''font-size:15pt''>Linea: </span>'
+    type: string
+    value: ('%.0f MHz (fija)' % (linea / 1e6)) if fijo >= 0 else '%.0f MHz (paso %d
+      de %d, pasada %d)' % (linea / 1e6, posicion + 1, n_lineas, pasada)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 1956
+    rotation: 0
+    state: enabled
+- name: et_portadora
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:15pt; color:" + (''black'') + "''><b>"
+      + str(x) + "</b></span>"'
+    gui_hint: 0,8,1,4
+    label: '<span style=''font-size:15pt''>Portadora: </span>'
+    type: string
+    value: '''%.2f MHz'' % (freq / 1e6)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 1956
+    rotation: 0
+    state: enabled
+- name: et_tiempos
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt; color:" + (''black'') + "''><b>"
+      + str(x) + "</b></span>"'
+    gui_hint: 3,6,1,6
+    label: '<span style=''font-size:11pt''>Pasada completa: </span>'
+    type: string
+    value: '''%d min %02d s (%.1f s encendida y %.1f s apagada por linea)'' % (n_lineas
+      * por_linea // 600, (n_lineas * por_linea // 10) % 60, encendido / 10.0, apagado
+      / 10.0)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 1956
+    rotation: 0
+    state: enabled
+- name: et_nivel
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt; color:" + (''black'') + "''><b>"
+      + str(x) + "</b></span>"'
+    gui_hint: 4,0,1,6
+    label: '<span style=''font-size:11pt''>Esta linea: </span>'
+    type: string
+    value: '''amplitud %.3f, sale unos %.1f dBm (objetivo %.1f dBm)'' % (amp_tabla[indice],
+      nivel_estimado[indice], objetivo[indice])'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1616
+    - 1956
+    rotation: 0
+    state: enabled
+- name: et_espurias
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt; color:" + (''black'') + "''><b>"
+      + str(x) + "</b></span>"'
+    gui_hint: 4,6,1,6
+    label: '<span style=''font-size:11pt''>Sus espurias (MHz): </span>'
+    type: string
+    value: '''fuga %.2f, imagen %.2f, 3C+S %.2f, 5C-S %.2f'' % (freq / 1e6, freq /
+      1e6 + separacion, 3 * freq / 1e6 + separacion, 5 * freq / 1e6 - separacion)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 1956
+    rotation: 0
+    state: enabled
+- name: et_cargadas
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt; color:" + (''#c0392b'' if
+      ''NO coincide'' in str(x) else ''black'') + "''><b>" + str(x) + "</b></span>"'
+    gui_hint: 5,0,1,4
+    label: '<span style=''font-size:11pt''>Conducida: </span>'
+    type: string
+    value: '(''%d/%d'' % (cargadas, n_lineas)) + (('', es de %g MHz: NO coincide''
+      % separacion_cal) if (cargadas > 0 and separacion_cal != 0 and separacion_cal
+      != separacion) else (('', de %g MHz'' % separacion_cal) if separacion_cal !=
+      0 else ''''))'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2136
+    rotation: 0
+    state: enabled
+- name: et_margen
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt; color:" + (''#c0392b'' if
+      x > 0 else ''#1e8449'') + "''><b>" + str(x) + "</b></span>"'
+    gui_hint: 5,4,1,4
+    label: '<span style=''font-size:11pt''>Lineas sin margen: </span>'
+    type: int
+    value: sin_margen
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 2136
+    rotation: 0
+    state: enabled
+- name: et_gmin
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt; color:" + (''black'') + "''><b>"
+      + str(x) + "</b></span>"'
+    gui_hint: 5,8,1,4
+    label: '<span style=''font-size:11pt''>Ganancia minima: </span>'
+    type: string
+    value: ('%d dB' % ganancia_minima) if cargadas > 0 else 'sin calibracion conducida'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 2136
+    rotation: 0
+    state: enabled
+- name: et_cal
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt; color:" + (''#c0392b'' if
+      str(x).startswith(''NO'') else ''black'') + "''><b>" + str(x) + "</b></span>"'
+    gui_hint: 8,0,1,6
+    label: '<span style=''font-size:11pt''>Calibracion conducida: </span>'
+    type: string
+    value: estado_cal
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 2136
+    rotation: 0
+    state: enabled
+- name: et_irr
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt; color:" + (''black'') + "''><b>"
+      + str(x) + "</b></span>"'
+    gui_hint: 8,6,1,6
+    label: '<span style=''font-size:11pt''>Ultima irradiada: </span>'
+    type: string
+    value: estado_irr
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1616
+    - 2136
+    rotation: 0
+    state: enabled
+- name: et_obj
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt; color:" + (''#c0392b'' if
+      str(x).startswith(''NO'') else ''black'') + "''><b>" + str(x) + "</b></span>"'
+    gui_hint: 9,0,1,8
+    label: '<span style=''font-size:11pt''>Objetivo: </span>'
+    type: string
+    value: estado_obj
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 2136
+    rotation: 0
+    state: enabled
+- name: et_salida
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: 'lambda x: "<span style=''font-size:11pt; color:" + (''#d68910'' if
+      ''SIN PLACA'' in str(x) else ''#1e8449'') + "''><b>" + str(x) + "</b></span>"'
+    gui_hint: 9,8,1,4
+    label: '<span style=''font-size:11pt''>Salida: </span>'
+    type: string
+    value: texto_salida + ', %.0f MSPS' % (samp_rate / 1e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2416
+    - 2136
+    rotation: 0
+    state: enabled
+- name: boton_conducida
+  id: variable_qtgui_push_button
+  parameters:
+    comment: 'Vale 1 mientras esta apretado. La accion
+
+      esta en el Python Snippet'
+    gui_hint: 6,0,1,4
+    label: 1. Calibracion conducida (captura .csv de la tinySA)
+    type: int
+    value: '0'
+    pressed: '1'
+    released: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2316
+    rotation: 0
+    state: enabled
+- name: boton_guardar_cal
+  id: variable_qtgui_push_button
+  parameters:
+    comment: 'Vale 1 mientras esta apretado. La accion
+
+      esta en el Python Snippet'
+    gui_hint: 6,4,1,4
+    label: Guardar calibracion
+    type: int
+    value: '0'
+    pressed: '1'
+    released: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 2316
+    rotation: 0
+    state: enabled
+- name: boton_importar_cal
+  id: variable_qtgui_push_button
+  parameters:
+    comment: 'Vale 1 mientras esta apretado. La accion
+
+      esta en el Python Snippet'
+    gui_hint: 6,8,1,4
+    label: Importar calibracion previa
+    type: int
+    value: '0'
+    pressed: '1'
+    released: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 2316
+    rotation: 0
+    state: enabled
+- name: boton_importar_obj
+  id: variable_qtgui_push_button
+  parameters:
+    comment: 'Vale 1 mientras esta apretado. La accion
+
+      esta en el Python Snippet'
+    gui_hint: 7,0,1,4
+    label: Importar objetivo o perfil de referencia
+    type: int
+    value: '0'
+    pressed: '1'
+    released: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 2316
+    rotation: 0
+    state: enabled
+- name: boton_irradiada
+  id: variable_qtgui_push_button
+  parameters:
+    comment: 'Vale 1 mientras esta apretado. La accion
+
+      esta en el Python Snippet'
+    gui_hint: 7,4,1,4
+    label: 2. Calibracion irradiada (trazas .DAT del receptor)
+    type: int
+    value: '0'
+    pressed: '1'
+    released: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1616
+    - 2316
+    rotation: 0
+    state: enabled
+- name: boton_referencia
+  id: variable_qtgui_push_button
+  parameters:
+    comment: 'Vale 1 mientras esta apretado. La accion
+
+      esta en el Python Snippet'
+    gui_hint: 7,8,1,4
+    label: 3. Guardar perfil de referencia (captura .csv)
+    type: int
+    value: '0'
+    pressed: '1'
+    released: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 2016
+    - 2316
+    rotation: 0
+    state: enabled
+- name: tono
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Un solo tono, ''separacion'' MHz por debajo de
+
+      la portadora'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    amp: amp_tx
+    freq: f_tono
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2516
+    rotation: 0
+    state: enabled
+- name: ritmo_simulacion
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Sin la placa, esto marca el ritmo de las
+
+      muestras (1 MSPS alcanza: no van a ningun lado)'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: auto
+    maximum: '0.1'
+    samples_per_second: 1e6
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 2516
+    rotation: 0
+    state: enabled
+- name: salida_nula
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: 'SIN PLACA: las muestras se tiran aca. No se
+
+      abre ni se usa ningun dispositivo'
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 2516
+    rotation: 0
+    state: enabled
+- name: curva_actual
+  id: variable
+  parameters:
+    comment: Marca la linea que sale ahora
+    value: '[(objetivo[k] if (k == indice and emite == 1) else -100) for k in range(n_lineas)]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2846
+    rotation: 0
+    state: enabled
+- name: nivel_respuesta
+  id: variable
+  parameters:
+    comment: 'Lo que saldria en cada linea con la amplitud
+
+      base, sin compensar, con la ganancia actual'
+    value: '[(medidos[k] + ganancia - ganancia_de_lectura) if medidos[k] != 0 else
+      -100 for k in range(n_lineas)]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 2976
+    rotation: 0
+    state: enabled
+- name: curva_irradiada
+  id: variable
+  parameters:
+    comment: 'Lo medido en la ultima irradiada, para el
+
+      grafico (sin dato queda abajo)'
+    value: '[(v if v != 0 else -100) for v in medido_irradiado]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 3106
+    rotation: 0
+    state: enabled
+- name: datos_obj
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: objetivo
+    vlen: '96'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 2806
+    rotation: 0
+    state: enabled
+- name: datos_est
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: nivel_estimado
+    vlen: '96'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 2936
+    rotation: 0
+    state: enabled
+- name: datos_actual
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: curva_actual
+    vlen: '96'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 3066
+    rotation: 0
+    state: enabled
+- name: datos_resp
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: nivel_respuesta
+    vlen: '96'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 3196
+    rotation: 0
+    state: enabled
+- name: ritmo_grafico
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Solo marca el ritmo del grafico
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: time
+    maximum: '0.01'
+    samples_per_second: '2000'
+    type: float
+    vlen: '96'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 2806
+    rotation: 0
+    state: enabled
+- name: grafico
+  id: qtgui_vector_sink_f
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Nivel por cable de cada linea (dBm)"'
+    vlen: '96'
+    x_start: f_primera / 1e6
+    x_step: paso_lineas / 1e6
+    x_axis_label: '"Frecuencia de la linea"'
+    y_axis_label: '"Nivel"'
+    x_units: '"MHz"'
+    y_units: '"dBm"'
+    ref_level: '0'
+    grid: 'True'
+    autoscale: 'False'
+    average: '1.0'
+    ymin: '-60'
+    ymax: '-10'
+    nconnections: '4'
+    update_time: '0.10'
+    showports: 'False'
+    gui_hint: 10,0,2,12
+    legend: 'True'
+    label1: '"Objetivo"'
+    width1: '3'
+    color1: '"blue"'
+    alpha1: '1.0'
+    label2: '"Lo que sale (estimado)"'
+    width2: '2'
+    color2: '"green"'
+    alpha2: '1.0'
+    label3: '"Linea que sale ahora"'
+    label4: '"Respuesta de la placa, sin compensar"'
+    width3: '4'
+    width4: '2'
+    color3: '"red"'
+    color4: '"black"'
+    alpha3: '1.0'
+    alpha4: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 2806
+    rotation: 0
+    state: enabled
+- name: datos_mascara
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: limite_lineas
+    vlen: '96'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 3366
+    rotation: 0
+    state: enabled
+- name: datos_irr
+  id: blocks_vector_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    repeat: 'True'
+    tags: '[]'
+    type: float
+    vector: curva_irradiada
+    vlen: '96'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 416
+    - 3496
+    rotation: 0
+    state: enabled
+- name: ritmo_grafico_2
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: Solo marca el ritmo del grafico
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ignoretag: 'True'
+    limit: time
+    maximum: '0.01'
+    samples_per_second: '2000'
+    type: float
+    vlen: '96'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 816
+    - 3366
+    rotation: 0
+    state: enabled
+- name: grafico_irradiado
+  id: qtgui_vector_sink_f
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Campo en la camara, ultima calibracion irradiada (dBuV/m)"'
+    vlen: '96'
+    x_start: f_primera / 1e6
+    x_step: paso_lineas / 1e6
+    x_axis_label: '"Frecuencia de la linea"'
+    y_axis_label: '"Campo"'
+    x_units: '"MHz"'
+    y_units: '"dBuV/m"'
+    ref_level: '0'
+    grid: 'True'
+    autoscale: 'False'
+    average: '1.0'
+    ymin: '20'
+    ymax: '80'
+    nconnections: '2'
+    update_time: '0.10'
+    showports: 'False'
+    gui_hint: 12,0,2,12
+    legend: 'True'
+    label1: '"Mascara de CISPR 11"'
+    width1: '3'
+    color1: '"red"'
+    alpha1: '1.0'
+    label2: '"Medido (mayor de las alturas)"'
+    width2: '3'
+    color2: '"blue"'
+    alpha2: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 1216
+    - 3366
+    rotation: 0
+    state: enabled
+- name: archivos_de_calibracion
+  id: snippet
+  parameters:
+    alias: ''
+    comment: 'Calibracion conducida, irradiada y perfil de
+
+      referencia: lee y escribe los archivos.
+
+      Tambien pone la letra y los colores'
+    priority: '0'
+    section: main_after_init
+    code: "# ============================================================================\n\
+      # ARCHIVOS DE CALIBRACION Y DE OBJETIVO\n# Es el unico codigo Python del flujo.\
+      \ Hace falta porque los bloques no saben\n# leer ni escribir archivos.\n#  \
+      \ 1. \"Calibracion conducida\": pide la captura (.csv) de la tinySA con el\n\
+      #      peine tal como esta saliendo, busca el pico de cada linea y calcula\n\
+      #      cuanto entrega la placa en cada una. Sirve sin calibrar o ya\n#     \
+      \ calibrado: se puede repetir para afinar.\n#   \"Guardar calibracion\" e \"\
+      Importar calibracion\": escriben y leen esos 96\n#      valores en un archivo\
+      \ de texto.\n#   \"Importar objetivo\": lee un archivo con el nivel por cable\
+      \ que tiene que\n#      tener cada linea (el objetivo inicial o un perfil de\
+      \ referencia).\n#   2. \"Calibracion irradiada\": pide las trazas (.DAT) del\
+      \ receptor, toma en\n#      cada linea el mayor nivel de todas y corrige el\
+      \ objetivo con lo que le\n#      falta o le sobra para llegar al limite de la\
+      \ mascara.\n#   3. \"Guardar perfil de referencia\": pide una captura (.csv)\
+      \ del peine ya\n#      calibrado y guarda el nivel de cada linea como un archivo\
+      \ de objetivo.\n# ============================================================================\n\
+      import math\nimport os\nimport time\n\nPRIMERA_LINEA = 50        # MHz\nSEPARACION\
+      \ = 10           # MHz entre una linea y la siguiente\nCANTIDAD = 96       \
+      \      # lineas, de 50 a 1000 MHz\nCERCA_TINYSA = 3          # MHz: hasta que\
+      \ distancia de una linea se busca su pico en la tinySA\nCERCA_RECEPTOR = 1 \
+      \       # MHz: lo mismo en las trazas del receptor\nMAXIMA_CORRECCION = 10 \
+      \   # dB: una correccion mas grande que esto no se aplica\n\n\ndef frecuencia_de_linea(k):\n\
+      \    return PRIMERA_LINEA + SEPARACION * k\n\n\ndef limite_de_la_mascara(frecuencia):\n\
+      \    # CISPR 11:2024 a 3 m en camara semianecoica, cuasi-pico, en dBuV/m.\n\
+      \    # En 230 MHz justo vale el limite mas bajo.\n    if self.get_mascara()\
+      \ == 0:              # grupo 1 clase A\n        if frecuencia <= 230:\n    \
+      \        return 50.0\n        return 57.0\n    else:                       \
+      \              # grupo 1 clase B\n        if frecuencia <= 230:\n          \
+      \  return 40.0\n        return 47.0\n\n\n# ----------------------------------------------------------------\
+      \ lectura de archivos\n\ndef leer_captura(nombre):\n    # Lee una captura de\
+      \ la tinySA (.csv) o una traza del receptor (.DAT): un\n    # renglon por punto,\
+      \ con la frecuencia y el nivel separados por coma o por\n    # punto y coma.\
+      \ Devuelve dos listas: MHz y nivel (dBm o dBuV/m).\n    # errors='ignore' saltea\
+      \ letras raras, como la u de dBuV/m del receptor.\n    frecuencias = []\n  \
+      \  niveles = []\n    archivo = open(nombre, errors='ignore')\n    for renglon\
+      \ in archivo:\n        partes = renglon.replace(';', ',').split(',')\n     \
+      \   try:\n            frecuencia = float(partes[0])\n            nivel = float(partes[1])\n\
+      \        except Exception:\n            continue                           \
+      \  # renglon de titulo o vacio: se saltea\n        if frecuencia > 100000:\n\
+      \            frecuencia = frecuencia / 1e6        # estaba en Hz: se pasa a\
+      \ MHz\n        frecuencias.append(frecuencia)\n        niveles.append(nivel)\n\
+      \    archivo.close()\n    return frecuencias, niveles\n\n\ndef leer_varias(nombres):\n\
+      \    # Lee varias capturas. Devuelve la lista de capturas, o None si alguna\
+      \ falla\n    capturas = []\n    for nombre in nombres:\n        try:\n     \
+      \       frecuencias, niveles = leer_captura(nombre)\n        except Exception:\n\
+      \            frecuencias = []\n        if len(frecuencias) == 0:\n         \
+      \   return None\n        capturas.append([frecuencias, niveles])\n    return\
+      \ capturas\n\n\ndef pico_de_la_linea(frecuencias, niveles, linea, cerca):\n\
+      \    # Devuelve el nivel mas alto que hay en la captura a menos de 'cerca' MHz\
+      \ de\n    # la linea. Si la captura no llega hasta esa frecuencia, devuelve\
+      \ None.\n    if linea < min(frecuencias) or linea > max(frecuencias):\n    \
+      \    return None\n    pico = None\n    for j in range(len(frecuencias)):\n \
+      \       if abs(frecuencias[j] - linea) <= cerca:\n            if pico is None\
+      \ or niveles[j] > pico:\n                pico = niveles[j]\n    return pico\n\
+      \n\ndef leer_archivo_de_valores(nombre):\n    # Lee un archivo con un renglon\
+      \ por linea: frecuencia y valor. Los renglones\n    # que empiezan con # son\
+      \ comentarios. Devuelve los 96 valores.\n    archivo = open(nombre)\n    valores\
+      \ = []\n    for renglon in archivo:\n        if renglon.startswith('#') or renglon.strip()\
+      \ == '':\n            continue\n        partes = renglon.split()\n        valores.append(float(partes[1]))\n\
+      \    archivo.close()\n    if len(valores) != CANTIDAD:\n        raise ValueError('el\
+      \ archivo no tiene 96 valores')\n    return valores\n\n\ndef portadora_del_encabezado(nombre):\n\
+      \    # Busca en el primer renglon del archivo la palabra 'portadora' y devuelve\n\
+      \    # el numero que le sigue (MHz entre la linea y la portadora). Si no esta,\n\
+      \    # devuelve 0: no se sabe con cual separacion se hizo.\n    archivo = open(nombre)\n\
+      \    primero = archivo.readline()\n    archivo.close()\n    partes = primero.replace(',',\
+      \ ' ').split()\n    for i in range(len(partes) - 1):\n        if partes[i] ==\
+      \ 'portadora':\n            try:\n                return float(partes[i + 1])\n\
+      \            except Exception:\n                return 0.0\n    return 0.0\n\
+      \n\ndef escribir_archivo_de_valores(nombre, encabezado, valores):\n    archivo\
+      \ = open(nombre, 'w')\n    archivo.write('# ' + encabezado + '\\n')\n    for\
+      \ k in range(CANTIDAD):\n        archivo.write('%d %.1f\\n' % (frecuencia_de_linea(k),\
+      \ valores[k]))\n    archivo.close()\n\n\n# ----------------------------------------------------------------\
+      \ calibracion conducida\n\ndef guardar_calibracion():\n    try:\n        # Se\
+      \ anota con que separacion de la portadora se hizo: la respuesta de la\n   \
+      \     # placa cambia un poco de una a otra\n        escribir_archivo_de_valores(self.get_archivo_cal(),\n\
+      \                                    'guardada el ' + time.strftime('%d-%m-%Y\
+      \ %H:%M') +\n                                    ', valores leidos con ganancia\
+      \ %d dB' % self.get_ganancia_de_lectura() +\n                              \
+      \      ', portadora %g MHz sobre la linea' % self.get_separacion_cal(),\n  \
+      \                                  self.get_medidos())\n    except Exception:\n\
+      \        self.set_estado_cal('NO se pudo guardar')\n        return False\n \
+      \   self.set_estado_cal('guardada a las ' + time.strftime('%H:%M:%S'))\n   \
+      \ return True\n\n\ndef importar_calibracion():\n    if not os.path.exists(self.get_archivo_cal()):\n\
+      \        self.set_estado_cal('no hay ninguna calibracion guardada')\n      \
+      \  return\n    try:\n        valores = leer_archivo_de_valores(self.get_archivo_cal())\n\
+      \    except Exception:\n        self.set_estado_cal('el archivo no se pudo leer:\
+      \ no se importo nada')\n        return\n    self.set_medidos(valores)      \
+      \              # al cambiar medidos, el flujo se actualiza solo\n    self.set_separacion_cal(portadora_del_encabezado(self.get_archivo_cal()))\n\
+      \    self.set_estado_cal('importada a las ' + time.strftime('%H:%M:%S'))\n\n\
+      \ndef generar_conducida():\n    # La captura tiene que ser del peine tal como\
+      \ esta saliendo ahora: sin\n    # calibrar (la primera vez) o con la calibracion\
+      \ que esta cargada. El\n    # programa sabe con que amplitud y que ganancia\
+      \ salio cada linea, y con eso\n    # saca cuanto entrega la placa. No cambiar\
+      \ la ganancia ni el objetivo entre\n    # la captura y el boton.\n    elegido\
+      \ = Qt.QFileDialog.getOpenFileNames(self, 'Elegir la captura de la tinySA con\
+      \ el peine tal como esta saliendo',\n                                      \
+      \        '', 'Capturas de la tinySA (*.csv)')\n    nombres = elegido[0]\n  \
+      \  if len(nombres) == 0:\n        return                                   #\
+      \ se cerro la ventana sin elegir nada\n    capturas = leer_varias(nombres)\n\
+      \    if capturas is None:\n        self.set_estado_cal('NO se genero: no se\
+      \ pudo leer alguna de las capturas')\n        return\n\n    ganancia = self.get_ganancia()\
+      \               # ganancia de TX elegida en la ventana\n    amplitudes = self.get_amp_tabla()\
+      \            # con que amplitud salio cada linea\n    anteriores = self.get_medidos()\
+      \              # lo que habia cargado (0 = sin dato)\n    estimados = self.get_nivel_estimado()\
+      \        # lo que se esperaba leer en cada linea\n    valores = []         \
+      \                        # un valor por linea, o None si no hay dato\n    for\
+      \ k in range(CANTIDAD):\n        if anteriores[k] != 0:\n            esperado\
+      \ = estimados[k]\n        else:\n            esperado = self.get_nivel_sin_calibrar()\n\
+      \        leidos = []\n        for captura in capturas:\n            pico = pico_de_la_linea(captura[0],\
+      \ captura[1], frecuencia_de_linea(k), CERCA_TINYSA)\n            if pico is\
+      \ not None:\n                leidos.append(pico)\n        if len(leidos) ==\
+      \ 0:\n            valores.append(None)                 # ninguna captura llega\
+      \ hasta esta linea\n            continue\n        # Con varias capturas se usa\
+      \ el valor mas bajo: MAX HOLD a veces retiene\n        # un pico momentaneo,\
+      \ y es raro que caiga dos veces en la misma linea\n        valor = min(leidos)\n\
+      \        # Control: si el valor esta lejos de lo esperado, la captura no sirve\n\
+      \        if valor > esperado + 6 or valor < esperado - 10:\n            self.set_estado_cal('NO\
+      \ se genero: en %d MHz se leyo %.1f dBm y se esperaba cerca de %.1f dBm'\n \
+      \                               % (frecuencia_de_linea(k), valor, esperado))\n\
+      \            return\n        # Lo que entrega la placa con la amplitud base\
+      \ y la ganancia de lectura\n        # (45 dB): a lo leido se le descuenta cuanto\
+      \ se subio la amplitud de esa\n        # linea y cuanto de mas tiene la ganancia\
+      \ usada\n        subida = 20 * math.log10(amplitudes[k] / self.get_amp_base())\n\
+      \        de_mas = ganancia - self.get_ganancia_de_lectura()\n        valores.append(round(valor\
+      \ - subida - de_mas, 1))\n\n    # Las lineas que la captura no alcanza se quedan\
+      \ con lo que tenian\n    nuevos = list(anteriores)\n    cuantas = 0\n    for\
+      \ k in range(CANTIDAD):\n        if valores[k] is not None:\n            nuevos[k]\
+      \ = valores[k]\n            cuantas = cuantas + 1\n    if cuantas == 0:\n  \
+      \      self.set_estado_cal('NO se genero: la captura no llega a ninguna linea\
+      \ del peine')\n        return\n    self.set_medidos(nuevos)\n    self.set_separacion_cal(self.get_separacion())\
+      \   # la calibracion vale para la separacion actual\n    if guardar_calibracion():\n\
+      \        self.set_estado_cal('generada a las %s con %d captura(s): %d lineas,\
+      \ leidas con ganancia %d dB'\n                            % (time.strftime('%H:%M:%S'),\
+      \ len(capturas), cuantas, ganancia))\n\n\n# ----------------------------------------------------------------\
+      \ objetivo\n\ndef cargar_objetivo(nombre):\n    valores = leer_archivo_de_valores(nombre)\n\
+      \    self.set_objetivo(valores)\n    return valores\n\n\ndef importar_objetivo():\n\
+      \    elegido = Qt.QFileDialog.getOpenFileName(self, 'Elegir el archivo de objetivo\
+      \ o un perfil de referencia',\n                                            \
+      \ '', 'Objetivos y perfiles (*.txt)')\n    nombre = elegido[0]\n    if nombre\
+      \ == '':\n        return\n    try:\n        valores = cargar_objetivo(nombre)\n\
+      \    except Exception:\n        self.set_estado_obj('NO se importo: el archivo\
+      \ no tiene 96 lineas con su valor')\n        return\n    # Un perfil de referencia\
+      \ se hizo con una separacion de la portadora: se\n    # avisa si la ventana\
+      \ tiene la otra, porque los armonicos irradiados cambian\n    portadora = portadora_del_encabezado(nombre)\n\
+      \    aviso = ''\n    if portadora != 0 and portadora != self.get_separacion():\n\
+      \        aviso = ' (OJO: es de la portadora a %g MHz y la ventana tiene %g MHz)'\
+      \ % (portadora, self.get_separacion())\n    # Se copia como objetivo actual,\
+      \ para que quede al volver a abrir el programa\n    if os.path.abspath(nombre)\
+      \ != os.path.abspath(self.get_archivo_obj()):\n        encabezado = 'copiado\
+      \ de ' + os.path.basename(nombre) + ' el ' + time.strftime('%d-%m-%Y %H:%M')\n\
+      \        if portadora != 0:\n            encabezado = encabezado + ', portadora\
+      \ %g MHz sobre la linea' % portadora\n        escribir_archivo_de_valores(self.get_archivo_obj(),\
+      \ encabezado, valores)\n    self.set_estado_obj('importado de ' + os.path.basename(nombre)\
+      \ + ' a las ' + time.strftime('%H:%M:%S') + aviso)\n\n\ndef calibracion_irradiada():\n\
+      \    # Las trazas tienen que ser del peine saliendo con el objetivo actual:\
+      \ todas\n    # las lineas calibradas por cable y ninguna sin margen\n    if\
+      \ self.get_cargadas() < CANTIDAD or self.get_sin_margen() > 0:\n        self.set_estado_obj('NO\
+      \ se corrigio: hace falta la calibracion conducida de las 96 lineas '\n    \
+      \                        'y que ninguna se quede sin margen (subir la ganancia)')\n\
+      \        return\n    # y la calibracion conducida tiene que ser de la misma\
+      \ separacion que la ventana\n    if self.get_separacion_cal() != 0 and self.get_separacion_cal()\
+      \ != self.get_separacion():\n        self.set_estado_obj('NO se corrigio: la\
+      \ calibracion conducida es de la portadora a %g MHz '\n                    \
+      \        'y la ventana tiene %g MHz' % (self.get_separacion_cal(), self.get_separacion()))\n\
+      \        return\n    elegido = Qt.QFileDialog.getOpenFileNames(self, 'Elegir\
+      \ las trazas del receptor (una por altura)',\n                             \
+      \                 '', 'Trazas del receptor (*.DAT *.dat)')\n    nombres = elegido[0]\n\
+      \    if len(nombres) == 0:\n        return\n    trazas = leer_varias(nombres)\n\
+      \    if trazas is None:\n        self.set_estado_obj('NO se corrigio: no se\
+      \ pudo leer alguna de las trazas')\n        return\n\n    objetivo = list(self.get_objetivo())\n\
+      \    correcciones = []\n    sin_corregir = 0\n    medido = []              \
+      \                    # para el grafico: 0 si no hay dato\n    for k in range(CANTIDAD):\n\
+      \        frecuencia = frecuencia_de_linea(k)\n        # el mayor nivel de la\
+      \ linea entre todas las trazas (las tres alturas)\n        mayor = None\n  \
+      \      for traza in trazas:\n            pico = pico_de_la_linea(traza[0], traza[1],\
+      \ frecuencia, CERCA_RECEPTOR)\n            if pico is not None and (mayor is\
+      \ None or pico > mayor):\n                mayor = pico\n        if mayor is\
+      \ None:\n            medido.append(0.0)\n            sin_corregir = sin_corregir\
+      \ + 1      # las trazas no llegan a esta linea\n            continue\n     \
+      \   medido.append(round(mayor, 1))\n        diferencia = limite_de_la_mascara(frecuencia)\
+      \ - mayor\n        if abs(diferencia) > MAXIMA_CORRECCION:\n            sin_corregir\
+      \ = sin_corregir + 1      # demasiado lejos: algo no anduvo\n            continue\n\
+      \        objetivo[k] = round(objetivo[k] + diferencia, 1)\n        correcciones.append(diferencia)\n\
+      \n    # Lo medido queda en el grafico y en un archivo, aunque no se corrija\
+      \ nada\n    self.set_medido_irradiado(medido)\n    texto = time.strftime('%d-%m-%Y\
+      \ %H:%M') + ', %d traza(s)' % len(nombres)\n    encabezado = texto + ': '\n\
+      \    for nombre in nombres:\n        encabezado = encabezado + os.path.basename(nombre)\
+      \ + ' '\n    escribir_archivo_de_valores(self.get_archivo_irr(), encabezado,\
+      \ medido)\n    self.set_estado_irr(texto)\n\n    if len(correcciones) == 0:\n\
+      \        self.set_estado_obj('NO se corrigio: ninguna linea quedo a menos de\
+      \ %d dB del limite' % MAXIMA_CORRECCION)\n        return\n    # Antes de pisar\
+      \ el objetivo se guarda una copia del anterior\n    if os.path.exists(self.get_archivo_obj()):\n\
+      \        escribir_archivo_de_valores(self.get_prefijo() + 'objetivo_anterior.txt',\
+      \ 'objetivo antes de la correccion del ' +\n                               \
+      \     time.strftime('%d-%m-%Y %H:%M'), self.get_objetivo())\n    self.set_objetivo(objetivo)\n\
+      \    escribir_archivo_de_valores(self.get_archivo_obj(),\n                 \
+      \               'corregido el ' + time.strftime('%d-%m-%Y %H:%M') + ' con %d\
+      \ traza(s) del receptor'\n                                % len(trazas), objetivo)\n\
+      \    self.set_estado_obj('corregido a las %s: %d lineas, de %+.1f a %+.1f dB,\
+      \ %d sin corregir'\n                        % (time.strftime('%H:%M:%S'), len(correcciones),\
+      \ min(correcciones), max(correcciones),\n                           sin_corregir))\n\
+      \n\ndef guardar_referencia():\n    elegido = Qt.QFileDialog.getOpenFileNames(self,\
+      \ 'Elegir la captura de la tinySA con el peine YA calibrado',\n            \
+      \                                  '', 'Capturas de la tinySA (*.csv)')\n  \
+      \  nombres = elegido[0]\n    if len(nombres) == 0:\n        return\n    capturas\
+      \ = leer_varias(nombres)\n    if capturas is None:\n        self.set_estado_obj('NO\
+      \ se guardo: no se pudo leer alguna de las capturas')\n        return\n    valores\
+      \ = []\n    for k in range(CANTIDAD):\n        leidos = []\n        for captura\
+      \ in capturas:\n            pico = pico_de_la_linea(captura[0], captura[1],\
+      \ frecuencia_de_linea(k), CERCA_TINYSA)\n            if pico is not None:\n\
+      \                leidos.append(pico)\n        if len(leidos) == 0:\n       \
+      \     self.set_estado_obj('NO se guardo: las capturas no llegan a %d MHz' %\
+      \ frecuencia_de_linea(k))\n            return\n        valores.append(min(leidos))\
+      \              # como en la calibracion conducida\n    nombre = self.get_prefijo()\
+      \ + 'perfil_referencia_' + time.strftime('%Y-%m-%d_%H%M') + '.txt'\n    escribir_archivo_de_valores(nombre,\
+      \ 'perfil de referencia medido por cable el ' +\n                          \
+      \      time.strftime('%d-%m-%Y %H:%M') + ' con ganancia %d dB' % self.get_ganancia()\
+      \ +\n                                ', portadora %g MHz sobre la linea' % self.get_separacion(),\n\
+      \                                valores)\n    diferencias = []\n    objetivo\
+      \ = self.get_objetivo()\n    for k in range(CANTIDAD):\n        diferencias.append(valores[k]\
+      \ - objetivo[k])\n    self.set_estado_obj('perfil guardado en %s. Medido menos\
+      \ objetivo: de %+.1f a %+.1f dB'\n                        % (nombre, min(diferencias),\
+      \ max(diferencias)))\n\n\n# Al abrir el programa se carga el objetivo guardado.\
+      \ Si todavia no hay uno, se\n# carga el objetivo inicial que viene con el experimento\n\
+      if os.path.exists(self.get_archivo_obj()):\n    al_abrir = self.get_archivo_obj()\n\
+      else:\n    al_abrir = 'objetivo_inicial_clase_A.txt'\nif os.path.exists(al_abrir):\n\
+      \    try:\n        cargar_objetivo(al_abrir)\n        self.set_estado_obj('cargado\
+      \ al abrir (' + al_abrir + ')')\n    except Exception:\n        self.set_estado_obj('el\
+      \ archivo de objetivo no se pudo leer: todas las lineas en -35 dBm')\n\n# Tambien\
+      \ se carga lo medido en la ultima calibracion irradiada, para el grafico\nif\
+      \ os.path.exists(self.get_archivo_irr()):\n    try:\n        self.set_medido_irradiado(leer_archivo_de_valores(self.get_archivo_irr()))\n\
+      \        archivo = open(self.get_archivo_irr())\n        self.set_estado_irr(archivo.readline()[2:].split(':')[0])\
+      \   # fecha y cantidad de trazas\n        archivo.close()\n    except Exception:\n\
+      \        self.set_estado_irr('el archivo de la ultima irradiada no se pudo leer')\n\
+      \n# Solo en la simulacion: se carga sola la calibracion conducida simulada,\
+      \ para\n# que se vean todas las curvas sin apretar nada. Con la placa no se\
+      \ carga sola.\nif self.get_prefijo() == 'simulacion_' and os.path.exists(self.get_archivo_cal()):\n\
+      \    importar_calibracion()\n\n# Colores pastel en los graficos. En GRC el bloque\
+      \ solo ofrece colores\n# fuertes, pero desde aca acepta cualquiera. Las curvas\
+      \ se cuentan desde 0.\nself.grafico.set_line_color(0, '#6fa8dc')           \
+      \  # objetivo: azul\nself.grafico.set_line_color(1, '#93c47d')             #\
+      \ lo que sale: verde\nself.grafico.set_line_color(2, '#e06666')            \
+      \ # linea actual: rojo\nself.grafico.set_line_color(3, '#b4a7d6')          \
+      \   # respuesta de la placa: violeta\nself.grafico_irradiado.set_line_color(0,\
+      \ '#e06666')   # mascara: rojo\nself.grafico_irradiado.set_line_color(1, '#6fa8dc')\
+      \   # medido: azul\n\n# Alto de la ventana: las filas de texto (0 a 9) quedan\
+      \ con lo justo y todo lo\n# que sobra va a los graficos (filas 10 a 13), que\
+      \ nunca bajan de 205 px. Asi\n# la ventana entra en una pantalla de 1080p con\
+      \ la escala en 125 %, y en una\n# pantalla mas alta los graficos crecen solos.\n\
+      self._grafico_win.setMinimumHeight(205)\nself._grafico_irradiado_win.setMinimumHeight(205)\n\
+      for fila in range(10):\n    self.top_grid_layout.setRowStretch(fila, 0)\nfor\
+      \ fila in range(10, 14):\n    self.top_grid_layout.setRowStretch(fila, 1)\n\
+      self.top_grid_layout.setVerticalSpacing(2)\nself.top_grid_layout.setContentsMargins(6,\
+      \ 4, 6, 4)\n\n# Letra y botones de la ventana\nself.setStyleSheet('QWidget {\
+      \ font-size: 10pt; } QPushButton { font-size: 11pt; min-height: 30px; }')\n\n\
+      # Colores para ubicarse rapido: PAUSA en rojo, CONGELAR en azul, y los botones\n\
+      # de los tres pasos del procedimiento con un fondo de color cada uno\nfor casilla\
+      \ in self.findChildren(Qt.QCheckBox):\n    if casilla.text().startswith('PAUSA'):\n\
+      \        casilla.setStyleSheet('color: #c0392b; font-weight: bold;')\n    if\
+      \ casilla.text().startswith('CONGELAR'):\n        casilla.setStyleSheet('color:\
+      \ #2e86c1; font-weight: bold;')\nfor boton in self.findChildren(Qt.QPushButton):\n\
+      \    if boton.text().startswith('1.'):\n        boton.setStyleSheet('background-color:\
+      \ #d6e6f5;')     # azul pastel\n    if boton.text().startswith('2.'):\n    \
+      \    boton.setStyleSheet('background-color: #d9ead3;')     # verde pastel\n\
+      \    if boton.text().startswith('3.'):\n        boton.setStyleSheet('background-color:\
+      \ #fff2cc;')     # amarillo pastel\n\n\n# ----------------------------------------------------------------\
+      \ botones\n# GNU Radio llama a set_boton_...(1) cuando se aprieta un boton y\
+      \ a\n# set_boton_...(0) cuando se suelta. Aca se define que hace esa llamada.\n\
+      # Los que abren una ventana para elegir archivos actuan al soltar el boton:\n\
+      # si actuaran al apretarlo, el boton quedaria hundido mientras la ventana\n\
+      # esta abierta.\ndef al_tocar_guardar_cal(valor):\n    if valor == 1:\n    \
+      \    guardar_calibracion()\n\n\ndef al_tocar_importar_cal(valor):\n    if valor\
+      \ == 1:\n        importar_calibracion()\n\n\ndef al_tocar_conducida(valor):\n\
+      \    if valor == 0:\n        generar_conducida()\n\n\ndef al_tocar_importar_obj(valor):\n\
+      \    if valor == 0:\n        importar_objetivo()\n\n\ndef al_tocar_irradiada(valor):\n\
+      \    if valor == 0:\n        calibracion_irradiada()\n\n\ndef al_tocar_referencia(valor):\n\
+      \    if valor == 0:\n        guardar_referencia()\n\n\nself.set_boton_guardar_cal\
+      \ = al_tocar_guardar_cal\nself.set_boton_importar_cal = al_tocar_importar_cal\n\
+      self.set_boton_conducida = al_tocar_conducida\nself.set_boton_importar_obj =\
+      \ al_tocar_importar_obj\nself.set_boton_irradiada = al_tocar_irradiada\nself.set_boton_referencia\
+      \ = al_tocar_referencia\n\n\n# ============================================================================\n\
+      # NO RESINTONIZAR DE MAS\n# El paso del barrido cambia 10 veces por segundo\
+      \ y GNU Radio vuelve a mandar la\n# frecuencia a la placa en cada cambio, aunque\
+      \ sea la misma. La placa\n# resintoniza igual, y eso con el tono encendido lo\
+      \ perturba. Aca se hace que\n# la frecuencia se mande solo cuando cambia.\n\
+      # ============================================================================\n\
+      mandar_frecuencia = self.set_freq\n\n\ndef mandar_frecuencia_si_cambia(frecuencia):\n\
+      \    if frecuencia != self.get_freq():\n        mandar_frecuencia(frecuencia)\n\
+      \n\nself.set_freq = mandar_frecuencia_si_cambia\n\n\n# ============================================================================\n\
+      # CONGELAR EL BARRIDO\n# Mientras la casilla CONGELAR esta tildada, el paso\
+      \ del barrido no avanza: la\n# placa se queda en la linea que estaba saliendo.\
+      \ (El flujo, por su lado, deja\n# el tono encendido mientras este congelado.)\n\
+      # ============================================================================\n\
+      avanzar_paso = self.set_paso\n\n\ndef avanzar_paso_si_no_esta_congelado(valor):\n\
+      \    if self.get_congelar() == 0:\n        avanzar_paso(valor)\n    else:\n\
+      \        # se devuelve el numero a la lista: al destildar, el barrido sigue\
+      \ donde estaba\n        self.get_lista_de_pasos().append(valor)\n\n\nself.set_paso\
+      \ = avanzar_paso_si_no_esta_congelado\n"
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate:
+    - 16
+    - 3696
+    rotation: 0
+    state: enabled
+connections:
+- - tono
+  - '0'
+  - ritmo_simulacion
+  - '0'
+- - ritmo_simulacion
+  - '0'
+  - salida_nula
+  - '0'
+- - datos_obj
+  - '0'
+  - ritmo_grafico
+  - '0'
+- - ritmo_grafico
+  - '0'
+  - grafico
+  - '0'
+- - datos_est
+  - '0'
+  - grafico
+  - '1'
+- - datos_actual
+  - '0'
+  - grafico
+  - '2'
+- - datos_resp
+  - '0'
+  - grafico
+  - '3'
+- - datos_mascara
+  - '0'
+  - ritmo_grafico_2
+  - '0'
+- - ritmo_grafico_2
+  - '0'
+  - grafico_irradiado
+  - '0'
+- - datos_irr
+  - '0'
+  - grafico_irradiado
+  - '1'
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0

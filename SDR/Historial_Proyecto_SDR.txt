@@ -1,7 +1,7 @@
 ===============================================================================
 HISTORIAL DEL PROYECTO - SDR COMO GENERADOR PEINE PARA ENSAYOS DE CEM
 Trabajo Practico Integrador 2C2026 - Compatibilidad Electromagnetica - FIUBA
-Ultima actualizacion: 19/10/2026
+Ultima actualizacion: 20/10/2026
 ===============================================================================
 
 -------------------------------------------------------------------------------
@@ -2199,6 +2199,122 @@ PROCEDIMIENTO / 19-10-2026 / RE-TP-001 version 2.0 (TP1, OE1)
   a 39 dBuV/m, casi sobre el limite de 40). Con 96 lineas y silencio la
   pasada duraba 19 min 12 s con 6 s por linea (con 7 s, 22 min 24 s).
 
+EXP-27 / diseno 20-10-2026 / xA9: peine cada 10 MHz calibrado hacia la mascara  [PENDIENTE]
+  Flujo: SDR\A9_21_EXP27_Peine_cada_10MHz\exp27_a9_peine_10MHz.grc
+  Decisiones del usuario del 20-10:
+   - Mascara: CISPR 11 grupo 1 clase A (<= 20 kVA), a 3 m 50 dBuV/m hasta
+     230 MHz y 57 dBuV/m de 230 a 1000 MHz. Con clase B, el piso del
+     receptor (10 dB de atenuador) quedaba a 8 a 12 dB del limite arriba
+     de 230 MHz. Falta que el CETEM confirme que usa clase A.
+   - Procedimiento en tres pasos: (1) calibracion conducida con la tinySA
+     hacia un objetivo por linea, estimado con la medicion del 13-10, (2)
+     calibracion irradiada en la camara, que corrige el objetivo con el
+     limite menos lo medido, con una pasada de verificacion, y (3) captura
+     conducida del peine calibrado, que queda como perfil de referencia.
+     En otra visita se recalibra por cable hasta reproducir ese perfil y
+     cualquier diferencia irradiada es de la cadena de medicion. Lo que se
+     verifica es relativo al dia de referencia. La tinySA es siempre la
+     misma, con el mismo cable y sin atenuador.
+   - Separacion de la portadora como variable, 6,25 o 10 MHz, para probar
+     las dos. Con 10 MHz los armonicos 3C+S (-9 a -10 dBc) y 5C-S caen
+     sobre otras lineas. Con lineas desiguales pueden taparlas: la de 100
+     MHz pide -26,5 dBm y su 3C+S cae en 340 MHz a unos -36,5 dBm, sobre
+     una linea que pide -38,1 dBm. Con 6,25 MHz caen entre lineas, a 5 MHz
+     de cada una, igual que la fuga y la imagen. A probar en casa con la
+     linea fija de 100 MHz, mirando 340 MHz (o 325 MHz con 6,25).
+   - Silencio largo apagado por defecto. Corte corto en cada salto, con
+     duracion ajustable (0,5 s por defecto, minimo 0,2 s porque la
+     amplitud tarda 0,05 s en llegar a la salida).
+   - Tiempo por linea ajustable, 7 s por defecto (pasada de 12 min con el
+     corte de 0,5 s). Ganancia de TX de 0 a 55 dB, por la tinySA sin
+     atenuador.
+  Calculo del nivel conducido (con las trazas del 13-10, 20 dB de atenuador
+  en el receptor segun los .DAT, sin el ajuste del dashboard): para cada
+  linea, T = mayor campo de las tres alturas en vertical menos la potencia
+  por cable del 05-10, y potencia necesaria = limite - T. Da de -26,5 a
+  -39,5 dBm (mediana -35,2). La ganancia de la antena de la SDR que implica
+  T (con E = P + G + 95,2 a 3 m y +6 dB del piso) va de -25 a -5 dBi, mas
+  baja por debajo de 230 MHz, como se espera de una antena chica.
+  El flujo: un tono por portadora, 40 MSPS, bloques USB de 16384 x 128, un
+  contador de decimas de segundo (Function Probe a 10 Hz) que arma cada
+  linea como apagado, encendido y apagado, con el salto en el medio del
+  apagado. Una lista con la respuesta de la placa por cable (lo que entrega
+  cada linea con amplitud 0,25 y ganancia 45 dB, como en el EXP-25) y un
+  objetivo por linea en dBm (objetivo.txt, se carga al abrir). La amplitud
+  de cada linea sale de objetivo menos respuesta, con tope 0,95, y la
+  ventana muestra la ganancia minima para que ninguna linea se quede sin
+  margen. A pedido del usuario no hay contadores por linea: no los va a
+  corregir a mano y ocupaban demasiado. La respuesta se ve en el grafico.
+  Las dos calibraciones son relativas a lo que esta cargado. La conducida
+  descuenta de cada linea leida la amplitud y la ganancia con que salio,
+  asi que sirve con el peine sin calibrar o ya calibrado, y se puede
+  repetir para afinar. La irradiada le suma al objetivo actual el limite
+  menos lo medido y no toca la respuesta conducida.
+  Botones: calibracion conducida (.csv), guardar e importar calibracion,
+  importar objetivo o perfil, calibracion irradiada (.DAT, correcciones de
+  hasta 10 dB, el resto queda sin corregir) y perfil de referencia (.csv).
+  Archivos iniciales: objetivo.txt y objetivo_inicial_clase_A.txt (limite
+  menos T interpolada entre las 24 lineas medidas) y
+  calibracion_conducida_estimada_EXP25.txt (EXP-25 interpolada, solo para
+  arrancar: hay que reemplazarla por una calibracion conducida real).
+  Probado sin la placa (osmosdr falso): ciclo de 1 s encendido y 0,5 s
+  apagado (0,3 s antes del salto y 0,2 s despues), una sola llamada a
+  set_center_freq por linea. Calibracion conducida con capturas falsas:
+  sin calibrar recupera la respuesta dentro de 0,04 dB, y ya calibrada,
+  con 1 dB de mas en cada linea, corrige exactamente 1 dB. Irradiada con
+  las trazas del 13-10 corridas 36 dB y perfil de referencia con una
+  captura vieja. Lienzo: 83 bloques, ninguno pisado.
+  Pedidos del usuario sobre la ventana (20-10): letra mas grande y botones
+  mas altos (una hoja de estilo en el snippet), graficos mas chicos y un
+  segundo grafico en dBuV/m con la mascara de CISPR 11 y lo medido en la
+  ultima calibracion irradiada (mayor de las alturas por linea). Va aparte
+  porque el primero esta en dBm por cable. Lo medido se guarda en
+  ultima_irradiada.txt y se carga al abrir.
+  Despues, tambien a pedido: los dos graficos uno encima del otro (el eje
+  de frecuencia largo da mas detalle), lineas mas gruesas y colores pastel.
+  El bloque QT GUI Vector Sink solo ofrece colores fuertes en GRC: los
+  pastel se ponen desde el snippet con set_line_color.
+  Para que la ventana entre sin desplazarse en la pantalla del usuario
+  (1080p al 125 %, unos 1536 x 780 utiles): letra en 10 a 15 pt (el
+  usuario prefirio achicarla un poco antes que perder alto de graficos),
+  poco espacio entre filas, graficos de 205 px como minimo que se llevan
+  todo el alto que sobre (en una pantalla al 100 % llegan a unos 300 px),
+  con la leyenda (el usuario la usa para prender y apagar cada curva con
+  un clic) y estados de a dos por fila. Colores para
+  ubicarse: la etapa cambia de color (pausa en rojo, corte en naranja,
+  linea fija en azul, emitiendo en verde), PAUSA en rojo y CONGELAR en
+  azul, lineas sin margen en rojo si hay alguna, mensajes que empiezan
+  con NO en rojo, la salida sin placa en naranja, y un fondo pastel en
+  cada boton de los tres pasos.
+  Version sin placa, para correr el flujo sin la SDR conectada:
+  exp27_a9_peine_10MHz_sin_placa.grc, igual pero con el tono a un Throttle
+  de 1 MSPS y un Null Sink en lugar del osmocom Sink. No abre ningun
+  dispositivo. Usa sus propios archivos, con el prefijo simulacion_, para
+  no pisar los de la placa. Si no hay objetivo guardado, las dos versiones
+  cargan objetivo_inicial_clase_A.txt al abrir.
+  Datos simulados para la version sin placa (pedido del usuario, para
+  ver todas las curvas): simulacion_calibracion_conducida.txt (la
+  estimada del EXP-25 con una ondulacion de +/-0,6 dB), que solo esa
+  version carga sola al abrir, y simulacion_ultima_irradiada.txt (el
+  mayor de tres alturas a +/-3 dB de la mascara). En capturas_simuladas\n  hay una captura de la tinySA del peine calibrado con ganancia 31 y tres
+  trazas del receptor en el formato del ESR-7, para probar los tres
+  botones, y una copia del estado inicial de los dos archivos para volver
+  a empezar. Ganancia por defecto: 31 dB.
+  Compatibilidad entre las dos separaciones (revisado a pedido del
+  usuario): la grilla, el objetivo y la correccion irradiada no dependen
+  de la separacion, pero la respuesta de la placa por cable si (cambia la
+  frecuencia de la portadora y la posicion del tono en la banda base), y
+  los armonicos irradiados tambien. Por eso la calibracion conducida y el
+  perfil de referencia guardan en el encabezado la portadora con que se
+  hicieron, la ventana avisa en rojo si la calibracion cargada no
+  coincide con la separacion elegida, la calibracion irradiada no se
+  aplica en ese caso, e importar un perfil de la otra separacion da un
+  aviso. La calibracion estimada del EXP-25 se reconoce como de 10 MHz.
+  Probado sin la placa con 13 controles, todos bien.
+  Capturas de la ventana: EXP27_ventana_barrido.png,
+  EXP27_ventana_linea_fija.png y EXP27_ventana_sin_placa.png (las trazas
+  del grafico irradiado son las del 13-10 corridas 36 dB, solo de prueba).
+
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
   investigar la calibracion de la xA9, porque leyo que las "portadoras
@@ -2525,6 +2641,11 @@ Para la bladeRF 2.0 micro xA9, sin ninguna calibracion nuestra:
   SDR\A9_20_EXP26_Peine_radiado\
     exp26_a9_peine_radiado_desde60.grc (EXP-25 con la ventana corregida y
     modo de linea fija, para el ensayo radiado)
+  SDR\A9_21_EXP27_Peine_cada_10MHz\
+    exp27_a9_peine_10MHz.grc (96 lineas cada 10 MHz, calibracion conducida
+    hacia un objetivo, irradiada hacia la mascara y perfil de referencia),
+    exp27_a9_peine_10MHz_sin_placa.grc (lo mismo sin la SDR, para probar),
+    archivos de objetivo y calibracion inicial, capturas de la ventana
   TPs\TP1_OE1_Procedimiento_RE\
     main.tex y figuras (procedimiento RE-TP-001) y la guia del profesor
   TPs\TP2_OE2_Manual_SDR\ a TPs\TP7_Integrador_EMC_Europe\
