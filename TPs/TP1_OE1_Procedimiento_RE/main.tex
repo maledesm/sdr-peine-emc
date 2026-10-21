@@ -231,8 +231,8 @@ Procedimiento de laboratorio para evaluar las emisiones radiadas de un Comb Gene
 
 \begin{itemize}
   \item Mesa fija y antena de medición en tres alturas fijas: 1, 2 y 3 metros. 
-  \item Polaridad de calibración: vertical.
-  \item Polaridad extra de comprobación: Horizontal.
+  \item Polarización de calibración: vertical.
+  \item Polarización extra de comprobación: horizontal.
   \item El ángulo de la mesa se elige una sola vez.
 \end{itemize}
 
@@ -281,7 +281,7 @@ Procedimiento de laboratorio para evaluar las emisiones radiadas de un Comb Gene
     Alturas de la antena de medición  & 1, 2 y 3~m \\
     Polarizaciones                    & V, y H con la antena transmisora acostada \\
     Orientación de la SDR             & conector TX hacia la antena \\
-    Geometría de calibración          & vertical, el mayor nivel de las tres alturas \\
+    Geometría de calibración          & vertical, en la altura elegida \\
     \bottomrule
   \end{tabular}
   \caption{Geometría. En la primera medición de cada laboratorio se fijan los valores definitivos.}
@@ -319,7 +319,7 @@ Según CISPR 16-1-1:
   \item RBW de 120~kHz y VBW de 300~kHz.
   \item Detector Peak con MAX HOLD.
   \item Transductor cargado, con el factor de antena y la pérdida del cable. Anotar cuál.
-  \item Atenuador interno en 0dB y preamplificador encendido. El piso tiene que quedar al menos 10~dB bajo el límite. El 13-10-2026, con 10~dB, quedó en unos 23~dB$\mu$V/m hasta 230~MHz y 36~dB$\mu$V/m arriba. No cambiarlos en toda la campaña.
+  \item Atenuador interno en 0~dB y preamplificador encendido. El piso tiene que quedar al menos 10~dB bajo el límite. El 13-10-2026, con 10~dB, quedó en unos 23~dB$\mu$V/m hasta 230~MHz y 36~dB$\mu$V/m arriba. No cambiarlos en toda la campaña.
   \item Barrido de unos 3~s, menos de la mitad del tiempo que cada línea está encendida (sección~\ref{sec:sdr}).
 \end{enumerate}
 
@@ -345,9 +345,9 @@ La primera vez en cada laboratorio y cada vez que cambie el montaje.
 
 \begin{enumerate}
   \item Calibración conducida cargada, ninguna línea sin margen y PAUSA destildada.
-  \item Una pasada completa en a una altura elegida en vertical. Guardar las trazas (.DAT).
+  \item Una pasada completa en una altura elegida, en vertical. Guardar la traza (.DAT).
   \item Calibración irradiada (botón~2). Se le suma al objetivo el límite menos lo medido.
-  \item Pasada de verificación en las tres alturas: cada línea a $\pm 1$~dB del límite. Si no, repetir el paso 3 con las trazas nuevas.
+  \item Pasada de verificación en la misma altura: cada línea a $\pm 1$~dB del límite. Si no, repetir el paso 3 con las trazas nuevas.
 \end{enumerate}
 
 El objetivo corregido y lo medido se guardan solos. Las líneas que no llegan al límite ni con la amplitud máxima se anotan y quedan fuera del criterio.
