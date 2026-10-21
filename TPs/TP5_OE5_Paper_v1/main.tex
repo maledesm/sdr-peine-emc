@@ -1,0 +1,138 @@
+% ============================================================================
+% TP5 -- Paper, version 1 (entregable OE5)
+% Formato IEEE de congreso (IEEEtran), dos columnas, 8 carillas, en ingles.
+% Revision doble ciego: el autor va anonimo hasta la version final.
+% Plantilla armada a partir del paper de referencia de la catedra (solo el
+% formato y la estructura, sin su texto).
+% Compilar con pdfLaTeX (Overleaf: Menu > Compiler > pdfLaTeX).
+% ============================================================================
+\documentclass[conference]{IEEEtran}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\begin{document}
+
+\title{Software Defined Radio-Based Reference Source\\
+for EMC Radiated Emissions (RE) Verification and\\
+Calibration}
+
+% Version anonima para la revision. En la version final van los autores:
+% \author{\IEEEauthorblockN{Martín Ledesma}
+% \IEEEauthorblockA{Facultad de Ingeniería, Universidad de Buenos Aires\\
+% Buenos Aires, Argentina\\
+% maledesma@fi.uba.ar}}
+\author{\IEEEauthorblockN{Anonymous Submission for Double-Blind Review}
+\IEEEauthorblockA{Author information withheld for peer review}}
+
+\maketitle
+
+\begin{abstract}
+Abstract text (one paragraph, about 150 to 250 words): problem, proposed system, calibration methodology, experimental validation and main results.
+\end{abstract}
+
+\begin{IEEEkeywords}
+electromagnetic compatibility (EMC), radiated emissions, software defined radio (SDR), comb generator, reference source, calibration.
+\end{IEEEkeywords}
+
+% ============================================================================
+\section{Introduction}
+
+Context and motivation. Problem statement. Contribution of this work.
+
+The main contributions of this work are:
+\begin{enumerate}
+  \item First contribution.
+  \item Second contribution.
+  \item Third contribution.
+\end{enumerate}
+
+The remainder of this paper is organized as follows. Section~\ref{sec:state} reviews the state of the art. Sections~\ref{sec:proposed} and~\ref{sec:implementation} describe the proposed system and its implementation. Section~\ref{sec:results} presents the experimental results and Section~\ref{sec:emissions} the emissions measurements. Sections~\ref{sec:conclusions} and~\ref{sec:future} present the conclusions and future work.
+
+% ============================================================================
+\section{State of the Art}\label{sec:state}
+
+Review of previous work, with references in IEEE style~\cite{b1}, \cite{b2}.
+
+\begin{table}[htbp]
+  \caption{Comparison with representative implementations}
+  \label{tab:comparison}
+  \centering
+  \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    Work & Tech. & Port. & Prog. & EMC \\
+    \midrule
+    Author (year) & -- & -- & -- & -- \\
+    Author (year) & -- & -- & -- & -- \\
+    This work     & SDR & Yes & Yes & Yes \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Table~\ref{tab:comparison} summarizes representative implementations.
+
+% ============================================================================
+\section{Proposed System}\label{sec:proposed}
+
+Architecture and design objectives.
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox[c][3cm][c]{0.9\columnwidth}{\centering Figure placeholder\\ (replace with \texttt{\textbackslash includegraphics})}}
+  \caption{Functional block diagram of the proposed system.}
+  \label{fig:block}
+\end{figure}
+
+Fig.~\ref{fig:block} presents the block diagram of the system.
+
+% ============================================================================
+\section{System Implementation}\label{sec:implementation}
+
+Hardware, software and calibration.
+
+\begin{equation}
+  E_{dB\mu V/m} = V_{receiver} + AF + L_{cable} - G_{amp}
+  \label{eq:field}
+\end{equation}
+
+% ============================================================================
+\section{Experimental Results}\label{sec:results}
+
+\subsection{First Analysis}
+Text.
+
+\subsection{Second Analysis}
+Text.
+
+% ============================================================================
+\section{Emissions Measurements}\label{sec:emissions}
+
+\subsection{Conducted Emissions}
+Text.
+
+\subsection{Radiated Emissions}
+Text.
+
+% ============================================================================
+\section{Conclusions}\label{sec:conclusions}
+
+Text.
+
+% ============================================================================
+\section{Future Work}\label{sec:future}
+
+Text.
+
+% ============================================================================
+\begin{thebibliography}{00}
+\bibitem{b1} A. Author, B. Author, and C. Author, ``Title of the paper,'' \textit{Journal Name}, vol. 1, no. 1, pp. 1--10, 2026.
+\bibitem{b2} A. Author, \textit{Title of the Book}. City: Publisher, 2026.
+\end{thebibliography}
+
+\end{document}
