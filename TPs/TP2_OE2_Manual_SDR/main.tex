@@ -1,0 +1,168 @@
+% ============================================================================
+% TP2 -- Manual y procedimiento funcional de la SDR (entregable OE2)
+% Plantilla basada en el TP1 (RE-TP-001). Un solo archivo .tex. Necesita en la
+% misma carpeta: logo_fiuba.png y logo_materia.png.
+% Compilar con pdfLaTeX (Overleaf: Menu > Compiler > pdfLaTeX).
+% ============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[default]{sourcesanspro}
+\usepackage[spanish,es-tabla,es-nodecimaldot]{babel}
+\usepackage[a4paper,margin=2.5cm,headheight=14pt]{geometry}
+\usepackage{graphicx}
+\usepackage{float}       % permite la opcion [H] en figuras y tablas
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usetikzlibrary{babel}   % evita el choque entre TikZ y los atajos < > del español
+\usepackage[hidelinks]{hyperref}
+
+% ---------------------------------------------------------------- datos ----
+\newcommand{\codigo}{OE2}
+\newcommand{\version}{0.1 (borrador)}
+\newcommand{\fecha}{21 de octubre de 2026}
+
+% Texto que hay que completar o confirmar antes de usar el documento
+\newcommand{\pendiente}[1]{\textcolor{red}{[#1]}}
+% Casillero vacio para completar a mano
+\newcommand{\casilla}{\rule{0pt}{4.2ex}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \codigo{} -- Manual y procedimiento funcional de la SDR}
+\rhead{\small Versión \version}
+\cfoot{\small \thepage}
+
+\setlist{itemsep=2pt,topsep=4pt}
+
+\begin{document}
+
+% ============================================================== caratula ====
+\begin{titlepage}
+  \centering
+  \vspace*{0.5cm}
+  % logo de la facultad a la izquierda y logo de la materia a la derecha
+  \begin{minipage}[c]{0.56\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{logo_fiuba.png}
+  \end{minipage}\hfill
+  \begin{minipage}[c]{0.34\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{logo_materia.png}
+  \end{minipage}\par
+  \vspace{0.8cm}
+  {\large Universidad de Buenos Aires -- Facultad de Ingeniería\par}
+  {\large Compatibilidad Electromagnética (8664 y TB074)\par}
+  {\large Trabajo Práctico N.\textsuperscript{o}~2 -- Entregable OE2\par}
+  \vspace{1.6cm}
+  {\LARGE \bfseries Manual y procedimiento funcional de la SDR\par}
+  \vspace{0.6cm}
+  {\Large Comb Generator basado en Software Defined Radio (SDR)\par}
+  \vspace{0.8cm}
+  {\large Código: \textbf{\codigo} \qquad Versión: \textbf{\version}\par}
+  \vfill
+  \begin{tabular}{ll}
+    \toprule
+    Autor               & Martín Ledesma \\
+    Docentes            & Pablo Marino Belcaguy \\
+                        & Walter Gustavo Fano \\
+    Fecha               & \fecha \\
+    \bottomrule
+  \end{tabular}
+  \vspace{1cm}
+\end{titlepage}
+
+% ====================================================== control de cambios ==
+\section*{Control de versiones}
+\begin{tabular}{@{}llp{8cm}@{}}
+  \toprule
+  Versión & Fecha & Cambios \\
+  \midrule
+  0.1 (borrador) & \fecha & Primera emisión. \\
+  \bottomrule
+\end{tabular}
+
+\section*{Participantes}
+\begin{tabular}{@{}lp{10cm}@{}}
+  \toprule
+  Persona & Función \\
+  \midrule
+  Martín Ledesma        & Autor. \\
+  Pablo Marino Belcaguy & Docente, revisión. \\
+  Walter Gustavo Fano   & Docente, revisión. \\
+  \bottomrule
+\end{tabular}
+
+\tableofcontents
+\newpage
+
+% ============================================================================
+\section{Introducción}
+
+\begin{itemize}
+  \item Objetivo del trabajo.
+  \item Alcance.
+  \item Contexto.
+\end{itemize}
+
+% ============================================================================
+\section{Desarrollo}
+
+\subsection{Primera parte}
+
+\begin{itemize}
+  \item Contenido.
+\end{itemize}
+
+% Ejemplo de tabla (borrar si no se usa)
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Parámetro & Valor \\
+    \midrule
+    Parámetro 1 & Valor 1 \\
+    Parámetro 2 & Valor 2 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Ejemplo de tabla.}
+  \label{tab:ejemplo}
+\end{table}
+
+% Ejemplo de figura (descomentar y poner el archivo en la carpeta)
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.8\textwidth]{nombre_de_la_figura.png}
+%   \caption{Ejemplo de figura.}
+%   \label{fig:ejemplo}
+% \end{figure}
+
+\subsection{Segunda parte}
+
+\begin{enumerate}
+  \item Paso 1.
+  \item Paso 2.
+\end{enumerate}
+
+% ============================================================================
+\section{Conclusiones}
+
+\begin{itemize}
+  \item Conclusión.
+\end{itemize}
+
+% ============================================================================
+\section{Referencias}
+
+\begin{enumerate}
+  \item Autor, título, publicación, año.
+\end{enumerate}
+
+\end{document}
