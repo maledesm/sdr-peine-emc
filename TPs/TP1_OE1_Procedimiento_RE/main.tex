@@ -1,0 +1,808 @@
+% ============================================================================
+% Procedimiento de ensayo RE-TP-001 (TP1, entregable OE1)
+% Base: esquema del procedimiento de Emisiones Radiadas provisto por la catedra.
+% Un solo archivo .tex. Necesita en la misma carpeta: logo_fiuba.png,
+% logo_materia.png, fig_esquema_general.png, fig_camara_anecoica.png y
+% fig_camara_semianecoica.png.
+% Compilar con pdfLaTeX (Overleaf: Menu > Compiler > pdfLaTeX).
+% ============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[default]{sourcesanspro}
+\usepackage[spanish,es-tabla,es-nodecimaldot]{babel}
+\usepackage[a4paper,margin=2.5cm,headheight=14pt]{geometry}
+\usepackage{graphicx}
+\usepackage{float}       % permite la opcion [H] en figuras y tablas
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usetikzlibrary{babel}   % evita el choque entre TikZ y los atajos < > del español
+\usepackage[hidelinks]{hyperref}
+
+% ---------------------------------------------------------------- datos ----
+\newcommand{\codigo}{RE-TP-001}
+\newcommand{\version}{2.1}
+\newcommand{\fecha}{20 de octubre de 2026}
+
+% Texto que hay que completar o confirmar antes de usar el documento
+\newcommand{\pendiente}[1]{\textcolor{red}{[#1]}}
+% Casillero vacio para completar a mano
+\newcommand{\casilla}{\rule{0pt}{4.2ex}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \codigo{} -- Procedimiento de ensayo de Emisiones Radiadas (RE)}
+\rhead{\small Versión \version}
+\cfoot{\small \thepage}
+
+\setlist{itemsep=2pt,topsep=4pt}
+
+\begin{document}
+
+% ============================================================== caratula ====
+\begin{titlepage}
+  \centering
+  \vspace*{0.5cm}
+  % logo de la facultad a la izquierda y logo de la materia a la derecha
+  \begin{minipage}[c]{0.56\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{logo_fiuba.png}
+  \end{minipage}\hfill
+  \begin{minipage}[c]{0.34\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{logo_materia.png}
+  \end{minipage}\par
+  \vspace{0.8cm}
+  {\large Universidad de Buenos Aires -- Facultad de Ingeniería\par}
+  {\large Compatibilidad Electromagnética (8664 y TB074)\par}
+  {\large Trabajo Práctico N.\textsuperscript{o}~1 -- Entregable OE1\par}
+  \vspace{1.6cm}
+  {\Large PROCEDIMIENTO DE ENSAYOS\par}
+  \vspace{0.3cm}
+  {\LARGE \bfseries Emisiones Radiadas (RE)\par}
+  \vspace{0.6cm}
+  {\Large Comb Generator basado en Software Defined Radio (SDR)\par}
+  \vspace{0.8cm}
+  {\large Código: \textbf{\codigo} \qquad Versión: \textbf{\version}\par}
+  \vfill
+  \begin{tabular}{ll}
+    \toprule
+    Autor               & Martín Ledesma \\
+    Docentes            & Pablo Marino Belcaguy \\
+                        & Walter Gustavo Fano \\
+    Laboratorio         & CETEM, Florencio Varela \\
+    Asistencia          & Federico Martinez (CETEM) \\
+    Fecha               & \fecha \\
+    \bottomrule
+  \end{tabular}
+  \vspace{1cm}
+\end{titlepage}
+
+% ====================================================== control de cambios ==
+\section*{Control de versiones}
+\begin{tabular}{@{}llp{8cm}@{}}
+  \toprule
+  Versión & Fecha & Cambios \\
+  \midrule
+  1.0 (borrador) & 5 de octubre de 2026 & Primera emisión. \\
+  1.1 (borrador) & 12 de octubre de 2026 & Antena transmisora y ajustes para la primera medición en el CETEM. \\
+  2.0 (borrador) & 19 de octubre de 2026 & Entregable OE1. Calibración conducida e irradiada contra el límite de CISPR~11, peine con una línea cada 10~MHz, tres alturas de antena e incertidumbre. \\
+  2.1 & \fecha & Grupo~1 clase~A. Calibración conducida hacia un objetivo por línea, perfil de referencia, tiempos del EXP-27 y plan de la visita. Texto más corto. \\
+  \bottomrule
+\end{tabular}
+
+\section*{Participantes}
+\begin{tabular}{@{}lp{10cm}@{}}
+  \toprule
+  Persona & Función en el ensayo \\
+  \midrule
+  Martín Ledesma        & Opera la SDR y el software y registra los resultados. \\
+  Federico Martinez     & Opera la cámara, el mástil, la mesa y el receptor del CETEM. \\
+  Pablo Marino Belcaguy & Docente, revisión del procedimiento. \\
+  Walter Gustavo Fano   & Docente, revisión del procedimiento. \\
+  \bottomrule
+\end{tabular}
+
+\tableofcontents
+\newpage
+
+% ============================================================================
+\section*{Procedimiento de ensayos Emisiones Radiadas (RE)}
+
+Procedimiento de laboratorio para evaluar las emisiones radiadas de un Comb Generator basado en SDR según CISPR~11 y ANSI C63.4.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_esquema_general.png}
+  \caption{Disposición general de un ensayo de emisiones radiadas.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_camara_anecoica.png}
+  \caption{Cámara y sala de medición.}
+\end{figure}
+
+\newpage
+\begin{center}
+  {\large\bfseries PROCEDIMIENTO DE ENSAYO DE EMISIONES RADIADAS (\codigo)}
+\end{center}
+
+% ============================================================================
+\section{Objeto y alcance}
+
+\begin{itemize}
+  \item EUT/DUT: Comb Generator basado en SDR (bladeRF 2.0 micro xA9), en su papel de calibrador. El peine que emite es la referencia de la cadena de medición.
+  \item También se registran sus emisiones propias, en pausa y sin antena: son el fondo contra el que se leen las líneas.
+  \item Normas: CISPR 16-1-1, CISPR 16-2-3, CISPR 16-4-2, CISPR~11 (grupo~1, clase~A, hasta 20~kVA) y ANSI C63.4.
+  \item Rango: 30~MHz a 1~GHz, ampliable hasta 6~GHz. Peine: 50~MHz a 1~GHz, una línea cada 10~MHz.
+\end{itemize}
+
+\subsection{Finalidad}
+
+\begin{itemize}
+  \item Verificar la cadena de medición completa (cámara, antena, cables y receptor) y controlar su continuidad en el tiempo.
+  \item El peine se prepara en tres pasos:
+        \begin{enumerate}
+          \item calibración conducida: cada línea a su objetivo, por cable (sección~\ref{sec:cal_conducida}),
+          \item calibración irradiada: cada línea sobre el límite de CISPR~11, en la cámara (sección~\ref{sec:cal_irradiada}),
+          \item perfil de referencia: captura por cable del peine ya calibrado (sección~\ref{sec:perfil}).
+        \end{enumerate}
+  \item En cada verificación posterior se recalibra por cable hasta reproducir el perfil y se compara contra el límite. Si el peine se recibe distinto, cambió la cadena.
+  \item La verificación es relativa al día de referencia: asume que ese día la cadena medía bien.
+  \item El peine es un emisor intencional. El límite se usa como nivel de referencia, no como criterio de conformidad.
+  \item Cambiar la antena transmisora, su posición, las alturas o el recorrido del USB obliga a repetir la calibración irradiada.
+  \item Se usa la clase~A porque deja margen sobre el piso del receptor. Con 10~dB de atenuador, arriba de 230~MHz el piso queda a 8 a 12~dB del límite de clase~B y a unos 20~dB del de clase~A. A confirmar con el CETEM.
+\end{itemize}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}lcc@{}}
+    \toprule
+    Banda & A 3~m (dB$\mu$V/m) & A 10~m (dB$\mu$V/m) \\
+    \midrule
+    30 a 230~MHz   & 50 & 40 \\
+    230 a 1000~MHz & 57 & 47 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Límites de CISPR~11:2024 para equipos del grupo~1, clase~A, hasta 20~kVA, en cámara semianecoica (cuasi-pico, tabla~8 de la norma). En 230~MHz vale el límite más estricto.}
+  \label{tab:limites}
+\end{table}
+
+% ============================================================================
+\section{Equipamiento y medios de ensayo}
+
+\begin{itemize}
+  \item Cámara semianecoica (SAC) calibrada a 3~m (o 10~m).
+  \item Receptor EMI R\&S ESR-7.
+  \item Detectores Peak y Quasi-Peak, RBW de 120~kHz hasta 1~GHz y de 1~MHz arriba. Se usa Peak con MAX HOLD (sección~\ref{sec:pasos}).
+  \item Antena de medición Bilog Hybrid (30~MHz a 1~GHz), con el factor de antena y la pérdida del cable cargados en el receptor como transductor.
+  \item Mástil motorizado de 1 a 4~m, o hasta la altura máxima de la cámara.
+  \item Mesa giratoria no metálica, a 0,8~m del plano de masa.
+  \item SDR bladeRF 2.0 micro xA9, con:
+        \begin{itemize}
+          \item antena telescópica de 30~cm en TX1, siempre la misma, extendida hasta el tope y vertical,
+          \item carga de 50~$\Omega$ para TX1, para medir la placa sin antena,
+          \item cable USB 3.0.
+        \end{itemize}
+  \item Computadora con GNU Radio 3.10 y el flujo del EXP-27, conectada por el cable USB 3.
+  \item Analizador portátil tinySA Ultra con su cable coaxial, siempre los mismos y sin atenuador. Son parte de la referencia.
+\end{itemize}
+
+\subsection{Referencias}
+
+\begin{itemize}
+  \item YRS03, Eurofins York, Comb Generator, referencia comercial del tipo de fuente.
+  \item bladeRF 2.0 micro, Nuand. Potencia de salida CW de +8~dBm.
+\end{itemize}
+
+\subsection{Precauciones}
+
+\begin{itemize}
+  \item Emitir solo dentro de la cámara. Fuera de la cámara, solo por cable al analizador.
+  \item Nunca conectar la salida TX de la SDR a su entrada RX.
+  \item El software arranca en PAUSA.
+  \item Si el programa se cierra solo o da errores de USB hay que desenchufar la SDR, esperar un minuto y volver a enchufarla.
+\end{itemize}
+
+% ============================================================================
+\section{Configuración del DUT}\label{sec:montaje}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.55\textwidth]{fig_camara_semianecoica.png}
+  \caption{Montaje de un equipo de mesa en la cámara semianecoica.}
+\end{figure}
+
+\begin{itemize}
+  \item SDR sobre la mesa giratoria no conductora, a 0,8~m del plano de tierra reflejante.
+  \item PC fuera de la cámara o blindada. Cables dentro de la cámara con filtro o ferrita (ANSI C63.4), para que no actúen como antenas.
+  \item Patrón: 96 líneas de 50~MHz a 1~GHz, una por vez (sección~\ref{sec:sdr}).
+\end{itemize}
+
+\subsection{Geometría}
+
+\begin{itemize}
+  \item Mesa fija y antena de medición en tres alturas fijas: 1, 2 y 3 metros. 
+  \item Polaridad de calibración: vertical.
+  \item Polaridad extra de comprobación: Horizontal.
+  \item El ángulo de la mesa se elige una sola vez.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[font=\small,>=latex]
+    \draw[line width=1.2pt] (-1,0) -- (11,0);
+    \node[below] at (5,0) {Plano de tierra reflectante};
+    \draw (0.2,0) -- (0.2,1.6) (1.8,0) -- (1.8,1.6);
+    \draw[line width=1pt] (0,1.6) -- (2,1.6);
+    \draw[fill=gray!25] (0.7,1.6) rectangle (1.3,1.9);
+    \draw[line width=0.8pt] (1.0,1.9) -- (1.0,2.6);
+    \node[above] at (1.0,2.6) {SDR + antena};
+    \draw[<->] (-0.4,0) -- (-0.4,1.6) node[midway,left] {0,8 m};
+    \draw[dashed] (0.7,1.7) -- (0.45,1.7) -- (0.45,0.05) -- (-1,0.05);
+    \node[left] at (-1,0.05) {USB a la PC};
+    \draw[line width=1pt] (9,0) -- (9,3.4);
+    \draw[line width=0.8pt] (8.2,3.0) -- (9,3.0);
+    \foreach \x/\h in {8.25/0.45,8.45/0.38,8.65/0.30,8.85/0.22}
+      \draw (\x,3.0-\h) -- (\x,3.0+\h);
+    \node[above] at (8.9,3.5) {Antena de medición};
+    \draw[<->] (9.5,0) -- (9.5,3.0) node[midway,right] {$h_1$, $h_2$, $h_3$};
+    \draw[<->] (1.0,0.6) -- (9,0.6) node[midway,above] {3 m};
+    \draw (9,0.05) -- (11,0.05);
+    \node[right] at (11,0.05) {al receptor};
+  \end{tikzpicture}
+  \caption{Montaje usado en este procedimiento.}
+\end{figure}
+
+\begin{enumerate}
+  \item SDR en el centro de la mesa, con la antena transmisora vertical.
+  \item Cable USB recto hasta el piso y al pasamuros, siempre por el mismo recorrido. Ferrita junto a la SDR.
+  \item Antena de medición a 3~m, en la primera de las tres alturas.
+  \item Fotografiar el montaje.
+\end{enumerate}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Parámetro & Valor por defecto \\
+    \midrule
+    Distancia de medición             & 3~m \\
+    Altura de la mesa                 & 0,8~m \\
+    Ángulo de la mesa                 & 0\textdegree \\
+    Alturas de la antena de medición  & 1, 2 y 3~m \\
+    Polarizaciones                    & V, y H con la antena transmisora acostada \\
+    Orientación de la SDR             & conector TX hacia la antena \\
+    Geometría de calibración          & vertical, el mayor nivel de las tres alturas \\
+    \bottomrule
+  \end{tabular}
+  \caption{Geometría. En la primera medición de cada laboratorio se fijan los valores definitivos.}
+  \label{tab:geometria}
+\end{table}
+
+% ============================================================================
+\section{Calibración conducida}\label{sec:cal_conducida}
+
+\begin{itemize}
+  \item Fuera de la cámara, con TX1 conectada por cable a la tinySA.
+  \item Lleva cada línea a su objetivo en dBm, guardado en el archivo de objetivo.
+  \item Objetivo inicial: el límite menos la transferencia de cada línea medida el 13-10-2026 (campo máximo menos potencia por cable). Va de $-26{,}5$ a $-39{,}5$~dBm.
+  \item La ganancia de TX fija el nivel base y la amplitud digital corrige cada línea.
+  \item Vale para la separación de la portadora con que se hizo (6,25 o 10~MHz), la tinySA y el cable.
+\end{itemize}
+
+\begin{enumerate}
+  \item Conectar TX1 a la tinySA: de 45 a 1005~MHz, RBW de 300~kHz, atenuación interna en 0~dB y MAX HOLD.
+  \item Abrir el flujo, que carga el objetivo solo. Elegir la separación y una ganancia de TX igual o mayor que la ganancia mínima que muestra la ventana. Destildar PAUSA.
+  \item Guardar dos capturas, de dos pasadas completas.
+  \item Generar la calibración conducida con las dos capturas (botón~1).
+  \item Tildar PAUSA. Anotar la ganancia y la separación.
+\end{enumerate}
+
+% ============================================================================
+\section{Procedimiento en la cámara}\label{sec:pasos}
+
+\subsection{Configuración del receptor}\label{sec:receptor}
+
+Según CISPR 16-1-1:
+
+\begin{enumerate}
+  \item De 30~MHz a 1~GHz.
+  \item RBW de 120~kHz y VBW de 300~kHz.
+  \item Detector Peak con MAX HOLD.
+  \item Transductor cargado, con el factor de antena y la pérdida del cable. Anotar cuál.
+  \item Atenuador interno en 0dB y preamplificador encendido. El piso tiene que quedar al menos 10~dB bajo el límite. El 13-10-2026, con 10~dB, quedó en unos 23~dB$\mu$V/m hasta 230~MHz y 36~dB$\mu$V/m arriba. No cambiarlos en toda la campaña.
+  \item Barrido de unos 3~s, menos de la mitad del tiempo que cada línea está encendida (sección~\ref{sec:sdr}).
+\end{enumerate}
+
+\subsection{Ruido de fondo (Ambient Noise)}
+
+\begin{itemize}
+  \item SDR apagada. Barrido Peak de 30~MHz a la máxima frecuencia de interés.
+  \item Piso al menos 6~dB bajo el límite (tabla~\ref{tab:limites}), mejor 10~dB. Guardar la traza.
+\end{itemize}
+
+\subsection{Emisión propia de la SDR}
+
+\begin{itemize}
+  \item En cada medición: flujo en PAUSA y traza en MAX HOLD durante un minuto. Muestra lo que emite la placa sola (su reloj y el USB).
+  \item Solo la primera vez: carga de 50~$\Omega$ en TX1, PAUSA destildada y una pasada completa. Muestra lo que irradia la placa sin antena. Después, PAUSA y la antena de vuelta.
+\end{itemize}
+
+
+
+\subsection{Calibración irradiada}\label{sec:cal_irradiada}
+
+La primera vez en cada laboratorio y cada vez que cambie el montaje.
+
+\begin{enumerate}
+  \item Calibración conducida cargada, ninguna línea sin margen y PAUSA destildada.
+  \item Una pasada completa en a una altura elegida en vertical. Guardar las trazas (.DAT).
+  \item Calibración irradiada (botón~2). Se le suma al objetivo el límite menos lo medido.
+  \item Pasada de verificación en las tres alturas: cada línea a $\pm 1$~dB del límite. Si no, repetir el paso 3 con las trazas nuevas.
+\end{enumerate}
+
+El objetivo corregido y lo medido se guardan solos. Las líneas que no llegan al límite ni con la amplitud máxima se anotan y quedan fuera del criterio.
+
+\subsection{Perfil de referencia}\label{sec:perfil}
+
+Luego de la calibración irradiada, por cable y fuera de la cámara.
+
+\begin{enumerate}
+  \item TX1 a la tinySA como en la calibración conducida, con la misma ganancia y separación.
+  \item Capturar el peine calibrado en dos pasadas.
+  \item Guardar el perfil de referencia (botón~3), con la fecha, la ganancia y la separación.
+\end{enumerate}
+
+El perfil es la referencia de la fuente para las verificaciones siguientes.
+
+\subsection{Medición de verificación}
+
+La medición de rutina, con la geometría de la tabla~\ref{tab:geometria}.
+
+\begin{enumerate}
+  \item Antes de entrar a la cámara: importar el perfil de referencia como objetivo y recalibrar por cable (sección~\ref{sec:cal_conducida}) hasta reproducirlo a $\pm 1$~dB, con la misma separación.
+  \item Mesa en el ángulo elegido y antena de medición vertical, en la altura elegida.
+  \item 3.\textsuperscript{er} LED de la SDR encendido fijo.
+  \item Reiniciar MAX HOLD y esperar una pasada completa, 12~min con los valores por defecto. La ventana muestra el paso y la pasada.
+  \item Comprobar que hay líneas cada 10~MHz, de 50~MHz a 1~GHz, que cada una supera al piso en al menos 10~dB y que caen a  $\pm 3$~dB de la máscara de la norma CISPR 11 grupo 1 clase A.
+  \item Guardar la traza (imagen y datos).
+  \item Repetir para distintas alturas sin comparar con la máscara.
+  \item Repetir con antena transmisora acostada, horizontal y perpendicular a la línea entre la SDR y la antena de medición. Antena de medición en horizontal. Repetir 4 a 6 en las tres alturas. No se compara con el límite.
+  \item Completar las tablas de la sección~\ref{sec:registro}.
+\end{enumerate}
+
+
+
+
+\subsection{Cálculo del campo eléctrico}
+
+\begin{equation}
+  E_{dB\mu V/m} = V_{receptor}\,(dB\mu V) + AF\,(dB/m)
+    + L_{cable}\,(dB) - G_{amp}\,(dB)
+\end{equation}
+
+\begin{itemize}
+  \item $AF$: factor de antena de la calibración del fabricante, cargado en el receptor.
+  \item $L_{cable}$: pérdida del cable, medida. Conviene que sea menor a 1~dB.
+  \item $G_{amp}$: ganancia del preamplificador. Anotar si está encendido.
+  \item Para controlar continuidad alcanza con la lectura del receptor, si $AF$, $L_{cable}$ y $G_{amp}$ son los de la calibración irradiada. Un cambio en ellos es lo que este procedimiento detecta.
+\end{itemize}
+
+\subsection{Cierre}
+
+Tildar PAUSA, cerrar el programa y desenchufar la SDR. Guardar trazas, fotos, archivos del software y el registro en una carpeta con la fecha.
+
+% ============================================================================
+\section{Registro y reporte}\label{sec:registro}
+
+\begin{itemize}
+  \item Espectro de 30~MHz a 1~GHz con el límite de CISPR~11 grupo~1 clase~A (tabla~\ref{tab:limites}).
+  \item Tabla de líneas: frecuencia, límite, nivel en cada altura y polarización, y diferencia con el límite. El ángulo de la mesa se anota una sola vez.
+  \item Trazas del ruido de fondo y de la emisión propia de la SDR, y fotos del montaje.
+  \item Archivos del software: objetivo, calibración conducida, perfil de referencia, última calibración irradiada y capturas de la tinySA.
+\end{itemize}
+
+\subsection{Criterio de aceptación}\label{sec:criterio}
+
+\begin{itemize}
+  \item Por línea: nivel en la geometría de calibración menos el límite.
+  \item Horizontal: solo que las líneas superen al piso en 10~dB.
+  \item Los $\pm$3~dB suman la tolerancia de la calibración ($\pm$1~dB) y la repetibilidad del montaje.
+  \item Las líneas a menos de 10~dB del ruido de fondo o de la emisión propia se marcan y no cuentan.
+\end{itemize}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Diferencia con el límite & Resultado \\
+    \midrule
+    Hasta $\pm$3~dB          & Conforme \\
+    Entre $\pm$3 y $\pm$6~dB & Revisar el montaje contra las fotos y repetir \\
+    Más de $\pm$6~dB         & No conforme, investigar la cadena de medición \\
+    \bottomrule
+  \end{tabular}
+  \caption{Criterio de continuidad. Valores iniciales, a confirmar con el paso de repetibilidad.}
+\end{table}
+
+Diagnóstico:
+
+\begin{itemize}
+  \item Varias líneas contiguas apartadas en el mismo sentido: un elemento con respuesta en frecuencia (antena, cable, preamplificador).
+  \item Todas apartadas por igual: una ganancia o una atenuación.
+  \item Dudas sobre la fuente: capturar con la tinySA y comparar con el perfil de referencia. Si difiere en más de 1~dB, el problema está en la fuente y no en la cadena.
+\end{itemize}
+
+\newpage
+\subsection{Niveles por línea}
+
+\begin{itemize}
+  \item Una tabla por polarización y por fecha. Niveles en dB$\mu$V/m.
+  \item $L$: límite. $h_1$ a $h_3$: las tres alturas. Máx.: el mayor de los tres. $\Delta$: Máx. menos $L$.
+  \item Cargada con la medición del 13-10-2026: peine anterior (una línea cada 40~MHz, 0~dBm por cable) y sin calibración irradiada. Las líneas quedan de 26 a 39~dB sobre el límite y no tienen resultado.
+  \item Un guion indica que no se midió.
+\end{itemize}
+
+\begingroup
+\footnotesize
+\begin{longtable}{|c|c|c|c|c|c|c|c|}
+  \caption{Niveles por línea en polarización vertical, 13-10-2026.}\label{tab:niveles_v}\\
+  \hline
+  Frecuencia (MHz) & $L$ & $h_1$ & $h_2$ & $h_3$ & Máx. & $\Delta$ & Resultado \\
+  \hline
+  \endfirsthead
+  \hline
+  Frecuencia (MHz) & $L$ & $h_1$ & $h_2$ & $h_3$ & Máx. & $\Delta$ & Resultado \\
+  \hline
+  \endhead
+  \hline
+  \endfoot
+  50 & 50 & - & - & - & - & - & - \\
+  60 & 50 & 76,3 & 78,6 & 80,2 & 80,2 & +30,2 & - \\
+  70 & 50 & - & - & - & - & - & - \\
+  80 & 50 & - & - & - & - & - & - \\
+  90 & 50 & - & - & - & - & - & - \\
+  100 & 50 & 75,7 & 76,2 & 74,5 & 76,2 & +26,2 & - \\
+  110 & 50 & - & - & - & - & - & - \\
+  120 & 50 & - & - & - & - & - & - \\
+  130 & 50 & - & - & - & - & - & - \\
+  140 & 50 & 83,3 & 84,2 & 82,9 & 84,2 & +34,2 & - \\
+  150 & 50 & - & - & - & - & - & - \\
+  160 & 50 & - & - & - & - & - & - \\
+  170 & 50 & - & - & - & - & - & - \\
+  180 & 50 & 89,3 & 88,2 & 84,8 & 89,3 & +39,3 & - \\
+  190 & 50 & - & - & - & - & - & - \\
+  200 & 50 & - & - & - & - & - & - \\
+  210 & 50 & - & - & - & - & - & - \\
+  220 & 50 & 85,0 & 69,2 & 73,6 & 85,0 & +35,0 & - \\
+  230 & 50 & - & - & - & - & - & - \\
+  240 & 57 & - & - & - & - & - & - \\
+  250 & 57 & - & - & - & - & - & - \\
+  260 & 57 & 90,3 & 94,3 & 89,1 & 94,3 & +37,3 & - \\
+  270 & 57 & - & - & - & - & - & - \\
+  280 & 57 & - & - & - & - & - & - \\
+  290 & 57 & - & - & - & - & - & - \\
+  300 & 57 & 92,2 & 93,0 & 87,8 & 93,0 & +36,0 & - \\
+  310 & 57 & - & - & - & - & - & - \\
+  320 & 57 & - & - & - & - & - & - \\
+  330 & 57 & - & - & - & - & - & - \\
+  340 & 57 & 95,2 & 94,2 & 88,2 & 95,2 & +38,2 & - \\
+  350 & 57 & - & - & - & - & - & - \\
+  360 & 57 & - & - & - & - & - & - \\
+  370 & 57 & - & - & - & - & - & - \\
+  380 & 57 & 93,7 & 89,3 & 85,0 & 93,7 & +36,7 & - \\
+  390 & 57 & - & - & - & - & - & - \\
+  400 & 57 & - & - & - & - & - & - \\
+  410 & 57 & - & - & - & - & - & - \\
+  420 & 57 & 92,8 & 86,4 & 81,3 & 92,8 & +35,8 & - \\
+  430 & 57 & - & - & - & - & - & - \\
+  440 & 57 & - & - & - & - & - & - \\
+  450 & 57 & - & - & - & - & - & - \\
+  460 & 57 & 90,6 & 85,9 & 79,5 & 90,6 & +33,6 & - \\
+  470 & 57 & - & - & - & - & - & - \\
+  480 & 57 & - & - & - & - & - & - \\
+  490 & 57 & - & - & - & - & - & - \\
+  500 & 57 & 89,1 & 84,7 & 77,8 & 89,1 & +32,1 & - \\
+  510 & 57 & - & - & - & - & - & - \\
+  520 & 57 & - & - & - & - & - & - \\
+  530 & 57 & - & - & - & - & - & - \\
+  540 & 57 & 88,4 & 86,9 & 82,5 & 88,4 & +31,4 & - \\
+  550 & 57 & - & - & - & - & - & - \\
+  560 & 57 & - & - & - & - & - & - \\
+  570 & 57 & - & - & - & - & - & - \\
+  580 & 57 & 85,7 & 85,6 & 85,0 & 85,7 & +28,7 & - \\
+  590 & 57 & - & - & - & - & - & - \\
+  600 & 57 & - & - & - & - & - & - \\
+  610 & 57 & - & - & - & - & - & - \\
+  620 & 57 & 86,4 & 88,8 & 88,5 & 88,8 & +31,8 & - \\
+  630 & 57 & - & - & - & - & - & - \\
+  640 & 57 & - & - & - & - & - & - \\
+  650 & 57 & - & - & - & - & - & - \\
+  660 & 57 & 82,9 & 90,4 & 93,6 & 93,6 & +36,6 & - \\
+  670 & 57 & - & - & - & - & - & - \\
+  680 & 57 & - & - & - & - & - & - \\
+  690 & 57 & - & - & - & - & - & - \\
+  700 & 57 & 81,1 & 93,5 & 91,1 & 93,5 & +36,5 & - \\
+  710 & 57 & - & - & - & - & - & - \\
+  720 & 57 & - & - & - & - & - & - \\
+  730 & 57 & - & - & - & - & - & - \\
+  740 & 57 & 85,5 & 95,6 & 88,5 & 95,6 & +38,6 & - \\
+  750 & 57 & - & - & - & - & - & - \\
+  760 & 57 & - & - & - & - & - & - \\
+  770 & 57 & - & - & - & - & - & - \\
+  780 & 57 & 80,5 & 92,1 & 89,0 & 92,1 & +35,1 & - \\
+  790 & 57 & - & - & - & - & - & - \\
+  800 & 57 & - & - & - & - & - & - \\
+  810 & 57 & - & - & - & - & - & - \\
+  820 & 57 & 80,0 & 91,5 & 90,3 & 91,5 & +34,5 & - \\
+  830 & 57 & - & - & - & - & - & - \\
+  840 & 57 & - & - & - & - & - & - \\
+  850 & 57 & - & - & - & - & - & - \\
+  860 & 57 & 76,6 & 90,2 & 89,2 & 90,2 & +33,2 & - \\
+  870 & 57 & - & - & - & - & - & - \\
+  880 & 57 & - & - & - & - & - & - \\
+  890 & 57 & - & - & - & - & - & - \\
+  900 & 57 & 84,1 & 92,8 & 91,3 & 92,8 & +35,8 & - \\
+  910 & 57 & - & - & - & - & - & - \\
+  920 & 57 & - & - & - & - & - & - \\
+  930 & 57 & - & - & - & - & - & - \\
+  940 & 57 & 89,0 & 90,6 & 90,5 & 90,6 & +33,6 & - \\
+  950 & 57 & - & - & - & - & - & - \\
+  960 & 57 & - & - & - & - & - & - \\
+  970 & 57 & - & - & - & - & - & - \\
+  980 & 57 & 87,4 & 89,3 & 89,1 & 89,3 & +32,3 & - \\
+  990 & 57 & - & - & - & - & - & - \\
+  1000 & 57 & - & - & - & - & - & - \\
+\end{longtable}
+
+\newpage
+\begin{longtable}{|c|c|c|c|c|c|c|c|}
+  \caption{Niveles por línea en polarización horizontal, con la antena transmisora acostada, 13-10-2026.}\label{tab:niveles_h}\\
+  \hline
+  Frecuencia (MHz) & $L$ & $h_1$ & $h_2$ & $h_3$ & Máx. & $\Delta$ & Resultado \\
+  \hline
+  \endfirsthead
+  \hline
+  Frecuencia (MHz) & $L$ & $h_1$ & $h_2$ & $h_3$ & Máx. & $\Delta$ & Resultado \\
+  \hline
+  \endhead
+  \hline
+  \endfoot
+  50 & 50 & - & - & - & - & - & - \\
+  60 & 50 & - & - & - & - & - & - \\
+  70 & 50 & - & - & - & - & - & - \\
+  80 & 50 & - & - & - & - & - & - \\
+  90 & 50 & - & - & - & - & - & - \\
+  100 & 50 & - & - & - & - & - & - \\
+  110 & 50 & - & - & - & - & - & - \\
+  120 & 50 & - & - & - & - & - & - \\
+  130 & 50 & - & - & - & - & - & - \\
+  140 & 50 & - & - & - & - & - & - \\
+  150 & 50 & - & - & - & - & - & - \\
+  160 & 50 & - & - & - & - & - & - \\
+  170 & 50 & - & - & - & - & - & - \\
+  180 & 50 & - & - & - & - & - & - \\
+  190 & 50 & - & - & - & - & - & - \\
+  200 & 50 & - & - & - & - & - & - \\
+  210 & 50 & - & - & - & - & - & - \\
+  220 & 50 & - & - & - & - & - & - \\
+  230 & 50 & - & - & - & - & - & - \\
+  240 & 57 & - & - & - & - & - & - \\
+  250 & 57 & - & - & - & - & - & - \\
+  260 & 57 & - & - & - & - & - & - \\
+  270 & 57 & - & - & - & - & - & - \\
+  280 & 57 & - & - & - & - & - & - \\
+  290 & 57 & - & - & - & - & - & - \\
+  300 & 57 & - & - & - & - & - & - \\
+  310 & 57 & - & - & - & - & - & - \\
+  320 & 57 & - & - & - & - & - & - \\
+  330 & 57 & - & - & - & - & - & - \\
+  340 & 57 & - & - & - & - & - & - \\
+  350 & 57 & - & - & - & - & - & - \\
+  360 & 57 & - & - & - & - & - & - \\
+  370 & 57 & - & - & - & - & - & - \\
+  380 & 57 & - & - & - & - & - & - \\
+  390 & 57 & - & - & - & - & - & - \\
+  400 & 57 & - & - & - & - & - & - \\
+  410 & 57 & - & - & - & - & - & - \\
+  420 & 57 & - & - & - & - & - & - \\
+  430 & 57 & - & - & - & - & - & - \\
+  440 & 57 & - & - & - & - & - & - \\
+  450 & 57 & - & - & - & - & - & - \\
+  460 & 57 & - & - & - & - & - & - \\
+  470 & 57 & - & - & - & - & - & - \\
+  480 & 57 & - & - & - & - & - & - \\
+  490 & 57 & - & - & - & - & - & - \\
+  500 & 57 & - & - & - & - & - & - \\
+  510 & 57 & - & - & - & - & - & - \\
+  520 & 57 & - & - & - & - & - & - \\
+  530 & 57 & - & - & - & - & - & - \\
+  540 & 57 & - & - & - & - & - & - \\
+  550 & 57 & - & - & - & - & - & - \\
+  560 & 57 & - & - & - & - & - & - \\
+  570 & 57 & - & - & - & - & - & - \\
+  580 & 57 & - & - & - & - & - & - \\
+  590 & 57 & - & - & - & - & - & - \\
+  600 & 57 & - & - & - & - & - & - \\
+  610 & 57 & - & - & - & - & - & - \\
+  620 & 57 & - & - & - & - & - & - \\
+  630 & 57 & - & - & - & - & - & - \\
+  640 & 57 & - & - & - & - & - & - \\
+  650 & 57 & - & - & - & - & - & - \\
+  660 & 57 & - & - & - & - & - & - \\
+  670 & 57 & - & - & - & - & - & - \\
+  680 & 57 & - & - & - & - & - & - \\
+  690 & 57 & - & - & - & - & - & - \\
+  700 & 57 & - & - & - & - & - & - \\
+  710 & 57 & - & - & - & - & - & - \\
+  720 & 57 & - & - & - & - & - & - \\
+  730 & 57 & - & - & - & - & - & - \\
+  740 & 57 & - & - & - & - & - & - \\
+  750 & 57 & - & - & - & - & - & - \\
+  760 & 57 & - & - & - & - & - & - \\
+  770 & 57 & - & - & - & - & - & - \\
+  780 & 57 & - & - & - & - & - & - \\
+  790 & 57 & - & - & - & - & - & - \\
+  800 & 57 & - & - & - & - & - & - \\
+  810 & 57 & - & - & - & - & - & - \\
+  820 & 57 & - & - & - & - & - & - \\
+  830 & 57 & - & - & - & - & - & - \\
+  840 & 57 & - & - & - & - & - & - \\
+  850 & 57 & - & - & - & - & - & - \\
+  860 & 57 & - & - & - & - & - & - \\
+  870 & 57 & - & - & - & - & - & - \\
+  880 & 57 & - & - & - & - & - & - \\
+  890 & 57 & - & - & - & - & - & - \\
+  900 & 57 & - & - & - & - & - & - \\
+  910 & 57 & - & - & - & - & - & - \\
+  920 & 57 & - & - & - & - & - & - \\
+  930 & 57 & - & - & - & - & - & - \\
+  940 & 57 & - & - & - & - & - & - \\
+  950 & 57 & - & - & - & - & - & - \\
+  960 & 57 & - & - & - & - & - & - \\
+  970 & 57 & - & - & - & - & - & - \\
+  980 & 57 & - & - & - & - & - & - \\
+  990 & 57 & - & - & - & - & - & - \\
+  1000 & 57 & - & - & - & - & - & - \\
+\end{longtable}
+\endgroup
+
+% ============================================================================
+\newpage
+\section{Incertidumbre de medición}\label{sec:incertidumbre}
+
+\begin{itemize}
+  \item Errores que más pesan: receptor, factor de antena, cable, cámara, fuente y montaje. El factor de antena es el más importante, porque la verificación habitual del laboratorio (inyectar señal en el cable) no lo controla.
+  \item Cada error es una incertidumbre $u$, en dB:
+        \begin{itemize}
+          \item receptor, antena, cable y cámara: de sus certificados de calibración,
+          \item montaje: la diferencia del paso de repetibilidad,
+          \item fuente: ecuación~\eqref{eq:fuente}.
+        \end{itemize}
+  \item Se combinan con la raíz de la suma de los cuadrados, porque es poco probable que todos se den a la vez y en el mismo sentido. La suma directa da el peor caso.
+\end{itemize}
+
+\begin{equation}\label{eq:incertidumbre}
+  u_c = \sqrt{u_{rec}^2 + u_{AF}^2 + u_{cable}^2 + u_{sitio}^2 + u_{fuente}^2 + u_{montaje}^2}
+\end{equation}
+
+\begin{itemize}
+  \item Se informa $U = 2\,u_c$, que cubre el 95~\% de los casos.
+  \item Ejemplo: con $u_{rec} = 1$~dB, $u_{AF} = 2$~dB y $u_{cable} = 1{,}5$~dB, $u_c = \sqrt{1 + 4 + 2{,}25} \approx 2{,}7$~dB y $U \approx 5{,}4$~dB.
+\end{itemize}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}llp{6.2cm}c@{}}
+    \toprule
+    Contribución & Símbolo & De dónde sale & Valor (dB) \\
+    \midrule
+    Receptor         & $u_{rec}$     & Certificado de calibración del receptor & \casilla \\
+    Factor de antena & $u_{AF}$      & Certificado de calibración de la antena & \casilla \\
+    Cable            & $u_{cable}$   & Medición del cable & \casilla \\
+    Cámara           & $u_{sitio}$   & Validación de la cámara & \casilla \\
+    Fuente           & $u_{fuente}$  & Ecuación~\eqref{eq:fuente} & \casilla \\
+    Montaje          & $u_{montaje}$ & Paso de repetibilidad & \casilla \\
+    \midrule
+    Combinada        & $u_c$         & Ecuación~\eqref{eq:incertidumbre} & \casilla \\
+    Expandida        & $U = 2\,u_c$  & Doble de la combinada & \casilla \\
+    \bottomrule
+  \end{tabular}
+  \caption{Incertidumbre de la medición. Se completa con los datos de cada laboratorio.}
+\end{table}
+
+\subsection{Incertidumbre de la fuente}
+
+Tres partes, combinadas con la misma regla:
+
+\begin{itemize}
+  \item Tolerancia de la calibración: una línea se acepta a $\pm a$~dB de su objetivo, en un lugar desconocido de esa franja. Su incertidumbre es $a/\sqrt{3}$, unos 0,58~dB con $\pm 1$~dB.
+  \item Analizador de la calibración (la tinySA): $u_{analizador}$, de su hoja de datos o su certificado.
+  \item Estabilidad de la fuente: si al repetir en distintos momentos (al encenderla, después de una hora, con otra temperatura) las líneas cambian hasta $\pm d$~dB, su incertidumbre es $d/\sqrt{3}$.
+\end{itemize}
+
+\begin{equation}\label{eq:fuente}
+  u_{fuente} = \sqrt{\left(\frac{a}{\sqrt{3}}\right)^2 + u_{analizador}^2 + \left(\frac{d}{\sqrt{3}}\right)^2}
+\end{equation}
+
+\subsection{Continuidad}
+
+Propuesta, a revisar con los docentes:
+
+\begin{itemize}
+  \item La verificación compara contra el día de referencia, con la misma antena, la misma geometría y la fuente recalibrada contra el mismo perfil.
+  \item Pesa la reproducibilidad: la fuente frente al perfil, el montaje y la estabilidad del receptor.
+  \item El valor absoluto del factor de antena pesa menos que en un ensayo de conformidad, porque es el mismo en las dos mediciones salvo que la antena cambie, que es lo que se quiere detectar.
+\end{itemize}
+
+\subsection{Errores sistemáticos}
+
+Se repiten siempre igual y no se corrigen promediando:
+
+\begin{itemize}
+  \item transductor sin cargar o equivocado,
+  \item preamplificador o atenuador en otro estado,
+  \item otro cable, o la pérdida del cable sin corregir.
+\end{itemize}
+
+Se anotan en la planilla. Ante una diferencia con el límite, se revisan primero.
+
+% ============================================================================
+\section{Configuración del SDR}\label{sec:sdr}
+
+\begin{itemize}
+  \item La SDR no genera pulsos de 1~ns: la tasa máxima es 61,44~MSPS y en la PC usada el USB sostiene 40~MSPS, unos 36~MHz de ancho instantáneo.
+  \item El peine se arma por saltos del oscilador local. La SDR emite una línea por vez y el receptor, en MAX HOLD, las acumula.
+\end{itemize}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}lp{8.6cm}@{}}
+    \toprule
+    Parámetro & Valor \\
+    \midrule
+    Líneas                          & 96 (50, 60, 70, \dots, 1000~MHz) \\
+    Separación entre líneas ($f_0$) & 10~MHz \\
+    Portadora de cada línea         & línea + 6,25~MHz o línea + 10~MHz, a elegir \\
+    Tasa de muestreo                & 40~MSPS, filtro de 36~MHz \\
+    Tiempo por línea                & 7~s encendida + 0,5~s de corte, los dos ajustables \\
+    Salto de frecuencia             & en la mitad del corte \\
+    Silencio largo                  & opcional, apagado por defecto \\
+    Pasada completa                 & 12~min (23~min~12~s con el silencio largo) \\
+    Nivel conducido                 & objetivo por línea, con la ganancia de TX entre la mínima y 55~dB \\
+    Nivel irradiado                 & límite de CISPR~11 grupo~1 clase~A, en la geometría de calibración \\
+    \bottomrule
+  \end{tabular}
+  \caption{Parámetros del generador peine (flujo del EXP-27).}
+\end{table}
+
+\subsection{Separación de la portadora}
+
+\begin{itemize}
+  \item El oscilador repite cada línea en sus armónicos impares, de 9 a 28~dB por debajo, y deja además la fuga de portadora y la imagen.
+  \item Con la portadora 10~MHz arriba, esas repeticiones caen sobre otras líneas. Con líneas desiguales pueden taparlas: la de 100~MHz cae en 340~MHz unos 1,6~dB por encima de esa línea.
+  \item Con la portadora 6,25~MHz arriba, caen entre dos líneas, a 5~MHz de cada una. Sobre la grilla quedan solo los armónicos de orden 7 y 9, de $-20$ a $-25$~dBc.
+  \item Las dos opciones quedan disponibles hasta compararlas con el modo de línea fija.
+  \item Ventanas de lectura de cada línea: $\pm 3$~MHz en la tinySA y $\pm 1$~MHz en el receptor.
+  \item La grilla de 10~MHz coincide con la del Comb generator de comparación, y es más de 80 veces el RBW de 120~kHz.
+\end{itemize}
+
+\subsection{Condición para el receptor}
+
+\begin{itemize}
+  \item Cada línea está encendida 7~s y el barrido dura unos 3~s: al menos un barrido completo cae dentro de cada línea (sección~\ref{sec:receptor}).
+  \item Si el barrido dura más, subir el tiempo por línea a más del doble del barrido.
+\end{itemize}
+
+El manejo del software y las calibraciones se describen en el manual de la SDR (OE2).
+
+\end{document}
