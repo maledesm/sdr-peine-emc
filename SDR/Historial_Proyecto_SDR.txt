@@ -1,7 +1,7 @@
 ===============================================================================
 HISTORIAL DEL PROYECTO - SDR COMO GENERADOR PEINE PARA ENSAYOS DE CEM
 Trabajo Practico Integrador 2C2026 - Compatibilidad Electromagnetica - FIUBA
-Ultima actualizacion: 20/10/2026
+Ultima actualizacion: 21/10/2026
 ===============================================================================
 
 -------------------------------------------------------------------------------
@@ -2333,6 +2333,18 @@ PROCEDIMIENTO / 20-10-2026 / RE-TP-001 version 2.1 (TP1, OE1)
      tinySA y perfil) e incertidumbre con una propuesta sobre continuidad.
   A pedido del usuario, todo el texto pasa a listas y tablas, sin prosa.
 
+REPOSITORIO / 21-10-2026 / TP1 vinculado con Overleaf
+  El usuario edita el TP1 en Overleaf (con la cuenta premium de un
+  tercero que le comparte el proyecto). La version de Overleaf manda: se
+  trajo con git subtree (squash) al lugar de TPs\TP1_OE1_Procedimiento_RE,
+  remoto overleaf-tp1, rama main. La sincronizacion con GitHub de Overleaf
+  no sirve, porque vincula un repositorio entero por proyecto. La carpeta
+  del TP queda solo con lo que va a Overleaf: el PDF compilado paso a
+  TPs\PDFs y la guia del profesor a materia. Correcciones aplicadas y
+  subidas a Overleaf: polarizacion, calibracion irradiada en una altura y
+  su verificacion en la misma, tabla de geometria y 0~dB. Los comandos para
+  traer y subir estan en context.md.
+
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
   investigar la calibracion de la xA9, porque leyo que las "portadoras
@@ -2665,12 +2677,15 @@ Para la bladeRF 2.0 micro xA9, sin ninguna calibracion nuestra:
     exp27_a9_peine_10MHz_sin_placa.grc (lo mismo sin la SDR, para probar),
     archivos de objetivo y calibracion inicial, capturas de la ventana
   TPs\TP1_OE1_Procedimiento_RE\
-    main.tex y figuras (procedimiento RE-TP-001) y la guia del profesor
+    main.tex y figuras (procedimiento RE-TP-001), vinculada con Overleaf
+  TPs\PDFs\
+    el PDF compilado de cada TP
   TPs\TP2_OE2_Manual_SDR\ a TPs\TP7_Integrador_EMC_Europe\
     un proyecto de Overleaf por TP (ver docs\plan.md)
   materia\
-    consigna original, notas de clase, guia de medicion de cables y
-    reuniones\ (2026-10-01: presentacion; 2026-10-12: resumen y figuras)
+    consigna original, guia del profesor para el procedimiento de RE,
+    notas de clase, guia de medicion de cables y
+    reuniones\ (2026-10-01: presentacion, 2026-10-12: resumen y figuras)
   normas\
     CISPR_11_2024.pdf y MIL-STD-461E.pdf
   CETEM\
