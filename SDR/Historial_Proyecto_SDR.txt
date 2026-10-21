@@ -2345,6 +2345,18 @@ REPOSITORIO / 21-10-2026 / TP1 vinculado con Overleaf
   su verificacion en la misma, tabla de geometria y 0~dB. Los comandos para
   traer y subir estan en context.md.
 
+REPOSITORIO / 21-10-2026 / TP2 a TP7 vinculados con Overleaf
+  Plantillas en TPs\Plantillas, un zip por TP: generica (basada en el TP1)
+  para TP2, TP3, TP4 y TP6, y formato IEEE de congreso para TP5 y TP7,
+  sacado del paper de referencia de la catedra (solo el formato, sin su
+  texto, y el paper no queda en el repo). El usuario creo un proyecto de
+  Overleaf por zip y cada carpeta quedo vinculada con git subtree
+  (remotos overleaf-tp2 a overleaf-tp7, tabla en context.md). Contenido
+  comparado antes de reemplazar: igual, salvo los .gitkeep vacios. Los
+  siete proyectos quedaron sincronizados en los dos sentidos (subtree push
+  responde Everything up-to-date). El mismo token de Overleaf sirve para
+  todos los proyectos.
+
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
   investigar la calibracion de la xA9, porque leyo que las "portadoras
@@ -2681,7 +2693,9 @@ Para la bladeRF 2.0 micro xA9, sin ninguna calibracion nuestra:
   TPs\PDFs\
     el PDF compilado de cada TP
   TPs\TP2_OE2_Manual_SDR\ a TPs\TP7_Integrador_EMC_Europe\
-    un proyecto de Overleaf por TP (ver docs\plan.md)
+    un proyecto de Overleaf por TP, vinculados (ver context.md)
+  TPs\Plantillas\
+    los zip con que se crearon los proyectos de Overleaf
   materia\
     consigna original, guia del profesor para el procedimiento de RE,
     notas de clase, guia de medicion de cables y
