@@ -43,4 +43,6 @@ Los TP1 a TP5 forman la fase 1 y los TP6 y TP7, la fase 2. TP1 a TP4 van en espa
 
 Las reglas para trabajar en el proyecto (seguridad de los equipos, forma de trabajo y estilo) están en [context.md](context.md).
 
+Los TPs se editan en Overleaf. Cada carpeta de `TPs/` vinculada se sincroniza con su proyecto mediante `git subtree`, y los PDF compilados están en [`TPs/PDFs/`](TPs/PDFs/). Antes de cualquier commit, pull o push hay que sincronizar también los proyectos de Overleaf: los pasos están en la sección Overleaf de [context.md](context.md).
+
 Herramientas: GNU Radio 3.10 (Radioconda) con gr-osmosdr, bladeRF-cli, tinySA Ultra+ como analizador de banco, pdfLaTeX (MiKTeX) y Overleaf.

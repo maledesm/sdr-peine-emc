@@ -9,6 +9,7 @@ Este archivo reúne las reglas para trabajar en el proyecto. Conviene leerlo ant
 1. [docs/plan.md](docs/plan.md), con los objetivos, las tareas y las fechas. Es el único lugar del plan.
 2. [docs/conocimiento_tecnico.md](docs/conocimiento_tecnico.md), con los equipos, los límites y los hallazgos ya verificados. No hace falta volver a descubrirlos.
 3. [docs/historial.md](docs/historial.md), con la cronología. El detalle de cada experimento está en [SDR/Historial_Proyecto_SDR.txt](SDR/Historial_Proyecto_SDR.txt).
+4. La sección Overleaf de este archivo, antes de tocar un TP o hacer cualquier operación de Git.
 
 ## Seguridad de los equipos (no negociable)
 
@@ -43,8 +44,31 @@ Este archivo reúne las reglas para trabajar en el proyecto. Conviene leerlo ant
 
 - GitHub privado `maledesm/sdr-peine-emc`, todo directo en `main`. Lo que se sube se elige en `.gitignore` (lista blanca).
 - No se suben `privado/` (material del profesor) ni `CONAE/` (otro proyecto).
-- Las carpetas de TP vinculadas con Overleaf se sincronizan con `git subtree`. La versión de Overleaf manda: antes de tocar el `.tex` en el repo, traer lo de Overleaf.
-  - TP1: remoto `overleaf-tp1`, rama `main`.
-  - Traer: `git subtree pull --prefix=TPs/TP1_OE1_Procedimiento_RE overleaf-tp1 main --squash`.
-  - Subir: `git subtree push --prefix=TPs/TP1_OE1_Procedimiento_RE overleaf-tp1 main`.
+- Cada commit lleva como título la descripción de la carpeta que toca, para que GitHub la siga mostrando en la lista de carpetas. Si toca varias carpetas, un commit por carpeta. El detalle va en el cuerpo del mensaje.
+
+## Overleaf (sincronización de los TPs)
+
+Los TPs se editan en Overleaf. Cada carpeta de `TPs/` vinculada es un `git subtree` de su proyecto de Overleaf, y la versión de Overleaf manda. Toda operación de Git sobre el repo (commit, pull, push) tiene que tener en cuenta también los proyectos de Overleaf.
+
+| TP | Carpeta | Remoto | Dirección |
+|---|---|---|---|
+| TP1 | `TPs/TP1_OE1_Procedimiento_RE` | `overleaf-tp1` | `https://git@git.overleaf.com/6ad8258ac639ee8038bd9fc0` |
+
+Rutina:
+1. Antes de tocar un TP, y antes de cualquier commit o `git push`, traer lo de Overleaf de cada proyecto vinculado: `git subtree pull --prefix=<carpeta> <remoto> main --squash`.
+2. Después de hacer el commit de un cambio en la carpeta de un TP, subirlo a Overleaf: `git subtree push --prefix=<carpeta> <remoto> main`.
+3. Antes de `git push` a GitHub, confirmar que todos los proyectos de Overleaf quedaron al día en los dos sentidos.
+
+Detalles:
+- La rama de Overleaf es `main`. El token de Overleaf lo escribe Martín, nunca quien asiste, y queda guardado en el administrador de credenciales de Windows.
+- La carpeta de un TP tiene solo lo que va a Overleaf. El PDF compilado va en `TPs/PDFs/`.
+- En un clon nuevo del repo faltan los remotos: `git remote add <remoto> <dirección>` para cada fila de la tabla.
+- No usar la sincronización con GitHub de Overleaf: vincula un repositorio entero por proyecto.
+- Vincular un proyecto nuevo:
+  1. crear el proyecto en Overleaf (por ejemplo, subiendo el .zip de la plantilla),
+  2. `git remote add overleaf-tpN <dirección>` y `git fetch overleaf-tpN`, este último lo corre Martín con su token,
+  3. sacar la carpeta del TP del repo con un commit (lo que no va a Overleaf se mueve antes a otro lado),
+  4. `git subtree add --prefix=<carpeta> overleaf-tpN main --squash`,
+  5. agregar la fila a la tabla de arriba.
+- Si Windows no deja borrar una carpeta vacía ("busy"), suele ser una terminal o una ventana abierta en ella.
 - Antes de hacer `git push`, confirmar con Martín. Antes de borrar algo, verificar qué es y consultarlo.
