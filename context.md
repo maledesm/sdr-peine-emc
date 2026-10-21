@@ -65,6 +65,8 @@ Rutina:
 2. Después de hacer el commit de un cambio en la carpeta de un TP, subirlo a Overleaf: `git subtree push --prefix=<carpeta> <remoto> main`.
 3. Antes de `git push` a GitHub, confirmar que todos los proyectos de Overleaf quedaron al día en los dos sentidos.
 
+Los pasos 1 y 2 para los siete TPs juntos los hacen `traer_de_overleaf.bat` y `subir_a_overleaf.bat`, en la raíz del repo. Si se agrega un proyecto, sumarlo también en los dos .bat.
+
 Detalles:
 - Todos los TPs están vinculados. Las plantillas con que se crearon los proyectos están en `TPs/Plantillas/` (TP5 y TP7 en formato IEEE de congreso, con su letra Times).
 - El primer pull después de un push crea un commit de unión sin cambios de archivos. Es normal.

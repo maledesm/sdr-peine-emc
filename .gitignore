@@ -5,6 +5,8 @@
 !/.gitattributes
 !/README.md
 !/context.md
+!/traer_de_overleaf.bat
+!/subir_a_overleaf.bat
 !/docs/
 !/TPs/
 !/SDR/
