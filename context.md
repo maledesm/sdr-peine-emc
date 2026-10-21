@@ -53,6 +53,12 @@ Los TPs se editan en Overleaf. Cada carpeta de `TPs/` vinculada es un `git subtr
 | TP | Carpeta | Remoto | Dirección |
 |---|---|---|---|
 | TP1 | `TPs/TP1_OE1_Procedimiento_RE` | `overleaf-tp1` | `https://git@git.overleaf.com/6ad8258ac639ee8038bd9fc0` |
+| TP2 | `TPs/TP2_OE2_Manual_SDR` | `overleaf-tp2` | `https://git@git.overleaf.com/6ad82e4108e3de47cf251656` |
+| TP3 | `TPs/TP3_OR3_Reporte_RE` | `overleaf-tp3` | `https://git@git.overleaf.com/6ad82ea02324e25380499180` |
+| TP4 | `TPs/TP4_OE4_Calibracion_RS` | `overleaf-tp4` | `https://git@git.overleaf.com/6ad82eaef67a96b728317bb5` |
+| TP5 | `TPs/TP5_OE5_Paper_v1` | `overleaf-tp5` | `https://git@git.overleaf.com/6ad82ecbf4f2b91a61df4dc7` |
+| TP6 | `TPs/TP6_OE7_Punta_de_Corriente` | `overleaf-tp6` | `https://git@git.overleaf.com/6ad82efceeda62b7c26baaa3` |
+| TP7 | `TPs/TP7_Integrador_EMC_Europe` | `overleaf-tp7` | `https://git@git.overleaf.com/6ad82f156fc9e5d486be2f91` |
 
 Rutina:
 1. Antes de tocar un TP, y antes de cualquier commit o `git push`, traer lo de Overleaf de cada proyecto vinculado: `git subtree pull --prefix=<carpeta> <remoto> main --squash`.
@@ -60,6 +66,9 @@ Rutina:
 3. Antes de `git push` a GitHub, confirmar que todos los proyectos de Overleaf quedaron al día en los dos sentidos.
 
 Detalles:
+- Todos los TPs están vinculados. Las plantillas con que se crearon los proyectos están en `TPs/Plantillas/` (TP5 y TP7 en formato IEEE de congreso, con su letra Times).
+- El primer pull después de un push crea un commit de unión sin cambios de archivos. Es normal.
+- Al titular los commits de pull, usar `-m "Trabajos prácticos del proyecto"`, la descripción de la carpeta `TPs`.
 - La rama de Overleaf es `main`. El token de Overleaf lo escribe Martín, nunca quien asiste, y queda guardado en el administrador de credenciales de Windows.
 - La carpeta de un TP tiene solo lo que va a Overleaf. El PDF compilado va en `TPs/PDFs/`.
 - En un clon nuevo del repo faltan los remotos: `git remote add <remoto> <dirección>` para cada fila de la tabla.
