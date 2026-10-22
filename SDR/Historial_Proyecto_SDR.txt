@@ -2199,7 +2199,7 @@ PROCEDIMIENTO / 19-10-2026 / RE-TP-001 version 2.0 (TP1, OE1)
   a 39 dBuV/m, casi sobre el limite de 40). Con 96 lineas y silencio la
   pasada duraba 19 min 12 s con 6 s por linea (con 7 s, 22 min 24 s).
 
-EXP-27 / diseno 20-10-2026 / xA9: peine cada 10 MHz calibrado hacia la mascara  [PENDIENTE]
+EXP-27 / diseno 20-10-2026 / xA9: peine cada 10 MHz calibrado hacia la mascara  [REEMPLAZADO POR EL EXP-28]
   Flujo: SDR\A9_21_EXP27_Peine_cada_10MHz\exp27_a9_peine_10MHz.grc
   Decisiones del usuario del 20-10:
    - Mascara: CISPR 11 grupo 1 clase A (<= 20 kVA), a 3 m 50 dBuV/m hasta
@@ -2356,6 +2356,100 @@ REPOSITORIO / 21-10-2026 / TP2 a TP7 vinculados con Overleaf
   siete proyectos quedaron sincronizados en los dos sentidos (subtree push
   responde Everything up-to-date). El mismo token de Overleaf sirve para
   todos los proyectos.
+
+EXP-28 / diseno 22-10-2026 / xA9: peine cada 10 MHz, botones simples y tres versiones  [PENDIENTE]
+  Carpeta: SDR\A9_22_EXP28_Peine_calibracion_CISPR\ (el EXP-27 queda como
+  estaba, como historia). Mismo peine que el EXP-27: 96 lineas de 50 a
+  1000 MHz, un tono por portadora 6,25 o 10 MHz arriba, 40 MSPS, 7 s por
+  linea y 0,5 s de corte.
+  Decisiones del usuario del 22-10:
+   - El objetivo irradiado es siempre CISPR 11 grupo 1 clase A. Sale el
+     selector de mascara.
+   - La conducida lleva todas las lineas a un mismo nivel. El objetivo
+     inicial es plano (campo "Nivel al reiniciar", -33 dBm por defecto),
+     sin usar la estimacion del 13-10.
+   - Botones: Reiniciar calibracion (objetivo plano y todas las lineas con
+     la misma amplitud, con confirmacion y copia en respaldos\),
+     1. Calibracion conducida (.csv de la tinySA), 2. Calibracion irradiada
+     (UNA traza .DAT, relativa a lo cargado: otra traza hace un ajuste
+     fino), 3. Guardar patron (.csv por cable del peine calibrado) y Cargar
+     patron (lo pone como objetivo para repetir la emision otro dia). Salen
+     Guardar calibracion, Importar calibracion previa e Importar objetivo:
+     todo se carga solo al abrir.
+   - La irradiada usa una sola traza, en una altura. Las otras alturas y
+     la horizontal solo comprueban el funcionamiento.
+   - La traza tiene que estar en dBuV/m (renglon y-Unit del .DAT). Con otra
+     unidad, sin unidad o con mas de una traza, mensaje en rojo y no se
+     corrige nada. La misma traza no se puede usar dos veces, aunque tenga
+     otro nombre: se compara el contenido con una huella md5, anotada en
+     trazas_usadas.txt.
+   - El control del piso por linea queda para despues de probarlo.
+  Tres versiones con el mismo snippet:
+   - exp28_a9_peine.grc, para el CETEM.
+   - exp28_a9_peine_casa.grc: la irradiada lee capturas .csv de la tinySA
+     con su antena y las pasa a campo con E = P + 107 + factor de antena
+     (campo ajustable, 35 dB/m por defecto). Archivos con prefijo casa_.
+   - exp28_a9_peine_demo.grc: sin placa, para mostrar la ventana. Arranca
+     emitiendo y carga datos de ejemplo (demo_*.txt). Archivos demo_.
+  Agregados en la revision, a pedido del usuario de buscar errores:
+   - Despues de cada conducida la ventana dice entre cuantos dB del
+     objetivo estaba lo leido, en verde si queda en +/-1 dB y en rojo si no.
+   - Si la irradiada deja lineas sin margen, avisa que ganancia poner.
+   - Si mas de 10 lineas quedan a mas del tope del limite, la traza no es
+     la del peine calibrado y se rechaza entera (solo en la version del
+     CETEM: en casa las lineas bajo el piso son esperables). Con una traza
+     real del 13-10 (peine viejo a 0 dBm) el boton sin este control
+     corregia 36 lineas con valores sin sentido.
+   - Los archivos se leen y escriben en la carpeta del programa aunque se
+     lo abra desde otro lado, y en UTF-8.
+   - Error heredado del EXP-27: GRC pone cada etiqueta en una barra de
+     herramientas que esconde detras de >> el texto que no entra. A 1536 px
+     de ancho desaparecian el mensaje de la irradiada, la linea y la
+     salida. El snippet pasa cada barra a un renglon comun, y los tres
+     renglones de estado siguen en un segundo renglon si hace falta.
+   - El bloque Options quedaba encima de samp_rate (tambien en el EXP-27).
+  Probado sin la placa (osmosdr falso, Qt de Windows con la ventana sin
+  mostrar): 45 controles bien en las tres versiones, entre ellos la
+  conducida (recupera la respuesta de la placa dentro de 0,35 dB), la
+  irradiada (lleva el objetivo a lo que pide la mascara dentro de 0,6 dB),
+  los rechazos, reiniciar, guardar y cargar patron, volver a abrir y una
+  sola resintonia por linea. Ventana minima de 1361 x 745 a escala 125 %,
+  sin barras de desplazamiento en 1536 x 780. La plataforma offscreen de
+  Qt no sirve para medir la ventana: tiene la letra rota y la agranda.
+  Tope de correccion irradiada: con las trazas del SDR del 13-10, partiendo
+  de -33 dBm planos y en una sola altura, 1 o 2 de 24 lineas piden mas de
+  10 dB de correccion (hasta +13,8 dB). Con el tope de 10 dB esas lineas no
+  se corregian nunca. Decision del usuario: tope de 15 dB. Probado: lineas
+  que piden +13,8, +13,0 y -12,5 dB se corrigen, y la traza real del 13-10
+  se sigue rechazando (43 lineas a mas de 15 dB). Las 45 pruebas siguen
+  bien.
+  Barrido del receptor: el usuario verifico en el CETEM que barre de 30 MHz
+  a 1 GHz en unos 3 s. Es un barrido en el dominio del tiempo: los 50 ms de
+  Meas Time del .DAT son por bloque, no por punto.
+
+PROCEDIMIENTO / 22-10-2026 / RE-TP-001 version 2.2 (TP1, OE1)
+  Archivo: TPs\TP1_OE1_Procedimiento_RE\main.tex (compila, 12 paginas,
+  antes 16).
+  Adaptado al EXP-28: objetivo conducido plano (-33 dBm al reiniciar), una
+  sola traza en la calibracion irradiada con ajuste fino, tope de 15 dB,
+  verificacion conducida de +/-1 dB con el boton 1, patron en lugar de
+  perfil de referencia (Guardar y Cargar patron). Las otras alturas y la
+  horizontal solo comprueban el funcionamiento.
+  Recortes de repeticiones, a pedido del usuario:
+   - Tablas de niveles: la del 13-10 queda solo con las 24 lineas medidas,
+     y la horizontal vacia se reemplaza por una planilla de 96 lineas en
+     dos columnas, en una pagina.
+   - Geometria: solo la tabla (la lista decia lo mismo).
+   - Piso y +/-3 dB: solo en el criterio de aceptacion. La configuracion
+     del receptor, el ruido de fondo y la verificacion remiten a el.
+   - "Condicion para el receptor" pasa a la configuracion del receptor.
+   - Finalidad: una frase con referencias en lugar de los tres pasos.
+   - Queda una sola figura generica (fig_esquema_general). Las otras dos
+     siguen en la carpeta pero no se usan.
+   - Un solo titulo al principio.
+   - "Separacion de la portadora" pasa al TP2
+     (desde_TP1_software_y_calibracion.tex). En el TP1 queda la fila de la
+     tabla de parametros y una fila nueva con las ventanas de lectura.
 
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
@@ -2688,6 +2782,10 @@ Para la bladeRF 2.0 micro xA9, sin ninguna calibracion nuestra:
     hacia un objetivo, irradiada hacia la mascara y perfil de referencia),
     exp27_a9_peine_10MHz_sin_placa.grc (lo mismo sin la SDR, para probar),
     archivos de objetivo y calibracion inicial, capturas de la ventana
+  SDR\A9_22_EXP28_Peine_calibracion_CISPR\
+    exp28_a9_peine.grc (CETEM), exp28_a9_peine_casa.grc (irradiada con la
+    tinySA) y exp28_a9_peine_demo.grc (sin placa, datos demo_*.txt),
+    capturas de la ventana
   TPs\TP1_OE1_Procedimiento_RE\
     main.tex y figuras (procedimiento RE-TP-001), vinculada con Overleaf
   TPs\PDFs\
