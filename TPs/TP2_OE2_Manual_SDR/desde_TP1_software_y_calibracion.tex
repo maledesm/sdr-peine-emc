@@ -35,3 +35,14 @@ Se hace con la SDR conectada por cable al analizador portátil, con atenuación 
 \end{enumerate}
 
 La calibración vale para el cable y el analizador con que se hizo. Lleva unos 20~minutos.
+
+% Viene de la seccion 8.1 del RE-TP-001 v2.2 (TP1), sacada de ahi el 22-10-2026
+\section{Separación de la portadora}\label{anexo:separacion}
+
+\begin{itemize}
+  \item El oscilador repite cada línea en sus armónicos impares, de 9 a 28~dB por debajo, y deja además la fuga de portadora y la imagen.
+  \item Con la portadora 10~MHz arriba, esas repeticiones caen sobre otras líneas. Con líneas desiguales pueden taparlas: la de 100~MHz cae en 340~MHz unos 1,6~dB por encima de esa línea.
+  \item Con la portadora 6,25~MHz arriba, caen entre dos líneas, a 5~MHz de cada una. Sobre la grilla quedan solo los armónicos de orden 7 y 9, de $-20$ a $-25$~dBc.
+  \item Las dos opciones quedan disponibles hasta compararlas con el modo de línea fija.
+  \item La grilla de 10~MHz coincide con la del Comb generator de comparación, y es más de 80 veces el RBW de 120~kHz.
+\end{itemize}
