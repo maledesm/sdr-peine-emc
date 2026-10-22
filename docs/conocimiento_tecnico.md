@@ -20,7 +20,7 @@ Lo verificado midiendo o leyendo código fuente. El detalle de cada medición es
 - La calibración por cable lee el .csv del analizador ("Generar calibración"), toma el máximo a ±4 MHz de cada línea y la lleva a 0 dBm. Se guarda en un archivo, se importa en la cámara y admite retoque manual.
 - Por cable, planitud de 1,1 dB (de −0,8 a +0,3 dBm) y desvío de 0,28 dB.
 - El EXP-26 suma selector de ganancia, línea fija, botón "Congelar" y casilla de silencio.
-- El próximo peine (EXP-27) va con una línea cada 10 MHz, de 50 MHz a 1 GHz, 7 s por línea y 7 s de silencio, y una calibración irradiada contra el límite de CISPR 11 (ver el [plan](plan.md)).
+- El peine actual (EXP-28) va con una línea cada 10 MHz, de 50 MHz a 1 GHz, 7 s por línea y 0,5 s de corte, objetivo conducido plano y una calibración irradiada con una sola traza contra CISPR 11 grupo 1 clase A (ver el [plan](plan.md)).
 
 ## Hallazgos de la xA9
 
@@ -40,10 +40,13 @@ Lo verificado midiendo o leyendo código fuente. El detalle de cada medición es
 - La amplitud digital sale con el retardo del buffer, mientras que frecuencia y ganancia son inmediatas.
 - Si el cierre del flujo se cuelga, el TX puede quedar habilitado. Verificar que no quede un proceso de Python con la placa tomada.
 - El barrido no usa Python: un Function Probe recorre una lista y una cascada de bloques Variable.
+- Los QT GUI Label y Chooser van dentro de una barra de herramientas que esconde detrás de un >> el texto que no entra. El EXP-28 los pasa a un renglón común desde el snippet.
+- Para medir la ventana sin mostrarla, la plataforma offscreen de Qt no sirve (la letra sale rota y agranda todo). Con la de Windows y `WA_DontShowOnScreen` la ventana se arma de verdad.
 
 ## CETEM (13-10-2026)
 
 Ver el [historial](historial.md) y el dashboard [`CETEM/Visita CETEM.html`](../CETEM/Visita%20CETEM.html).
+- El ESR-7 barre de 30 MHz a 1 GHz en unos 3 s, en el dominio del tiempo: los 50 ms de "Meas Time" del encabezado son por bloque, no por punto.
 - Los .DAT del R&S ESR-7 traen un encabezado de pares clave y valor, la cantidad de puntos y una fila por punto con la frecuencia en Hz y el nivel en dBµV/m (cable y bilog incluidos), separados por punto y coma. Se midió con MAX PEAK, MAX HOLD, RBW de 120 kHz, paso de 30 kHz, 50 ms por punto y preamplificador de 20 dB.
 - El atenuador del receptor está compensado en los niveles mostrados, pero sube el piso. Con 20 dB el piso quedó entre 37 y 39 dBµV/m, unos 10 dB más alto que con 10 dB. En el dashboard todo está llevado a 20 dB.
 - Con 0 dBm por cable, el máximo de las tres alturas en vertical quedó entre 36 y 49 dB por encima del límite de CISPR 11.

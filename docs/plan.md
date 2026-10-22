@@ -27,7 +27,10 @@ Procedimiento normativo formal, paso a paso, para el ensayo de RE en laboratorio
 - [x] Versión 2.0 del RE-TP-001 (19-10). Dos calibraciones, una conducida a bajo nivel y otra irradiada que deja cada línea sobre el límite de CISPR 11 grupo 1 clase B, peine con una línea cada 10 MHz, tres alturas de antena, solo antena Bilog Hybrid, planilla y tablas con la medición del 13-10 e incertidumbre simplificada.
 - [x] Geometría de calibración en vertical, con el mayor nivel de las tres alturas. La horizontal se mide con la antena transmisora acostada, para comprobar que esa polarización funciona, sin compararla con el límite.
 - [x] Sin pendientes en rojo (19-10). Distancia del 13-10 confirmada en 3 m, 7 s por línea con un barrido de unos 3 s, e incertidumbre con fórmulas y una tabla para completar.
-- [ ] Confirmar con el CETEM que el receptor barra de 30 MHz a 1 GHz en unos 3 s (según el encabezado del 13-10 el barrido duraba unos 27 min) y pedir los certificados para la tabla de incertidumbre.
+- [x] El receptor barre de 30 MHz a 1 GHz en unos 3 s (lo verificó Martín en el CETEM, barrido en el dominio del tiempo).
+- [x] Versión 2.2 (22-10): software del EXP-28, objetivo inicial plano, una sola traza en la irradiada y patrón.
+- [ ] Pedir al CETEM los certificados para la tabla de incertidumbre.
+- [x] Repeticiones recortadas (22-10): de 16 a 12 páginas, con una planilla de niveles en una página. La separación de la portadora pasó al TP2.
 - [ ] Revisión de los docentes.
 
 ### TP2 · OE2 · Manual y procedimiento funcional de la SDR
@@ -53,10 +56,12 @@ Título tentativo: "Preverificaciones de RE con comb generator a base de SDR". E
 - [ ] Al menos 20 referencias de valor ([bibliografia.md](bibliografia.md)): normas (CISPR 11, CISPR 16, IEC 61000-4-3, MIL-STD-461, ECSS-E-ST-20), artículos, datasheets (bladeRF 2.0 micro, AD9361) y manuales (tinySA, receptor R&S).
 - [ ] Confirmar en IEEE Xplore que no hay trabajos iguales y consultar al INTI el alcance de su calibración en EMC.
 
-### EXP-27 · Peine cada 10 MHz y calibración conducida a bajo nivel
-- [ ] Flujo con 96 líneas de 50 MHz a 1 GHz, una cada 10 MHz, con la portadora 10 MHz arriba de cada línea y 7 s por línea con 7 s de silencio (pasada de 22 min 24 s).
-- [ ] Elegir el nivel conducido y si se baja con la ganancia de TX o con la amplitud digital, según cuál deje mejor relación entre líneas y espurias. Con lo medido el 13-10, para llegar al límite las líneas tienen que bajar entre 36 y 49 dB respecto de 0 dBm.
-- [ ] Generar la calibración irradiada a partir de las trazas del receptor, con el límite de CISPR 11 como objetivo.
+### EXP-27 y EXP-28 · Peine cada 10 MHz calibrado hacia CISPR 11 clase A
+- [x] Flujo con 96 líneas de 50 MHz a 1 GHz, una cada 10 MHz (EXP-27, 20-10). Rehecho en el EXP-28 (22-10) con Reiniciar, conducida, irradiada con una sola traza, guardar y cargar patrón, más una versión de casa (irradiada con la tinySA) y una demo sin placa.
+- [x] Nivel conducido: objetivo plano de −33 dBm, que la irradiada corrige línea por línea. Se baja con la ganancia de TX (la mínima que muestra la ventana) y la amplitud digital corrige cada línea.
+- [x] Tope de corrección irradiada en 15 dB (22-10). Con 10 dB, 1 o 2 de cada 24 líneas del 13-10 no se corregían.
+- [ ] Calibración conducida real con la tinySA, irradiada y verificación en casa, y patrón para la prueba de repetibilidad.
+- [ ] Calibración irradiada en el CETEM con el límite de CISPR 11 como objetivo.
 - [ ] Verificar con el modo de línea fija que ninguna repetición de otra línea tape a una línea débil.
 
 ## Fase 2

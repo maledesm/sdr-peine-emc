@@ -24,6 +24,9 @@ Resumen cronológico de lo hecho: visitas, reuniones, experimentos y decisiones.
 | 16-10-2026 | Reunión con el profesor. Le gusta el trabajo y se acuerdan mejoras técnicas, tres ejercicios y una hoja de ruta hacia el paper (hoy en [plan.md](plan.md)). Se crea este repositorio y se hace la búsqueda bibliográfica (47 papers). |
 | 18-10-2026 | Se redefine el plan con los docentes. La primera parte son cinco TPs (procedimiento de RE, manual de la SDR, reporte de RE, procedimiento de calibración de RS y paper v1), entregados juntos como primer parcial. La segunda son la punta de corriente y el integrador, un paper para EMC Europe 2027 (entrega 22-02-2027). Se adopta el Aprendizaje Basado en Proyectos. Ver [plan.md](plan.md). |
 | 19-10-2026 | Repositorio reorganizado por TPs, con las normas y el material de la materia en sus carpetas. Versión 2.0 del procedimiento RE-TP-001 (TP1), con una calibración conducida y otra irradiada contra el límite de CISPR 11 y un peine cada 10 MHz. |
+| 20-10-2026 | Diseño del EXP-27, peine cada 10 MHz con calibración conducida, irradiada y perfil de referencia. Versión 2.1 del TP1, con CISPR 11 grupo 1 clase A. |
+| 21-10-2026 | Los siete TPs quedan vinculados con sus proyectos de Overleaf. |
+| 22-10-2026 | EXP-28: el flujo del EXP-27 con objetivo plano, botones Reiniciar, conducida, irradiada con una sola traza y patrón, más versiones de casa y demo, probadas sin la placa. Martín confirma que el receptor del CETEM barra la banda en unos 3 s. Versión 2.2 del TP1, sin repeticiones (de 16 a 12 páginas). |
 
 ## Etapas
 
@@ -49,6 +52,5 @@ Cinco TPs antes del primer parcial y el paper para EMC Europe 2027 como integrad
 ## Preguntas abiertas
 - Si el silencio entre saltos estaba activado en el CETEM. Con silencio la pasada dura 4,8 min y sin silencio 2,4 min, así que si duró unos 2,5 min estaba desactivado.
 - La causa de los picos en frecuencias de portadora, de los picos sueltos y del pico recurrente en 750 MHz.
-- Cómo tomó el receptor cada traza. Con paso de 30 kHz y 50 ms por punto, un barrido tardaría unos 27 min.
 - El significado de "1 M, 2 M, 3 M" (se asumió altura de antena) y "cara" (posición de la mesa) en los nombres de archivo.
 - La robustez del USB, porque hubo un corte a los 15 min con el cable original.
