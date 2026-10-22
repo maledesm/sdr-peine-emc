@@ -267,7 +267,7 @@ Procedimiento de laboratorio para evaluar las emisiones radiadas de un Comb Gene
   \item Lleva cada línea a su objetivo en dBm, guardado en el archivo de objetivo.
   \item Objetivo inicial: plano, el mismo nivel para todas las líneas ($-33$~dBm por defecto). Lo deja el botón Reiniciar calibración, que además pone todas las líneas con la misma amplitud. La calibración irradiada lo corrige después línea por línea.
   \item La ganancia de TX fija el nivel base y la amplitud digital corrige cada línea.
-  \item Vale para la separación de la portadora con que se hizo (6,25 o 10~MHz), la tinySA y el cable.
+  \item Vale para la separación de la portadora con que se hizo (6,25 o 10~MHz, cada una con su tasa de muestreo), la tinySA y el cable.
 \end{itemize}
 
 \begin{enumerate}
@@ -545,7 +545,7 @@ Diagnóstico:
 \section{Configuración del SDR}\label{sec:sdr}
 
 \begin{itemize}
-  \item La SDR no genera pulsos de 1~ns: la tasa máxima es 61,44~MSPS y en la PC usada el USB sostiene 40~MSPS, unos 36~MHz de ancho instantáneo.
+  \item La SDR no genera pulsos de 1~ns: la tasa máxima es 61,44~MSPS. El peine usa 20 o 30~MSPS según la separación de la portadora, menos de los 40~MSPS que sostiene el USB de la PC usada.
   \item El peine se arma por saltos del oscilador local. La SDR emite una línea por vez y el receptor, en MAX HOLD, las acumula.
 \end{itemize}
 
@@ -559,7 +559,7 @@ Diagnóstico:
     Separación entre líneas ($f_0$) & 10~MHz \\
     Portadora de cada línea         & línea + 6,25~MHz o línea + 10~MHz, a elegir y anotar en la planilla \\
     Ventana de lectura de cada línea & $\pm 3$~MHz en la tinySA y $\pm 1$~MHz en el receptor \\
-    Tasa de muestreo                & 40~MSPS, filtro de 36~MHz \\
+    Tasa de muestreo                & 20~MSPS con la portadora a 6,25~MHz y 30~MSPS con 10~MHz, filtro del 90~\% de la tasa. La separación se cambia solo en PAUSA \\
     Tiempo por línea                & 7~s encendida + 0,5~s de corte, los dos ajustables \\
     Salto de frecuencia             & en la mitad del corte \\
     Silencio largo                  & opcional, apagado por defecto \\
