@@ -1,4 +1,4 @@
-# ejemplo para la demo, valores leidos con ganancia 45 dB, portadora 6.25 MHz sobre la linea
+# ejemplo para la demo, valores leidos con ganancia 45 dB, portadora 6.25 MHz sobre la linea, tasa 20 MSPS
 50 -23.2
 60 -23.0
 70 -22.9

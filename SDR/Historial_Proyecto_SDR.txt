@@ -2451,6 +2451,33 @@ PROCEDIMIENTO / 22-10-2026 / RE-TP-001 version 2.2 (TP1, OE1)
      (desde_TP1_software_y_calibracion.tex). En el TP1 queda la fila de la
      tabla de parametros y una fila nueva con las ventanas de lectura.
 
+EXP-28 / resultado y cambio 22-10-2026 / primera conducida real y tasa atada a la separacion
+  Primera conducida real con la xA9, version de casa, todavia a 40 MSPS,
+  separacion 6,25 MHz, cable a la tinySA (atenuacion 0 dB, RBW 300 kHz,
+  MAX HOLD). Archivos en SDR\A9_22_EXP28_Peine_calibracion_CISPR\:
+  casa_cond_1.csv (sin calibrar, captura SA_261022_185845.bmp) y
+  casa_cond_ver.csv (calibrado, captura SA_261022_191540.bmp).
+   - Sin calibrar: lineas de -41,5 a -36,8 dBm (mediana -38,2, desvio
+     1,2 dB). Las mas bajas, de 810 a 860 MHz.
+   - Con una calibracion (boton 1 con una sola captura): de -34,6 a
+     -32,4 dBm contra el objetivo de -33 (mediana -33,2, desvio 0,35 dB).
+     Dos lineas fuera de +/-1 dB: 50 MHz (-34,6) y 290 MHz (-34,5). Hacia
+     falta una vuelta mas del boton 1.
+  Cambio pedido por el usuario: la tasa de muestreo va atada a la
+  separacion, 20 MSPS con la portadora a 6,25 MHz y 30 MSPS con 10 MHz
+  (filtro del 90 %, 18 y 27 MHz). La mitad de datos por el USB que a 40
+  MSPS. La imagen del muestreo cae 20 o 30 MHz arriba de la linea, sobre la
+  grilla. Bloques USB de 128 a 64, para que la amplitud siga llegando a la
+  salida en unos 50 ms (52 ms a 20 MSPS y 35 ms a 30 MSPS) y el corte
+  minimo de 0,2 s siga alcanzando. GNU Radio cambia la tasa del sumidero al
+  cambiar la separacion, aun emitiendo: cambiarla solo en PAUSA.
+  La calibracion y el patron anotan la tasa en el encabezado. Una
+  calibracion sin tasa (como la de arriba, a 40 MSPS) no se carga al abrir
+  y pide Reiniciar. Un patron sin tasa no se carga.
+  Probado sin la placa: 45 controles de antes, 4 del tope de 15 dB y 15
+  nuevos de la tasa, todos bien. Falta probar con la placa: LED fijo a 20 y
+  30 MSPS, planitud por cable y que no aparezcan espurias nuevas.
+
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
   investigar la calibracion de la xA9, porque leyo que las "portadoras

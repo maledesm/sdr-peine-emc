@@ -44,10 +44,16 @@ blocks:
 - name: samp_rate
   id: variable
   parameters:
-    comment: 'Tasa de muestreo. Con 40 MSPS la imagen del
+    comment: 'Tasa de muestreo atada a la separacion: 20
 
-      muestreo cae 40 MHz arriba de la linea'
-    value: 40e6
+      MSPS con la portadora a 6,25 MHz y 30 MSPS
+
+      con 10 MHz. La imagen del muestreo cae 20 o
+
+      30 MHz arriba de la linea, sobre la grilla.
+
+      Cambiar la separacion solo en PAUSA'
+    value: 20e6 if separacion == 6.25 else 30e6
   states:
     bus_sink: false
     bus_source: false
@@ -132,10 +138,14 @@ blocks:
 - name: bloques_usb
   id: variable
   parameters:
-    comment: 'Bloques en espera. Con 128 x 16384 la
+    comment: 'Bloques USB de 16384 muestras: 64 guardan 52
 
-      amplitud tarda 0,05 s en llegar a la salida'
-    value: '128'
+      ms a 20 MSPS y 35 ms a 30 MSPS. La amplitud
+
+      llega a la salida con ese retardo, por eso
+
+      el corte minimo es de 0,2 s'
+    value: '64'
   states:
     bus_sink: false
     bus_source: false
@@ -2025,7 +2035,9 @@ blocks:
       \ el factor de antena.\n#   3. \"Guardar patron\": pide una captura (.csv) del\
       \ peine ya calibrado y\n#      guarda el nivel por cable de cada linea.\n# \
       \  \"Cargar patron\": pone un patron guardado como objetivo, para que la\n#\
-      \      calibracion conducida vuelva a sacar lo mismo otro dia.\n# ============================================================================\n\
+      \      calibracion conducida vuelva a sacar lo mismo otro dia.\n# La tasa de\
+      \ muestreo va atada a la separacion (20 o 30 MSPS): la calibracion\n# y el patron\
+      \ anotan las dos y solo valen para ellas.\n# ============================================================================\n\
       import hashlib\nimport math\nimport os\nimport shutil\nimport time\n\nPRIMERA_LINEA\
       \ = 50        # MHz\nSEPARACION = 10           # MHz entre una linea y la siguiente\n\
       CANTIDAD = 96             # lineas, de 50 a 1000 MHz\nCERCA_TINYSA = 3     \
@@ -2117,18 +2129,26 @@ blocks:
       \ ' ').split()\n    for i in range(len(partes) - 1):\n        if partes[i] ==\
       \ palabra:\n            try:\n                return float(partes[i + 1])\n\
       \            except Exception:\n                return 0.0\n    return 0.0\n\
-      \n\ndef escribir_archivo_de_valores(nombre, texto, valores):\n    archivo =\
-      \ open(nombre, 'w', encoding='utf-8')\n    archivo.write('# ' + texto + '\\\
-      n')\n    for k in range(CANTIDAD):\n        archivo.write('%d %.1f\\n' % (frecuencia_de_linea(k),\
-      \ valores[k]))\n    archivo.close()\n\n\ndef guardar_respaldo(nombre, cuando):\n\
-      \    # Copia el archivo a la carpeta respaldos antes de pisarlo o de borrarlo\n\
-      \    if os.path.exists(nombre):\n        if not os.path.isdir('respaldos'):\n\
-      \            os.mkdir('respaldos')\n        shutil.copyfile(nombre, os.path.join('respaldos',\
-      \ cuando + '_' + nombre))\n\n\n# ----------------------------------------------------------------\
-      \ trazas ya usadas\n\ndef huella_del_archivo(nombre):\n    # Un codigo de 32\
-      \ letras que sale de todo el contenido del archivo: dos\n    # archivos iguales\
-      \ dan el mismo codigo aunque tengan otro nombre, y dos\n    # trazas distintas\
-      \ nunca dan el mismo\n    archivo = open(nombre, 'rb')\n    contenido = archivo.read()\n\
+      \n\ndef tasa_de_la_separacion(separacion):\n    # La tasa de muestreo va atada\
+      \ a la separacion (bloque samp_rate): 20 MSPS\n    # con la portadora a 6,25\
+      \ MHz y 30 MSPS con 10 MHz\n    if separacion == 6.25:\n        return 20.0\n\
+      \    return 30.0\n\n\ndef es_de_otra_tasa(nombre):\n    # Una calibracion o\
+      \ un patron valen para la tasa con que se hicieron. Los\n    # que no dicen\
+      \ la tasa son de la version anterior del flujo, a 40 MSPS\n    portadora = numero_del_encabezado(nombre,\
+      \ 'portadora')\n    tasa = numero_del_encabezado(nombre, 'tasa')\n    return\
+      \ portadora == 0 or tasa != tasa_de_la_separacion(portadora)\n\n\ndef escribir_archivo_de_valores(nombre,\
+      \ texto, valores):\n    archivo = open(nombre, 'w', encoding='utf-8')\n    archivo.write('#\
+      \ ' + texto + '\\n')\n    for k in range(CANTIDAD):\n        archivo.write('%d\
+      \ %.1f\\n' % (frecuencia_de_linea(k), valores[k]))\n    archivo.close()\n\n\n\
+      def guardar_respaldo(nombre, cuando):\n    # Copia el archivo a la carpeta respaldos\
+      \ antes de pisarlo o de borrarlo\n    if os.path.exists(nombre):\n        if\
+      \ not os.path.isdir('respaldos'):\n            os.mkdir('respaldos')\n     \
+      \   shutil.copyfile(nombre, os.path.join('respaldos', cuando + '_' + nombre))\n\
+      \n\n# ---------------------------------------------------------------- trazas\
+      \ ya usadas\n\ndef huella_del_archivo(nombre):\n    # Un codigo de 32 letras\
+      \ que sale de todo el contenido del archivo: dos\n    # archivos iguales dan\
+      \ el mismo codigo aunque tengan otro nombre, y dos\n    # trazas distintas nunca\
+      \ dan el mismo\n    archivo = open(nombre, 'rb')\n    contenido = archivo.read()\n\
       \    archivo.close()\n    return hashlib.md5(contenido).hexdigest()\n\n\ndef\
       \ traza_ya_usada(huella):\n    # Devuelve el renglon de trazas_usadas.txt con\
       \ esa huella, o '' si la traza\n    # no se uso nunca\n    usadas = self.get_prefijo()\
@@ -2141,12 +2161,13 @@ blocks:
       \    archivo.write(huella + ' ' + ahora() + ' ' + os.path.basename(nombre) +\
       \ '\\n')\n    archivo.close()\n\n\n# ----------------------------------------------------------------\
       \ reiniciar\n\ndef guardar_calibracion():\n    # Se anota con que separacion\
-      \ de la portadora se hizo: la respuesta de la\n    # placa cambia un poco de\
-      \ una a otra\n    escribir_archivo_de_valores(self.get_archivo_cal(),\n    \
-      \                            'guardada el ' + ahora() +\n                  \
-      \              ', valores leidos con ganancia %d dB' % self.get_ganancia_de_lectura()\
-      \ +\n                                ', portadora %g MHz sobre la linea' % self.get_separacion_cal(),\n\
-      \                                self.get_medidos())\n\n\ndef poner_objetivo_plano(motivo):\n\
+      \ de la portadora y que tasa se hizo: la\n    # respuesta de la placa cambia\
+      \ un poco de una a otra\n    escribir_archivo_de_valores(self.get_archivo_cal(),\n\
+      \                                'guardada el ' + ahora() +\n              \
+      \                  ', valores leidos con ganancia %d dB' % self.get_ganancia_de_lectura()\
+      \ +\n                                ', portadora %g MHz sobre la linea' % self.get_separacion_cal()\
+      \ +\n                                ', tasa %g MSPS' % (self.get_samp_rate()\
+      \ / 1e6),\n                                self.get_medidos())\n\n\ndef poner_objetivo_plano(motivo):\n\
       \    nivel = self.get_nivel_inicial()\n    self.set_objetivo([nivel] * CANTIDAD)\n\
       \    escribir_archivo_de_valores(self.get_archivo_obj(),\n                 \
       \               'objetivo plano de %.1f dBm, %s el %s' % (nivel, motivo, ahora()),\n\
@@ -2321,11 +2342,12 @@ blocks:
       \ 'patron_' + time.strftime('%Y-%m-%d_%H%M') + '.txt'\n    try:\n        escribir_archivo_de_valores(nombre,\
       \ 'patron medido por cable el ' + ahora() +\n                              \
       \      ' con ganancia %d dB' % self.get_ganancia() +\n                     \
-      \               ', portadora %g MHz sobre la linea' % self.get_separacion(),\n\
-      \                                    valores)\n    except Exception:\n     \
-      \   self.set_estado_obj('NO se guardo: no se pudo escribir ' + nombre)\n   \
-      \     return\n    objetivo = self.get_objetivo()\n    diferencias = []\n   \
-      \ for k in range(CANTIDAD):\n        diferencias.append(valores[k] - objetivo[k])\n\
+      \               ', portadora %g MHz sobre la linea' % self.get_separacion()\
+      \ +\n                                    ', tasa %g MSPS' % (self.get_samp_rate()\
+      \ / 1e6),\n                                    valores)\n    except Exception:\n\
+      \        self.set_estado_obj('NO se guardo: no se pudo escribir ' + nombre)\n\
+      \        return\n    objetivo = self.get_objetivo()\n    diferencias = []\n\
+      \    for k in range(CANTIDAD):\n        diferencias.append(valores[k] - objetivo[k])\n\
       \    self.set_estado_obj('patron guardado en %s. Medido menos objetivo: de %+.1f\
       \ a %+.1f dB'\n                        % (nombre, min(diferencias), max(diferencias)))\n\
       \n\ndef cargar_patron():\n    elegido = Qt.QFileDialog.getOpenFileName(self,\
@@ -2334,7 +2356,10 @@ blocks:
       \ '':\n        return\n    try:\n        valores = leer_archivo_de_valores(nombre)\n\
       \    except Exception:\n        self.set_estado_obj('NO se cargo: el archivo\
       \ no tiene 96 lineas con su valor')\n        return\n    # El patron vale para\
-      \ la separacion de la portadora con que se midio\n    portadora = numero_del_encabezado(nombre,\
+      \ la separacion de la portadora y la tasa con que se midio\n    if es_de_otra_tasa(nombre):\n\
+      \        self.set_estado_obj('NO se cargo: el patron no dice la tasa de muestreo\
+      \ o no es la de su separacion '\n                            '(version anterior\
+      \ del flujo)')\n        return\n    portadora = numero_del_encabezado(nombre,\
       \ 'portadora')\n    if portadora != 0 and portadora != self.get_separacion():\n\
       \        self.set_estado_obj('NO se cargo: el patron es de la portadora a %g\
       \ MHz y la ventana tiene %g MHz. '\n                            'Cambiar la\
@@ -2359,9 +2384,12 @@ blocks:
       \  poner_objetivo_plano('creado al abrir')\n        self.set_estado_obj('no\
       \ habia objetivo guardado: plano en %.1f dBm' % self.get_nivel_inicial())\n\
       \    except Exception:\n        self.set_estado_obj('NO se pudo escribir ' +\
-      \ self.get_archivo_obj())\n\nif os.path.exists(self.get_archivo_cal()):\n  \
-      \  try:\n        self.set_medidos(leer_archivo_de_valores(self.get_archivo_cal()))\n\
-      \        self.set_separacion_cal(numero_del_encabezado(self.get_archivo_cal(),\
+      \ self.get_archivo_obj())\n\nif os.path.exists(self.get_archivo_cal()) and es_de_otra_tasa(self.get_archivo_cal()):\n\
+      \    self.set_estado_cal('NO se cargo: la calibracion guardada es de otra tasa\
+      \ de muestreo (version anterior '\n                        'del flujo). Usar\
+      \ Reiniciar')\nelif os.path.exists(self.get_archivo_cal()):\n    try:\n    \
+      \    self.set_medidos(leer_archivo_de_valores(self.get_archivo_cal()))\n   \
+      \     self.set_separacion_cal(numero_del_encabezado(self.get_archivo_cal(),\
       \ 'portadora'))\n        self.set_estado_cal('cargada al abrir (' + encabezado(self.get_archivo_cal()).split(',')[0]\
       \ + ')')\n    except Exception:\n        self.set_estado_cal('NO se pudo leer\
       \ ' + self.get_archivo_cal() + ': usar Reiniciar')\nelse:\n    self.set_estado_cal('no\

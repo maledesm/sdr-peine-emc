@@ -58,6 +58,8 @@ def snipfcn_archivos_de_calibracion(self):
     #      guarda el nivel por cable de cada linea.
     #   "Cargar patron": pone un patron guardado como objetivo, para que la
     #      calibracion conducida vuelva a sacar lo mismo otro dia.
+    # La tasa de muestreo va atada a la separacion (20 o 30 MSPS): la calibracion
+    # y el patron anotan las dos y solo valen para ellas.
     # ============================================================================
     import hashlib
     import math
@@ -246,6 +248,22 @@ def snipfcn_archivos_de_calibracion(self):
         return 0.0
 
 
+    def tasa_de_la_separacion(separacion):
+        # La tasa de muestreo va atada a la separacion (bloque samp_rate): 20 MSPS
+        # con la portadora a 6,25 MHz y 30 MSPS con 10 MHz
+        if separacion == 6.25:
+            return 20.0
+        return 30.0
+
+
+    def es_de_otra_tasa(nombre):
+        # Una calibracion o un patron valen para la tasa con que se hicieron. Los
+        # que no dicen la tasa son de la version anterior del flujo, a 40 MSPS
+        portadora = numero_del_encabezado(nombre, 'portadora')
+        tasa = numero_del_encabezado(nombre, 'tasa')
+        return portadora == 0 or tasa != tasa_de_la_separacion(portadora)
+
+
     def escribir_archivo_de_valores(nombre, texto, valores):
         archivo = open(nombre, 'w', encoding='utf-8')
         archivo.write('# ' + texto + '\n')
@@ -298,12 +316,13 @@ def snipfcn_archivos_de_calibracion(self):
     # ---------------------------------------------------------------- reiniciar
 
     def guardar_calibracion():
-        # Se anota con que separacion de la portadora se hizo: la respuesta de la
-        # placa cambia un poco de una a otra
+        # Se anota con que separacion de la portadora y que tasa se hizo: la
+        # respuesta de la placa cambia un poco de una a otra
         escribir_archivo_de_valores(self.get_archivo_cal(),
                                     'guardada el ' + ahora() +
                                     ', valores leidos con ganancia %d dB' % self.get_ganancia_de_lectura() +
-                                    ', portadora %g MHz sobre la linea' % self.get_separacion_cal(),
+                                    ', portadora %g MHz sobre la linea' % self.get_separacion_cal() +
+                                    ', tasa %g MSPS' % (self.get_samp_rate() / 1e6),
                                     self.get_medidos())
 
 
@@ -581,7 +600,8 @@ def snipfcn_archivos_de_calibracion(self):
         try:
             escribir_archivo_de_valores(nombre, 'patron medido por cable el ' + ahora() +
                                         ' con ganancia %d dB' % self.get_ganancia() +
-                                        ', portadora %g MHz sobre la linea' % self.get_separacion(),
+                                        ', portadora %g MHz sobre la linea' % self.get_separacion() +
+                                        ', tasa %g MSPS' % (self.get_samp_rate() / 1e6),
                                         valores)
         except Exception:
             self.set_estado_obj('NO se guardo: no se pudo escribir ' + nombre)
@@ -605,7 +625,11 @@ def snipfcn_archivos_de_calibracion(self):
         except Exception:
             self.set_estado_obj('NO se cargo: el archivo no tiene 96 lineas con su valor')
             return
-        # El patron vale para la separacion de la portadora con que se midio
+        # El patron vale para la separacion de la portadora y la tasa con que se midio
+        if es_de_otra_tasa(nombre):
+            self.set_estado_obj('NO se cargo: el patron no dice la tasa de muestreo o no es la de su separacion '
+                                '(version anterior del flujo)')
+            return
         portadora = numero_del_encabezado(nombre, 'portadora')
         if portadora != 0 and portadora != self.get_separacion():
             self.set_estado_obj('NO se cargo: el patron es de la portadora a %g MHz y la ventana tiene %g MHz. '
@@ -642,7 +666,10 @@ def snipfcn_archivos_de_calibracion(self):
         except Exception:
             self.set_estado_obj('NO se pudo escribir ' + self.get_archivo_obj())
 
-    if os.path.exists(self.get_archivo_cal()):
+    if os.path.exists(self.get_archivo_cal()) and es_de_otra_tasa(self.get_archivo_cal()):
+        self.set_estado_cal('NO se cargo: la calibracion guardada es de otra tasa de muestreo (version anterior '
+                            'del flujo). Usar Reiniciar')
+    elif os.path.exists(self.get_archivo_cal()):
         try:
             self.set_medidos(leer_archivo_de_valores(self.get_archivo_cal()))
             self.set_separacion_cal(numero_del_encabezado(self.get_archivo_cal(), 'portadora'))
@@ -893,7 +920,7 @@ class exp28_a9_peine(gr.top_block, Qt.QWidget):
         self.texto_salida = texto_salida = 'bladeRF xA9, TX1'
         self.sin_margen = sin_margen = sum(1 for db in pedido if amp_base * 10 ** (db / 20.0) > amp_max)
         self.separacion_cal = separacion_cal = 0.0
-        self.samp_rate = samp_rate = 40e6
+        self.samp_rate = samp_rate = 20e6 if separacion == 6.25 else 30e6
         self.prefijo = prefijo = ''
         self.pasada = pasada = ciclo // n_lineas + 1
         self.nivel_estimado = nivel_estimado = [((medidos[k] + ganancia - ganancia_de_lectura) + 20 * math.log10(amp_tabla[k] / amp_base)) if medidos[k] != 0 else -100 for k in range(n_lineas)]
@@ -935,7 +962,7 @@ class exp28_a9_peine(gr.top_block, Qt.QWidget):
         self.boton_guardar_patron = boton_guardar_patron = 0
         self.boton_conducida = boton_conducida = 0
         self.boton_cargar_patron = boton_cargar_patron = 0
-        self.bloques_usb = bloques_usb = 128
+        self.bloques_usb = bloques_usb = 64
         self.archivo_obj = archivo_obj = prefijo + 'objetivo.txt'
         self.archivo_irr = archivo_irr = prefijo + 'ultima_irradiada.txt'
         self.archivo_cal = archivo_cal = prefijo + 'calibracion_conducida.txt'
@@ -1616,6 +1643,7 @@ class exp28_a9_peine(gr.top_block, Qt.QWidget):
 
     def set_separacion(self, separacion):
         self.separacion = separacion
+        self.set_samp_rate(20e6 if self.separacion == 6.25 else 30e6)
         self._separacion_callback(self.separacion)
         self.set_f_tono(-self.separacion * 1e6)
         self.set_et_espurias('fuga %.2f, imagen %.2f, 3C+S %.2f, 5C-S %.2f' % (self.freq / 1e6, self.freq / 1e6 + self.separacion, 3 * self.freq / 1e6 + self.separacion, 5 * self.freq / 1e6 - self.separacion))
