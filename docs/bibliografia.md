@@ -27,6 +27,8 @@ PDF en [`bibliografia/`](../bibliografia/): las carpetas 1 a 5 tienen los 20 pri
 - [Carobbi, 2014](../bibliografia/4_Comparaciones_e_Incertidumbre/2014_Carobbi_Proficiency_Test_Scheme_RE_30_1000_MHz.pdf). Proficiency test scheme, RE 30–1000 MHz (Univ. de Florencia). Protocolo real con radiador de referencia.
 - [Kovačević et al., 2022](../bibliografia/4_Comparaciones_e_Incertidumbre/2022_Kovacevic_Interlaboratory_Comparison_RE_Tubular_Dipole.pdf). Interlaboratory comparison of RE with a tubular dipole. NT&RP. DOI 10.2298/NTRP2203207K. Referencia por simulación y medición.
 - [Kang et al., 2001](../bibliografia/4_Comparaciones_e_Incertidumbre/2001_Kang_Reproducibility_Uncertainty_RE_OATS_SAC.pdf). Reproducibility and uncertainty of RE at OATS and SAC. IEEE TEMC. DOI 10.1109/15.974650. Reproducibilidad en cámaras semianecoicas.
+- JCGM 100:2008 (GUM). Evaluation of measurement data, guide to the expression of uncertainty in measurement. BIPM, gratis en bipm.org, con traducción al español. Base de la incertidumbre del TP1 (tipo B, combinada y expandida).
+- CISPR 16-4-2. Uncertainties, statistics and limit modelling, measurement instrumentation uncertainty. IEC. Aplica la GUM a las mediciones de EMC. No la tenemos.
 
 ## 5. Lazo cerrado y autocalibración de SDR
 - [Kim et al., 2026](../bibliografia/5_Lazo_Cerrado_y_Autocalibracion/2026_Kim_Self_Calibrating_SDR_Arrays.pdf). A self-calibrating SDR for beam- and null-forming arrays. arXiv 2604.02498. La SDR mide y compensa su respuesta.
@@ -91,5 +93,5 @@ A buscar:
 
 ## Normas
 - En [`normas/`](../normas/), CISPR 11:2024 y MIL-STD-461E.
-- No las tenemos: CISPR 16-1-1, 16-1-4 y 16-1-6, CISPR 32, ANSI C63.4 y C63.5, IEC 61000-4-3 y ECSS-E-ST-20.
+- No las tenemos: CISPR 16-1-1, 16-1-4, 16-1-6 y 16-4-2, CISPR 32, ANSI C63.4 y C63.5, IEC 61000-4-3 y ECSS-E-ST-20.
 - Fuentes comerciales de referencia: Com-Power, York EMC, Seibersdorf (RefRad), Schwarzbeck, AET (dipolo esférico) y TekBox. Nota de aplicación 71 de AR sobre ensayos multitono.

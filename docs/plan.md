@@ -35,9 +35,10 @@ Procedimiento normativo formal, paso a paso, para el ensayo de RE en laboratorio
 - [ ] Revisión de los docentes.
 
 ### TP2 · OE2 · Manual y procedimiento funcional de la SDR
-- [ ] Parte general: programas, configuración, modos de TX y RX, cuidados del equipo.
-- [ ] El peine en detalle, con el flujo nuevo de líneas cada 10 MHz: parámetros y las dos calibraciones. Base en `desde_TP1_software_y_calibracion.tex`.
-- [ ] Recepción, para RS. La autocalibración por lazo TX→RX quedó descartada (EXP-18).
+- [x] Versión 1.0 (26-10), pensada para usarse en cualquier laboratorio, cámara o facultad: requerimientos de la consigna, equipos e instalación, cuidados, arquitectura del peine, la ventana, procedimientos de cada botón, versiones y archivos, uso en otro laboratorio, problemas frecuentes, recepción, valores preliminares y limitaciones (11 páginas).
+- [ ] Medir por cable con 20 y 30 MSPS y completar los valores preliminares.
+- [ ] Recepción para RS, junto con el TP4. La autocalibración por lazo TX→RX quedó descartada (EXP-18).
+- [ ] Revisión de los docentes.
 
 ### TP3 · OR3 · Reporte de mediciones de RE
 Con los datos del CETEM del 13-10 y las mediciones que se hagan en casa o en la facultad.
