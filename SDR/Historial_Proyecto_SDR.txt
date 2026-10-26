@@ -2521,6 +2521,13 @@ MANUAL / 26-10-2026 / OE2 version 1.0 (TP2): manual de la SDR
   Tambien en el TP1: la GUM y CISPR 16-4-2 en las referencias, y en
   docs\bibliografia.md para el paper.
 
+MANUAL / 26-10-2026 / OE2 version 1.1 (TP2): version corta
+  A pedido del usuario, de 11 a 7 carillas con la caratula (pidio cerca
+  de 8). Se unieron los botones (estaban en la tabla de controles y en los
+  procedimientos), se saco la seccion de limitaciones (ya estaba en los
+  requerimientos y en la arquitectura), y se acortaron las tablas y la
+  separacion de la portadora. Sin la tabla de participantes.
+
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
   investigar la calibracion de la xA9, porque leyo que las "portadoras
