@@ -2506,6 +2506,21 @@ PROCEDIMIENTO / 26-10-2026 / RE-TP-001 version 2.3: incertidumbre en dB
   mismo sentido: se suman las varianzas (GUM, CISPR 16-4-2). La suma de los
   limites queda como peor caso y marca el limite de no conforme.
 
+MANUAL / 26-10-2026 / OE2 version 1.0 (TP2): manual de la SDR
+  Archivo: TPs\TP2_OE2_Manual_SDR\main.tex (compila, 11 paginas).
+  Decision del usuario: el manual no apunta a nadie en especial, pero tiene
+  que poder usarlo cualquiera en su propio laboratorio, camara o facultad.
+  Contenido, en listas y tablas: requerimientos de la consigna y estado
+  (CW en 1,5 y 2 GHz pendiente, TX y RX con una sola SDR descartado),
+  equipos e instalacion desde cero, cuidados del equipo, arquitectura del
+  peine con un diagrama del flujo, separacion de la portadora (lo que vino
+  del TP1), la ventana con una captura de la demo, que hace cada boton,
+  versiones y archivos, uso en otro laboratorio (numero de serie de la
+  placa, formato del receptor y del analizador, limite y grilla fijos),
+  problemas frecuentes, recepcion, valores preliminares y limitaciones.
+  Tambien en el TP1: la GUM y CISPR 16-4-2 en las referencias, y en
+  docs\bibliografia.md para el paper.
+
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
   investigar la calibracion de la xA9, porque leyo que las "portadoras
