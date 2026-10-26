@@ -2528,6 +2528,30 @@ MANUAL / 26-10-2026 / OE2 version 1.1 (TP2): version corta
   requerimientos y en la arquitectura), y se acortaron las tablas y la
   separacion de la portadora. Sin la tabla de participantes.
 
+MANUAL / 26-10-2026 / OE2 version 2.0 (TP2): manual de la SDR como instrumento
+  El usuario noto que el manual repetia el TP1 mas corto. La consigna no
+  pide un manual: el OE2 sale del plan del 18-10, que mezclaba una parte
+  general de la SDR con el peine en detalle. Decision: manual de la xA9
+  como instrumento de RF para EMC, sin el contexto del proyecto, sin
+  procedimiento funcional aparte (lo que daria, como el LED, los niveles
+  esperados y la calibracion, va en las otras secciones), lo mas conciso
+  posible y con graficos de mediciones propias.
+  Secciones: la placa (tabla de datos), instalacion y primer uso, uso desde
+  GNU Radio (parametros del osmocom Sink y modos), defectos y como
+  manejarlos, nivel de salida y calibracion, cuidados, aplicaciones del
+  proyecto (peine en el TP1, lazo descartado, RS en el TP4) y referencias.
+  6 carillas con la caratula.
+  Graficos con pgfplots, datos en archivos .dat en la carpeta del TP2:
+   - fig_tono_100MHz.dat: EXP-15 R2 y R3 (99 a 101 MHz, RBW 10 kHz), un
+     tono con fuga, imagen y tercer armonico, y la rafaga de desborde.
+   - fig_armonicos.dat: EXP-23 SA_261005_101642, una linea de 50 MHz con
+     la portadora en 55 MHz, armonicos 3C+S a 17C-S de -9 a -28 dBc
+     (verificados contra la formula).
+   - fig_peine.dat: EXP-28 casa_cond_1 y casa_cond_ver, pico de cada una
+     de las 96 lineas sin calibrar y con una calibracion.
+  Colores: los dos primeros de la paleta de referencia (azul y naranja),
+  rotulos en gris oscuro, una leyenda cuando hay mas de una curva.
+
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
   investigar la calibracion de la xA9, porque leyo que las "portadoras
