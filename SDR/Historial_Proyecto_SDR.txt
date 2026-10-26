@@ -2552,6 +2552,40 @@ MANUAL / 26-10-2026 / OE2 version 2.0 (TP2): manual de la SDR como instrumento
   Colores: los dos primeros de la paleta de referencia (azul y naranja),
   rotulos en gris oscuro, una leyenda cuando hay mas de una curva.
 
+REPORTE / 26-10-2026 / OR3 version 1.0 (TP3): reporte de mediciones de RE
+  Archivo: TPs\TP3_OR3_Reporte_RE\main.tex (compila, 6 carillas con la
+  caratula). Campanas de casa (EXP-26, 12-10) y del CETEM (13-10), con
+  cuatro graficos hechos con las trazas y tres fotos del montaje.
+  Decisiones del usuario del 26-10:
+   - No se compara con CISPR 11: el peine salia a 0 dBm por cable y no
+     tiene sentido contra el limite. La seccion queda sin terminar, hasta
+     las mediciones de diciembre de 2026.
+   - Atenuacion del receptor: a las trazas medidas con 10 dB (Comb
+     generator, SDR en pausa y piso) se les suman 10 dB, para que los
+     pisos queden en el mismo lugar que los de las trazas de 20 dB (como en
+     el dashboard). Se le mostro que los pisos con 20 dB salen 8 a 11 dB
+     mas altos, lo que indica que el receptor ya compensa el atenuador y
+     que el ajuste cuenta la atenuacion dos veces. Sin el ajuste la SDR
+     quedaria 43 dB sobre el Comb generator en lugar de 33. El reporte lo
+     aclara.
+  Valores recalculados con criterios explicitos (pico a +/-1 MHz):
+   - SDR, 24 lineas a las tres alturas: de 69,2 a 95,6 dBuV/m.
+   - Variacion con la altura por linea: mediana 7,8 dB, maxima 15,8 dB
+     (la bitacora del 13-10 decia 7,9).
+   - Mesa girada 180 grados a 3 m: las lineas bajan una mediana de 2,9 dB,
+     de -8,8 a +1,8 dB.
+   - SDR a 1 m sobre la pausa: de 30 a 56 dB (la entrada del 13-10 decia
+     30 a 46, con otro criterio).
+   - Sin antena: lineas de 31 a 57 dBuV/m.
+   - Portadoras a menos de 6 dB de su linea: 9 a 1 m, 6 a 2 m, ninguna a
+     3 m (31 a 43 dB abajo). Algunas superan a su linea.
+   - Comb generator a 1 m: 90 de 95 lineas (50 a 990 MHz) a 6 dB o mas
+     sobre la traza del piso, de 41,5 a 67 dBuV/m (la entrada del 13-10
+     decia 75 a 87 de 98, con otro criterio). SDR menos Comb: mediana
+     33 dB.
+  Datos de los graficos en la carpeta del TP3 (fig_sdr_1m, fig_comb,
+  fig_alturas y fig_casa .dat), trazas reducidas al maximo de cada MHz.
+
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
   investigar la calibracion de la xA9, porque leyo que las "portadoras
