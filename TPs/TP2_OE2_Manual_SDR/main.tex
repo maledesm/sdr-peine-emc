@@ -118,7 +118,7 @@
 % ============================================================================
 \section{Introducción}
 
-Este manual describe la SDR bladeRF 2.0 micro xA9 como instrumento de RF para ensayos de EMC: qué es, cómo se instala y se usa desde GNU Radio, qué defectos tiene y qué se midió con ella. Está pensado para cualquier laboratorio, cámara o facultad que tenga esta placa u otra con el mismo chip, y los valores que da son mediciones propias, por cable, con un analizador tinySA Ultra. Las aplicaciones del proyecto tienen su propio documento: el generador peine está en el procedimiento RE-TP-001 (TP1) y la susceptibilidad radiada, en el TP4.
+Este manual describe la SDR bladeRF 2.0 micro xA9 como instrumento de RF para ensayos de EMC, explicando qué es, cómo se instala y se usa desde GNU Radio, qué defectos tiene y qué se puede medir con ella. Está pensado para cualquier laboratorio, cámara o facultad que tenga esta placa u otra con el mismo chip, y los valores que da son mediciones propias, por cable, con un analizador tinySA Ultra.
 
 % ============================================================================
 \section{La placa}
@@ -207,7 +207,7 @@ La frecuencia y la ganancia cambian al instante, pero la amplitud sale con el re
   \label{fig:tono}
 \end{figure}
 
-Como en toda conversión directa, aparecen dos defectos alrededor del oscilador (figura~\ref{fig:tono}). La fuga de portadora es una línea en la frecuencia del oscilador, de $-37$ a $-51$~dBc según la ganancia, que no baja con la amplitud digital: conviene usar la amplitud más alta posible y correr el tono lejos del centro. La imagen es una copia del tono del otro lado del oscilador, a unos $-40$~dBc. Según su controlador, el AD9361 corrige las dos al arrancar y cada vez que el oscilador se mueve más de 100~MHz. Los comandos \texttt{calibrate} de bladeRF-cli son de la placa anterior y no sirven para esta.
+Como en toda conversión directa, aparecen dos defectos alrededor del oscilador (figura~\ref{fig:tono}). La fuga de portadora es una línea en la frecuencia del oscilador, de $-37$ a $-51$~dBc según la ganancia, que no baja con la amplitud digital, osea conviene usar la amplitud más alta posible y correr el tono lejos del centro. La imagen es una copia del tono del otro lado del oscilador, a unos $-40$~dBc. Según su controlador, el AD9361 corrige las dos al arrancar y cada vez que el oscilador se mueve más de 100~MHz. Los comandos \texttt{calibrate} de bladeRF-cli solo sirven para las placas Nuand de versión V1, lo cual no es el caso de la de este informe.
 
 Con amplitud 1,0, de vez en cuando una muestra cae justo en el pico, no entra en los 12~bits y da la vuelta. Aparecen entonces ráfagas de líneas a $-12$~dBc, como en la parte de abajo de la figura, así que la amplitud total nunca debe llegar a 1. Además, los armónicos del reloj de 38,4~MHz aparecen entre $-74$ y $-78$~dBm (192,0, 345,6 y 422,4~MHz).
 
@@ -232,7 +232,7 @@ La salida no tiene filtro, así que cada tono se repite en los armónicos impare
 % ============================================================================
 \section{Nivel de salida y calibración}
 
-La ganancia de TX es lineal: 10~dB más dan de 9,9 a 10,3~dB más a la salida. Con 45~dB y amplitud 0,25 cada tono sale en unos $-23$~dBm, y con 65~dB, en unos $-3$~dBm. A +3~dBm la salida comprime 0,4~dB.
+La ganancia de TX es lineal,  10~dB más dan de 9,9 a 10,3~dB más a la salida. Con 45~dB y amplitud 0,25 cada tono sale en unos $-23$~dBm, y con 65~dB, en unos $-3$~dBm. A +3~dBm la salida comprime 0,4~dB.
 
 La respuesta en frecuencia no es plana. Sin calibrar, un peine con todas las líneas a la misma amplitud varía 4,7~dB de 50~MHz a 1~GHz y cae hacia arriba (figura~\ref{fig:peine}). Se calibra contra un analizador por cable: con la ganancia fija se mide cada frecuencia y se corrige su amplitud. Una vuelta dejó las líneas entre $-1{,}6$ y $+0{,}6$~dB del objetivo, y se repite hasta quedar en $\pm 1$~dB. La calibración vale para la tasa, el analizador y el cable con que se hizo.
 
