@@ -29,7 +29,8 @@ Procedimiento normativo formal, paso a paso, para el ensayo de RE en laboratorio
 - [x] Sin pendientes en rojo (19-10). Distancia del 13-10 confirmada en 3 m, 7 s por línea con un barrido de unos 3 s, e incertidumbre con fórmulas y una tabla para completar.
 - [x] El receptor barre de 30 MHz a 1 GHz en unos 3 s (lo verificó Martín en el CETEM, barrido en el dominio del tiempo).
 - [x] Versión 2.2 (22-10): software del EXP-28, objetivo inicial plano, una sola traza en la irradiada y patrón.
-- [ ] Pedir al CETEM los certificados para la tabla de incertidumbre.
+- [x] Versión 2.3 (26-10): incertidumbre simplificada en dB, relativa al día de referencia (U = 3,3 dB con k = 2), verificación irradiada en ±2 dB y criterio de ±3,5 dB. Ya no hacen falta los certificados del CETEM.
+- [ ] Reemplazar la reposición del montaje estimada (1,5 dB) con el resultado de la prueba de repetibilidad.
 - [x] Repeticiones recortadas (22-10): de 16 a 12 páginas, con una planilla de niveles en una página. La separación de la portadora pasó al TP2.
 - [ ] Revisión de los docentes.
 
