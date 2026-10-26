@@ -1,7 +1,9 @@
 % ============================================================================
 % TP2 -- Manual y procedimiento funcional de la SDR (entregable OE2)
 % Plantilla basada en el TP1 (RE-TP-001). Un solo archivo .tex. Necesita en la
-% misma carpeta: logo_fiuba.png, logo_materia.png y fig_ventana_demo.png.
+% misma carpeta: logo_fiuba.png, logo_materia.png y los datos de los graficos
+% (fig_tono_100MHz.dat, fig_armonicos.dat y fig_peine.dat, sacados de
+% capturas de la tinySA del EXP-15, EXP-23 y EXP-28).
 % Compilar con pdfLaTeX (Overleaf: Menu > Compiler > pdfLaTeX).
 % ============================================================================
 \documentclass[11pt,a4paper]{article}
@@ -15,22 +17,41 @@
 \usepackage{float}       % permite la opcion [H] en figuras y tablas
 \usepackage{booktabs}
 \usepackage{array}
-\usepackage{longtable}
 \usepackage{enumitem}
 \usepackage{amsmath}
 \usepackage{xcolor}
 \usepackage{fancyhdr}
-\usepackage{tikz}
-\usetikzlibrary{babel,positioning}   % babel evita el choque entre TikZ y los atajos < > del español
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
 \usepackage[hidelinks]{hyperref}
 
 % ---------------------------------------------------------------- datos ----
 \newcommand{\codigo}{OE2}
-\newcommand{\version}{1.1 (borrador)}
+\newcommand{\version}{2.0 (borrador)}
 \newcommand{\fecha}{26 de octubre de 2026}
 
 % Columna de tabla con texto alineado a la izquierda
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% Colores de los graficos: dos series de la paleta de referencia, texto y grilla neutros
+\definecolor{serieuno}{HTML}{2A78D6}
+\definecolor{seriedos}{HTML}{EB6834}
+\definecolor{tinta}{HTML}{52514E}
+\definecolor{grilla}{HTML}{E4E3DF}
+\pgfplotsset{
+  espectro/.style={
+    width=0.96\textwidth, height=5.2cm,
+    grid=major, grid style={grilla,line width=0.4pt},
+    axis line style={tinta}, tick style={tinta},
+    tick label style={font=\footnotesize,text=tinta},
+    label style={font=\small},
+    legend style={draw=none,font=\footnotesize,fill=none},
+    legend cell align=left,
+    every axis plot/.append style={line width=0.9pt},
+    /pgf/number format/use comma,
+  },
+}
+\tikzset{rotulo/.style={font=\footnotesize,text=tinta,align=center}}
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -39,7 +60,7 @@
 \cfoot{\small \thepage}
 
 \setlist{itemsep=1pt,topsep=3pt}
-\setlength{\emergencystretch}{3em}   % deja cortar los renglones con nombres de archivo largos
+\setlength{\emergencystretch}{3em}   % deja cortar los renglones con nombres largos
 
 \begin{document}
 
@@ -63,7 +84,7 @@
   \vspace{1.6cm}
   {\LARGE \bfseries Manual y procedimiento funcional de la SDR\par}
   \vspace{0.6cm}
-  {\Large Comb Generator basado en Software Defined Radio (SDR)\par}
+  {\Large bladeRF 2.0 micro xA9 como instrumento de RF para EMC\par}
   \vspace{0.8cm}
   {\large Código: \textbf{\codigo} \qquad Versión: \textbf{\version}\par}
   \vfill
@@ -85,8 +106,9 @@
   Versión & Fecha & Cambios \\
   \midrule
   0.1 (borrador) & 21 de octubre de 2026 & Plantilla. \\
-  1.0 (borrador) & 26 de octubre de 2026 & Primera versión completa, con el flujo del EXP-28. \\
-  1.1 (borrador) & \fecha & Versión corta. \\
+  1.0 (borrador) & 26 de octubre de 2026 & Manual del peine del EXP-28. \\
+  1.1 (borrador) & 26 de octubre de 2026 & Versión corta. \\
+  2.0 (borrador) & \fecha & Manual de la SDR como instrumento, con gráficos de mediciones propias. \\
   \bottomrule
 \end{tabular}
 
@@ -96,226 +118,181 @@
 \section{Introducción}
 
 \begin{itemize}
-  \item Manual de uso de un generador peine hecho con una SDR bladeRF 2.0 micro xA9 y GNU Radio. Sirve para verificar la cadena de medición de emisiones radiadas (RE) de un laboratorio de EMC y seguir su continuidad en el tiempo.
-  \item Pensado para cualquier laboratorio, cámara o facultad que tenga una SDR similar, un analizador portátil y un receptor de EMC.
-  \item Alcance: 96 líneas de 50~MHz a 1~GHz, una cada 10~MHz, calibración por cable, calibración irradiada contra CISPR~11 grupo~1 clase~A a 3~m y patrón para repetir la emisión otro día. El ensayo en sí está en el RE-TP-001 (TP1).
-  \item Flujo de referencia: EXP-28, en \texttt{SDR/A9\_22\_EXP28\_Peine\_calibracion\_CISPR} del repositorio del proyecto.
+  \item Manual de la SDR bladeRF 2.0 micro xA9 como instrumento de RF para ensayos de EMC: qué es, cómo se instala y se usa desde GNU Radio, qué defectos tiene y qué se midió con ella.
+  \item Pensado para cualquier laboratorio, cámara o facultad que tenga esta placa o una con el mismo chip. Los valores son mediciones propias por cable con un analizador tinySA Ultra.
+  \item Las aplicaciones del proyecto tienen su propio documento: el generador peine en el RE-TP-001 (TP1) y la susceptibilidad radiada en el TP4.
+\end{itemize}
+
+% ============================================================================
+\section{La placa}
+
+\begin{itemize}
+  \item Transceptor AD9361 de conversión directa: la señal en banda base se lleva a RF con un oscilador local, sin frecuencia intermedia. Dos salidas (TX1 y TX2) y dos entradas (RX1 y RX2).
+  \item Una FPGA entre el chip y el USB~3. La placa se alimenta por el USB y solo funciona en un puerto USB~3.
+  \item Convertidores de 12~bits: las muestras complejas van de $-1$ a $+1$ y una muestra de exactamente $+1$ desborda (sección~\ref{sec:defectos}).
 \end{itemize}
 
 \begin{table}[H]
   \centering
   \small
-  \begin{tabular}{@{}L{4.4cm}L{6.9cm}L{2.5cm}@{}}
+  \begin{tabular}{@{}L{4.6cm}L{9.4cm}@{}}
     \toprule
-    Requerimiento & Cómo lo cumple & Estado \\
+    Magnitud & Valor \\
     \midrule
-    CW con frecuencia, amplitud y permanencia controladas & Línea fija, ganancia de TX, amplitud por línea y tiempo por línea & Cumplido hasta 1~GHz \\
-    CW en 1,5 y 2~GHz & La xA9 llega a 6~GHz, el flujo a 1~GHz & Pendiente \\
-    Barrido de 100~MHz a 1~GHz cada 50~MHz & Barrido de 50 a 1000~MHz cada 10~MHz & Cumplido \\
-    Generador de varios tonos & Una línea por vez, juntadas con MAX HOLD & Cumplido \\
-    Registro de resultados & Capturas .csv, calibración, patrón y respaldos & Cumplido \\
-    Generar y recibir con una SDR & Los armónicos del TX entran al RX (EXP-18) & Descartado \\
-    Automatizar la campaña & Barrido, calibraciones y patrón desde la ventana & Cumplido \\
+    Frecuencia & TX de 47~MHz a 6~GHz. RX de 70~MHz a 6~GHz \\
+    Tasa de muestreo & Hasta 61,44~MSPS. En una PC común, hasta 30~MSPS sin cortes, o 40~MSPS con bloques USB grandes \\
+    Ancho de banda del filtro & De 200~kHz a 56~MHz. Usar el 90~\% de la tasa \\
+    Ganancia de TX & De $-23{,}75$ a 66~dB, en pasos de 1~dB desde GNU Radio \\
+    Salida máxima por cable & Unos +4~dBm por tono a fondo de escala con 60~dB de ganancia, hasta +5~dBm con un solo tono \\
+    Entrada máxima del RX & Sin valor publicado para esta placa. Criterio conservador: $-15$~dBm sin atenuador \\
+    Firmware y FPGA probados & 2.4.0 y 0.14.0, cargados desde la memoria de la placa \\
     \bottomrule
   \end{tabular}
-  \caption{Requerimientos de la consigna y estado del flujo.}
+  \caption{Datos de la bladeRF 2.0 micro xA9.}
 \end{table}
 
 % ============================================================================
-\section{Equipos e instalación}
+\section{Instalación y primer uso}
+
+\begin{enumerate}
+  \item Instalar Radioconda (GNU Radio 3.10 con gr-osmosdr) y el paquete de Nuand para Windows, que trae el driver USB y bladeRF-cli.
+  \item Conectar la placa a un puerto USB~3. Con \texttt{bladeRF-cli -p} aparece su número de serie, y con \texttt{bladeRF-cli -e version} sus versiones. bladeRF-cli solo se usa para consultar: no escribir la memoria ni actualizar el firmware.
+  \item Abrir la placa siempre por su número de serie (\texttt{bladerf=<serie>}), para no confundirla con otra SDR conectada.
+  \item Mientras un flujo transmite, el tercer LED de la placa tiene que quedar fijo. Si titila, faltan muestras por el USB y lo que sale no vale.
+\end{enumerate}
+
+% ============================================================================
+\section{Uso desde GNU Radio}
 
 \begin{table}[H]
   \centering
   \small
-  \begin{tabular}{@{}L{3.2cm}L{10.8cm}@{}}
+  \begin{tabular}{@{}L{4.2cm}L{9.8cm}@{}}
     \toprule
-    Equipo & Datos \\
+    Parámetro del osmocom Sink & Uso \\
     \midrule
-    SDR & bladeRF 2.0 micro xA9 (chip AD9361). TX de 47~MHz a 6~GHz, RX desde 70~MHz, ganancia de TX de $-23{,}75$ a 66~dB. Solo USB~3. Probada con firmware 2.4.0 y FPGA 0.14.0. Antena telescópica de 30~cm, extendida. \\
-    Analizador por cable & tinySA Ultra, con el mismo cable SMA y sin atenuador. Máximo +6~dBm con atenuación en 0~dB. Exporta .csv. \\
-    Receptor & El del laboratorio, con su antena y su transductor. Probado con un R\&S ESR-7. \\
-    PC & Windows con USB~3, Radioconda 2025.03.14 (GNU Radio 3.10.12 y gr-osmosdr) y el paquete de Nuand (driver USB y bladeRF-cli). \\
+    Device Arguments & \texttt{bladerf=<serie>,buffers=64,buflen=16384}. Bloques USB grandes para tasas altas \\
+    Sample Rate & Hasta 30~MSPS sin cortes. El flujo del peine usa 20 o 30~MSPS \\
+    Ch0 Frequency & Frecuencia del oscilador local. Resintoniza en cada llamada, aunque el valor no cambie \\
+    Ch0 RF Gain & La única ganancia que actúa, de a 1~dB. IF y BB Gain se ignoran \\
+    Ch0 Bandwidth & El 90~\% de la tasa \\
     \bottomrule
   \end{tabular}
-  \caption{Equipos y programas.}
+  \caption{Parámetros del bloque de salida. En el osmocom Source (recepción), Gain Mode va en False y también actúa solo RF Gain.}
 \end{table}
 
-\begin{enumerate}
-  \item Instalar Radioconda y el paquete de Nuand. bladeRF-cli solo se usa para consultar la placa, nunca para escribir su memoria.
-  \item Conectar la SDR a un puerto USB~3 y anotar su número de serie con \texttt{bladeRF-cli -p}.
-  \item Copiar la carpeta del EXP-28 y probar primero la versión demo (\texttt{exp28\_a9\_peine\_demo.grc}), que no usa la placa.
-  \item En las versiones con placa, poner el número de serie propio en el bloque osmocom Sink (\texttt{bladerf=<serie>}).
-\end{enumerate}
+\begin{itemize}
+  \item CW: un Signal Source complejo, corrido unos MHz del centro, hacia el osmocom Sink. Así el tono queda lejos de la fuga de portadora.
+  \item Barrido: un Function Probe que recorre una lista y una cascada de bloques Variable que calculan la frecuencia y la amplitud de cada paso, sin Python. Mandar la frecuencia solo cuando cambia.
+  \item Varios tonos: un Vector Source con una tabla precalculada rinde mucho más que varios Signal Source sumados. La suma de las amplitudes tiene que quedar debajo de 1 (tope práctico 0,95).
+  \item Recepción: osmocom Source hacia un QT GUI Frequency Sink. Comparte la tasa con el TX y puede abrir la misma placa con el mismo número de serie.
+  \item Tiempos: la frecuencia y la ganancia cambian al instante, pero la amplitud sale con el retardo de los bloques USB (unos 50~ms con 64 bloques a 20~MSPS). Para no dejar rastros en MAX HOLD, apagar el tono antes de cada salto.
+\end{itemize}
 
-\subsection{Cuidados del equipo}
+% ============================================================================
+\section{Defectos y cómo manejarlos}\label{sec:defectos}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[espectro, height=4.6cm, xmin=99, xmax=101, ymin=-90, ymax=0,
+        xticklabels={}, ylabel={Nivel (dBm)},
+        title={\small Estado normal}, title style={yshift=-1ex}]
+      \addplot[serieuno] table[x=f,y=normal]{fig_tono_100MHz.dat};
+      \node[rotulo,anchor=west] at (axis cs:100.25,-8) {tono};
+      \node[rotulo,anchor=south] at (axis cs:100.0,-51) {fuga\\$-45$~dBc};
+      \node[rotulo,anchor=south] at (axis cs:99.75,-46) {imagen\\$-40$~dBc};
+      \node[rotulo,anchor=south] at (axis cs:99.4,-48) {$-3f$\\$-42$~dBc};
+    \end{axis}
+  \end{tikzpicture}
+
+  \begin{tikzpicture}
+    \begin{axis}[espectro, height=4.6cm, xmin=99, xmax=101, ymin=-90, ymax=0,
+        xlabel={Frecuencia (MHz)}, ylabel={Nivel (dBm)},
+        title={\small Ráfaga de desborde}, title style={yshift=-1ex}]
+      \addplot[seriedos] table[x=f,y=desborde]{fig_tono_100MHz.dat};
+      \node[rotulo,anchor=west] at (axis cs:99.03,-8) {una línea cada 200~kHz, $-12$~dBc};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Un tono a 100~MHz visto de cerca, con la portadora en 100,0~MHz y el tono 200~kHz arriba, con amplitud 1,0 (EXP-15, RBW de 10~kHz). La mayor parte del tiempo se ve arriba. Cada 10 a 15~s, durante 1 o 2~s, aparece la ráfaga de abajo.}
+  \label{fig:tono}
+\end{figure}
 
 \begin{itemize}
-  \item No escribir la memoria de la placa ni actualizar el firmware. Bias tee siempre apagado.
-  \item Nunca conectar el TX de la placa a su propio RX.
-  \item La ganancia de TX tiene tope en 55~dB y la amplitud en 0,95: en el peor caso salen unos $-1$~dBm, debajo de los +6~dBm de la tinySA sin atenuador. Con amplitud 1,0 el convertidor desborda.
-  \item El programa arranca en PAUSA. Conectar y desconectar el cable o la antena solo en PAUSA, y descargarse antes tocando algo metálico a tierra.
-  \item Si el cierre se cuelga, el TX puede quedar habilitado: cerrar el proceso de Python y desenchufar la placa.
+  \item Fuga de portadora: una línea en la frecuencia del oscilador, de $-37$ a $-51$~dBc según la ganancia. No baja con la amplitud digital, así que conviene usar la amplitud más alta posible y correr el tono lejos del centro.
+  \item Imagen: una copia del tono del otro lado del oscilador, a unos $-40$~dBc.
+  \item Según su controlador, el AD9361 corrige solo la fuga y la imagen al arrancar y cada vez que el oscilador se mueve más de 100~MHz. Los comandos \texttt{calibrate} de bladeRF-cli son de la placa anterior y no sirven para esta.
+  \item Desborde: con amplitud 1,0 una muestra cae justo en el pico, no entra en los 12~bits y da la vuelta. Aparecen ráfagas de líneas a $-12$~dBc (figura~\ref{fig:tono}). La amplitud total nunca debe llegar a 1.
+  \item Reloj: sus armónicos de 38,4~MHz aparecen entre $-74$ y $-78$~dBm (192,0, 345,6 y 422,4~MHz).
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[espectro, xmin=45, xmax=1005, ymin=-70, ymax=10,
+        xlabel={Frecuencia (MHz)}, ylabel={Nivel (dBm)}]
+      \addplot[serieuno] table[x=f,y=nivel]{fig_armonicos.dat};
+      \node[rotulo,anchor=west] at (axis cs:56,-20) {tono\\en 50~MHz};
+      \node[rotulo,anchor=south] at (axis cs:169,-12.8) {3C+S\\$-9$~dBc};
+      \node[rotulo,anchor=south] at (axis cs:270,-18.7) {5C$-$S\\$-15$~dBc};
+      \node[rotulo,anchor=south] at (axis cs:930,-31.7) {17C$-$S\\$-28$~dBc};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Una sola línea de 50~MHz con la portadora C en 55~MHz ($S = 5$~MHz), en toda la banda (EXP-23, RBW de 300~kHz).}
+  \label{fig:armonicos}
+\end{figure}
+
+\begin{itemize}
+  \item La salida no tiene filtro: cada tono se repite en los armónicos impares del oscilador, en $3C+S$, $5C-S$, $7C+S$ y así hasta el orden 17, de $-9$ a $-28$~dBc (figura~\ref{fig:armonicos}). Solo un filtro pasabajos los saca. Si no hay filtro, elegir $S$ para que caigan donde no molesten.
+  \item La imagen del muestreo cae una tasa arriba del tono. Con el tono a un tercio de la tasa queda a unos $-33$~dBc: conviene que el tono quede lejos del borde del filtro.
+\end{itemize}
+
+% ============================================================================
+\section{Nivel de salida y calibración}
+
+\begin{itemize}
+  \item La ganancia de TX es lineal: 10~dB más dan de 9,9 a 10,3~dB más a la salida.
+  \item Con ganancia 45~dB y amplitud 0,25, cada tono sale en unos $-23$~dBm. Con 65~dB, en unos $-3$~dBm. A +3~dBm comprime 0,4~dB.
+  \item La respuesta no es plana: sin calibrar, un peine con todas las líneas a la misma amplitud varía 4,7~dB de 50~MHz a 1~GHz, y cae hacia arriba (figura~\ref{fig:peine}).
+  \item Se calibra contra un analizador por cable: con la ganancia fija se mide cada frecuencia y se corrige su amplitud. Una vuelta dejó las líneas entre $-1{,}6$ y $+0{,}6$~dB del objetivo, y se repite hasta quedar en $\pm 1$~dB. La calibración vale para la tasa, el analizador y el cable con que se hizo.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[espectro, xmin=40, xmax=1010, ymin=-44, ymax=-30,
+        xlabel={Frecuencia de la línea (MHz)}, ylabel={Nivel (dBm)},
+        legend pos=south west]
+      \addplot[serieuno, mark=*, mark size=1pt] table[x=linea,y=sin_calibrar]{fig_peine.dat};
+      \addplot[seriedos, mark=*, mark size=1pt] table[x=linea,y=calibrada]{fig_peine.dat};
+      \addplot[tinta, dashed, line width=0.6pt] coordinates {(40,-33) (1010,-33)};
+      \legend{{Sin calibrar (amplitud 0,25)}, {Con una calibración}, {Objetivo}}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Nivel por cable de las 96 líneas de un peine, de 50~MHz a 1~GHz (EXP-28, 40~MSPS). Calibrado, el desvío baja de 1,2 a 0,35~dB.}
+  \label{fig:peine}
+\end{figure}
+
+% ============================================================================
+\section{Cuidados del equipo}
+
+\begin{itemize}
+  \item No escribir la memoria de la placa ni actualizar el firmware sin necesidad. Bias tee siempre apagado: pondría continua en la entrada del instrumento conectado.
+  \item Nunca conectar el TX de la placa a su propio RX sin atenuador. Si hace falta, con 30~dB de ganancia de TX como máximo.
+  \item Con un analizador sin atenuador (+6~dBm de máximo en la tinySA), limitar la ganancia de TX: con 55~dB y amplitud 0,95 salen unos $-1$~dBm.
+  \item Conectar y desconectar cables y antenas sin transmitir, y descargarse antes tocando algo metálico a tierra.
+  \item Si un flujo se cierra mal, el TX puede quedar habilitado: cerrar el proceso de Python y desenchufar la placa. Después de un error de USB, desenchufarla un minuto.
   \item Emitir al aire solo dentro de una cámara, o fuera de ella con el nivel más bajo y el menor tiempo posibles.
 \end{itemize}
 
 % ============================================================================
-\section{Arquitectura del peine}
+\section{Aplicaciones en el proyecto}
 
 \begin{itemize}
-  \item La SDR arma el peine con una línea por vez: salta el oscilador de línea en línea y el receptor, en MAX HOLD, las junta.
-  \item Cada línea es un tono $S$~MHz por debajo de la portadora, así que la fuga de portadora y la imagen caen fuera de las líneas.
-  \item La ganancia de TX fija el nivel base y la amplitud de cada línea compensa la respuesta de la placa y del camino.
-  \item En cada salto el tono se apaga un momento (corte), para que el MAX HOLD no tome nada mientras el oscilador se mueve.
+  \item Generador peine para verificar la cadena de RE: 96 líneas de 50~MHz a 1~GHz, una por vez, juntadas por el receptor con MAX HOLD, con calibración por cable e irradiada. Flujo del EXP-28, procedimiento en el RE-TP-001 (TP1).
+  \item Lazo TX hacia RX por cable (EXP-18): el RX sigue al TX dB a dB, pero los armónicos del TX entran por las respuestas armónicas del RX y la lectura cambia de 1 a 2~dB en cada sintonía. Se descartó como autocalibración.
+  \item Fuente para susceptibilidad radiada, con el campo medido aparte con sensores: TP4.
 \end{itemize}
-
-\begin{figure}[H]
-  \centering
-  \begin{tikzpicture}[font=\small,>=latex,
-      caja/.style={draw,rounded corners=2pt,align=center,minimum height=1.1cm,text width=2.3cm},
-      archivo/.style={draw,dashed,align=center,minimum height=1.0cm,text width=2.3cm}]
-    \node[caja] (probe) {Function Probe\\paso, 10 por segundo};
-    \node[caja,right=1.6cm of probe] (vars) {Variables\\línea, emite, amplitud};
-    \node[caja,right=1.6cm of vars] (tono) {Signal Source\\tono a $-S$~MHz};
-    \node[caja,right=1.6cm of tono] (sink) {osmocom Sink\\salida TX1};
-    \node[caja,below=1.0cm of probe] (graficos) {Gráficos y etiquetas};
-    \node[caja,below=1.0cm of vars] (snippet) {Python Snippet\\botones};
-    \node[archivo,below=1.0cm of tono] (archivos) {Archivos\\objetivo, calibración, patrón};
-    \draw[->] (probe) -- (vars);
-    \draw[->] (vars) -- node[above]{amplitud} (tono);
-    \draw[->] (tono) -- node[above]{muestras} (sink);
-    \draw[->] (vars.north) to[bend left=25] node[above]{frecuencia y ganancia} (sink.north);
-    \draw[->] (vars.south west) -- (graficos.north east);
-    \draw[<->] (snippet) -- node[right,align=left]{objetivo\\medidos} (vars);
-    \draw[<->] (snippet) -- (archivos);
-  \end{tikzpicture}
-  \caption{Arquitectura del flujo.}
-\end{figure}
-
-\begin{table}[H]
-  \centering
-  \small
-  \begin{tabular}{@{}lL{9.4cm}@{}}
-    \toprule
-    Parámetro & Valor \\
-    \midrule
-    Líneas            & 96, de 50 a 1000~MHz, una cada 10~MHz \\
-    Portadora y tasa  & 6,25~MHz arriba con 20~MSPS, o 10~MHz arriba con 30~MSPS. Cambiarla solo en PAUSA \\
-    Tiempo por línea  & 7~s encendida + 0,5~s de corte (mínimo 0,2~s). Pasada completa de 12~min \\
-    Ganancia y amplitud & Ganancia de TX de 0 a 55~dB, amplitud de 0,25 a 0,95 \\
-    Ventana de lectura & $\pm 3$~MHz en la tinySA y $\pm 1$~MHz en el receptor \\
-    \bottomrule
-  \end{tabular}
-  \caption{Parámetros del flujo del EXP-28.}
-\end{table}
-
-\begin{itemize}
-  \item La salida no tiene filtro: cada línea se repite en los armónicos impares de su portadora, de 9 a 28~dB por debajo.
-  \item Con la portadora a 10~MHz esas repeticiones caen sobre otras líneas y pueden tapar a una débil. Con 6,25~MHz caen entre dos líneas, a 5~MHz de cada una. Las dos opciones quedan disponibles hasta compararlas con la línea fija.
-\end{itemize}
-
-% ============================================================================
-\section{Operación}
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.92\textwidth]{fig_ventana_demo.png}
-  \caption{Ventana del flujo (versión demo, con datos de ejemplo).}
-\end{figure}
-
-\begin{table}[H]
-  \centering
-  \small
-  \begin{tabular}{@{}L{3.8cm}L{10.2cm}@{}}
-    \toprule
-    Control & Función \\
-    \midrule
-    PAUSA y CONGELAR      & Silencio, o quedarse emitiendo en la línea actual. \\
-    Ganancia de TX        & Usar la ganancia mínima que muestra la ventana. \\
-    Modo                  & Barrido completo o una línea fija, para orientar antenas, medir el margen sobre el piso o mirar armónicos. \\
-    Nivel al reiniciar    & Objetivo plano que deja el botón Reiniciar ($-33$~dBm por defecto). \\
-    Reiniciar calibración & Objetivo plano y todas las líneas con la misma amplitud. Pide confirmación y guarda una copia en respaldos. \\
-    1, 2 y 3, Cargar patrón & Calibración conducida, irradiada, guardar y cargar el patrón (sección~\ref{sec:botones}). \\
-    \bottomrule
-  \end{tabular}
-  \caption{Controles principales.}
-\end{table}
-
-\begin{itemize}
-  \item Al abrir, el programa carga solo el objetivo, la calibración y la última irradiada guardados. Para cerrar: PAUSA, cerrar la ventana y esperar a que termine el proceso.
-  \item La etapa cambia de color: PAUSA en rojo, CORTE en naranja, línea fija en azul y EMITIENDO en verde. Los mensajes que empiezan con NO o tienen OJO salen en rojo.
-  \item Líneas sin margen: las que no llegan a su objetivo ni con amplitud 0,95. Se arreglan subiendo la ganancia.
-  \item El tercer LED de la placa tiene que quedar fijo. Si titila faltan muestras por el USB y la medición no vale.
-\end{itemize}
-
-\subsection{Qué hace cada botón}\label{sec:botones}
-
-\begin{itemize}
-  \item 1. Calibración conducida: lee capturas por cable del peine tal como sale, toma el pico de cada línea (el menor entre capturas), descuenta amplitud y ganancia y calcula la amplitud que lleva cada línea a su objetivo. Dice entre cuántos dB del objetivo estaba lo leído, en verde dentro de $\pm 1$~dB. Rechaza capturas a más de 6~dB por encima o 10~dB por debajo de lo esperado.
-  \item 2. Calibración irradiada: lee una sola traza del receptor, en dB$\mu$V/m, y le suma al objetivo el límite menos lo medido. Es relativa a lo cargado: otra traza hace un ajuste fino. Rechaza trazas en otra unidad, con más de una traza o ya usadas, y la traza entera si más de 10 líneas quedan a más de 15~dB del límite.
-  \item 3. Guardar patrón: guarda el nivel por cable de cada línea del peine calibrado, con la ganancia, la separación y la tasa. Cargar patrón lo pone como objetivo, y la conducida reproduce la misma emisión otro día.
-\end{itemize}
-
-% ============================================================================
-\section{Versiones, archivos y otro laboratorio}
-
-\begin{itemize}
-  \item Tres versiones con el mismo código: para la cámara (traza .DAT del receptor), de casa (captura .csv de un analizador con su antena, pasada a campo con $E = P + 107 + AF$) y demo (sin placa, con datos de ejemplo).
-  \item Archivos de texto en la carpeta del programa, con un renglón por línea del peine: objetivo, calibración conducida, última irradiada, trazas usadas y un patrón por fecha, más la carpeta respaldos. Las versiones de casa y demo usan sus propios archivos, con el prefijo casa o demo.
-  \item En otro laboratorio:
-        \begin{itemize}
-          \item poner el número de serie propio en el osmocom Sink,
-          \item el receptor tiene que exportar un texto con el renglón y-Unit en dB$\mu$V/m y un renglón por punto con la frecuencia en Hz y el nivel, separados por punto y coma,
-          \item el analizador, un .csv con la frecuencia en MHz y el nivel en dBm,
-          \item el límite (CISPR~11 clase~A a 3~m) y la grilla están fijos en el bloque \texttt{limite\_lineas} y en el snippet.
-        \end{itemize}
-\end{itemize}
-
-% ============================================================================
-\section{Problemas frecuentes}
-
-\begin{table}[H]
-  \centering
-  \small
-  \begin{tabular}{@{}L{5.4cm}L{8.6cm}@{}}
-    \toprule
-    Síntoma & Qué hacer \\
-    \midrule
-    El tercer LED titila & Usar un puerto USB~3, cerrar otros programas y repetir la pasada. \\
-    Error de USB o cierre inesperado & PAUSA si se puede, cerrar, desenchufar, esperar un minuto y volver a enchufar. \\
-    NO se generó: en X~MHz se leyó\dots & La captura es de otra ganancia, con atenuación o al aire. Repetirla. \\
-    Conducida en rojo: NO coincide & La calibración es de la otra separación. Cambiarla o calibrar de nuevo. \\
-    NO se cargó: otra tasa & Calibración de una versión anterior. Reiniciar y calibrar. \\
-    NO se corrigió (irradiada) & Traza en otra unidad, ya usada o que no es la del peine calibrado. Exportar otra. \\
-    Líneas sin margen & Subir la ganancia a la mínima que muestra la ventana. \\
-    Picos sueltos en MAX HOLD & El tono quedó encendido en un salto. Subir el corte. \\
-    \bottomrule
-  \end{tabular}
-  \caption{Problemas frecuentes.}
-\end{table}
-
-% ============================================================================
-\section{Recepción y valores preliminares}
-
-\begin{itemize}
-  \item La xA9 recibe desde 70~MHz. Sin valor publicado de entrada máxima, el criterio conservador es no superar $-15$~dBm sin atenuador.
-  \item El lazo TX hacia RX por cable (EXP-18) se descartó: los armónicos del TX entran al RX y la lectura cambia de 1 a 2~dB en cada sintonía. Para RS, la medición de campo con sensores queda para el TP4.
-\end{itemize}
-
-\begin{table}[H]
-  \centering
-  \small
-  \begin{tabular}{@{}L{4.4cm}L{9.6cm}@{}}
-    \toprule
-    Magnitud & Valor medido por cable con la tinySA \\
-    \midrule
-    Nivel de salida & Unos $-3$~dBm por línea con ganancia 65~dB y amplitud 0,25. Cae 4,5~dB de 420~MHz a 1~GHz. Comprime 0,4~dB con +3~dBm. \\
-    Planitud & Sin calibrar, de $-41{,}5$ a $-36{,}8$~dBm. Calibrada, de $-34{,}6$ a $-32{,}4$~dBm contra $-33$~dBm, con desvío de 0,35~dB (40~MSPS). \\
-    Fuga e imagen & Fuga de $-37$ a $-51$~dBc según la ganancia, imagen de unos $-40$~dBc. \\
-    Armónicos & 3C+S de $-9$ a $-10$~dBc, 5C$-$S de $-12$ a $-17$~dBc, hasta el orden 17 a $-28$~dBc. \\
-    \bottomrule
-  \end{tabular}
-  \caption{Valores preliminares. Los de 20 y 30~MSPS quedan por medir.}
-\end{table}
 
 % ============================================================================
 \section{Referencias}
