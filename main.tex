@@ -27,7 +27,7 @@
 
 % ---------------------------------------------------------------- datos ----
 \newcommand{\codigo}{OE2}
-\newcommand{\version}{2.1 (borrador)}
+\newcommand{\version}{2.2 (borrador)}
 \newcommand{\fecha}{26 de octubre de 2026}
 
 % Columna de tabla con texto alineado a la izquierda
@@ -109,7 +109,8 @@
   1.0 (borrador) & 26 de octubre de 2026 & Manual del peine del EXP-28. \\
   1.1 (borrador) & 26 de octubre de 2026 & Versión corta. \\
   2.0 (borrador) & 26 de octubre de 2026 & Manual de la SDR como instrumento, con gráficos de mediciones propias. \\
-  2.1 (borrador) & \fecha & Texto en párrafos, con listas solo para pasos y reglas. \\
+  2.1 (borrador) & 26 de octubre de 2026 & Texto en párrafos, con listas solo para pasos y reglas. \\
+  2.2 (borrador) & \fecha & Defectos y nivel de salida en listas, sin dos puntos dentro de las oraciones. \\
   \bottomrule
 \end{tabular}
 
@@ -123,7 +124,7 @@ Este manual describe la SDR bladeRF 2.0 micro xA9 como instrumento de RF para en
 % ============================================================================
 \section{La placa}
 
-La placa se arma alrededor del transceptor AD9361, de conversión directa: la señal en banda base pasa a RF con un oscilador local, sin frecuencia intermedia. Tiene dos salidas (TX1 y TX2), dos entradas (RX1 y RX2) y una FPGA entre el chip y el USB~3, que además la alimenta. Solo funciona en un puerto USB~3. Los convertidores son de 12~bits: las muestras complejas van de $-1$ a $+1$, y una muestra de exactamente $+1$ desborda (sección~\ref{sec:defectos}).
+La placa se arma alrededor del transceptor AD9361, de conversión directa, que lleva la señal en banda base a RF con un oscilador local, sin frecuencia intermedia. Tiene dos salidas (TX1 y TX2), dos entradas (RX1 y RX2) y una FPGA entre el chip y el USB~3, que además la alimenta. Solo funciona en un puerto USB~3. Los convertidores son de 12~bits. Las muestras complejas van de $-1$ a $+1$, y una muestra de exactamente $+1$ desborda (sección~\ref{sec:defectos}).
 
 \begin{table}[H]
   \centering
@@ -137,7 +138,7 @@ La placa se arma alrededor del transceptor AD9361, de conversión directa: la se
     Ancho de banda del filtro & De 200~kHz a 56~MHz. Usar el 90~\% de la tasa \\
     Ganancia de TX & De $-23{,}75$ a 66~dB, en pasos de 1~dB desde GNU Radio \\
     Salida máxima por cable & Unos +4~dBm por tono a fondo de escala con 60~dB de ganancia, hasta +5~dBm con un solo tono \\
-    Entrada máxima del RX & Sin valor publicado para esta placa. Criterio conservador: $-15$~dBm sin atenuador \\
+    Entrada máxima del RX & Sin valor publicado para esta placa. Como criterio conservador, no superar $-15$~dBm sin atenuador \\
     Firmware y FPGA probados & 2.4.0 y 0.14.0, cargados desde la memoria de la placa \\
     \bottomrule
   \end{tabular}
@@ -149,7 +150,7 @@ La placa se arma alrededor del transceptor AD9361, de conversión directa: la se
 
 \begin{enumerate}
   \item Instalar Radioconda (GNU Radio 3.10 con gr-osmosdr) y el paquete de Nuand para Windows, que trae el driver USB y bladeRF-cli.
-  \item Conectar la placa a un puerto USB~3. Con \texttt{bladeRF-cli -p} aparece su número de serie, y con \texttt{bladeRF-cli -e version} sus versiones. bladeRF-cli solo se usa para consultar: no escribir la memoria ni actualizar el firmware.
+  \item Conectar la placa a un puerto USB~3. Con \texttt{bladeRF-cli -p} aparece su número de serie, y con \texttt{bladeRF-cli -e version} sus versiones. bladeRF-cli solo se usa para consultar, sin escribir la memoria ni actualizar el firmware.
   \item Abrir la placa siempre por su número de serie (\texttt{bladerf=<serie>}), para no confundirla con otra SDR conectada.
   \item Mientras un flujo transmite, el tercer LED de la placa tiene que quedar fijo. Si titila, faltan muestras por el USB y lo que sale no vale.
 \end{enumerate}
@@ -174,7 +175,7 @@ La placa se arma alrededor del transceptor AD9361, de conversión directa: la se
   \caption{Parámetros del bloque de salida. En el osmocom Source (recepción), Gain Mode va en False y también actúa solo RF Gain.}
 \end{table}
 
-Una portadora CW se arma con un Signal Source complejo hacia el osmocom Sink, con el tono corrido unos MHz del centro para alejarlo de la fuga de portadora. Un barrido no necesita Python: un Function Probe recorre una lista y una cascada de bloques Variable calcula la frecuencia y la amplitud de cada paso. Conviene mandar la frecuencia solo cuando cambia, porque la placa resintoniza en cada llamada. Para varios tonos, un Vector Source con una tabla precalculada rinde mucho más que varios Signal Source sumados, siempre con la suma de las amplitudes debajo de 1 (tope práctico 0,95). Para recibir alcanza con un osmocom Source hacia un QT GUI Frequency Sink, que comparte la tasa con el TX y puede abrir la misma placa con el mismo número de serie.
+Una portadora CW se arma con un Signal Source complejo hacia el osmocom Sink, con el tono corrido unos MHz del centro para alejarlo de la fuga de portadora. Un barrido no necesita Python, porque un Function Probe recorre una lista y una cascada de bloques Variable calcula la frecuencia y la amplitud de cada paso. Conviene mandar la frecuencia solo cuando cambia, porque la placa resintoniza en cada llamada. Para varios tonos, un Vector Source con una tabla precalculada rinde mucho más que varios Signal Source sumados, siempre con la suma de las amplitudes debajo de 1 (tope práctico 0,95). Para recibir alcanza con un osmocom Source hacia un QT GUI Frequency Sink, que comparte la tasa con el TX y puede abrir la misma placa con el mismo número de serie.
 
 La frecuencia y la ganancia cambian al instante, pero la amplitud sale con el retardo de los bloques USB, unos 50~ms con 64 bloques a 20~MSPS. Por eso, para no dejar rastros en MAX HOLD, el tono se apaga antes de cada salto.
 
@@ -207,9 +208,13 @@ La frecuencia y la ganancia cambian al instante, pero la amplitud sale con el re
   \label{fig:tono}
 \end{figure}
 
-Como en toda conversión directa, aparecen dos defectos alrededor del oscilador (figura~\ref{fig:tono}). La fuga de portadora es una línea en la frecuencia del oscilador, de $-37$ a $-51$~dBc según la ganancia, que no baja con la amplitud digital, osea conviene usar la amplitud más alta posible y correr el tono lejos del centro. La imagen es una copia del tono del otro lado del oscilador, a unos $-40$~dBc. Según su controlador, el AD9361 corrige las dos al arrancar y cada vez que el oscilador se mueve más de 100~MHz. Los comandos \texttt{calibrate} de bladeRF-cli solo sirven para las placas Nuand de versión V1, lo cual no es el caso de la de este informe.
-
-Con amplitud 1,0, de vez en cuando una muestra cae justo en el pico, no entra en los 12~bits y da la vuelta. Aparecen entonces ráfagas de líneas a $-12$~dBc, como en la parte de abajo de la figura, así que la amplitud total nunca debe llegar a 1. Además, los armónicos del reloj de 38,4~MHz aparecen entre $-74$ y $-78$~dBm (192,0, 345,6 y 422,4~MHz).
+\begin{itemize}
+  \item La fuga de portadora es una línea en la frecuencia del oscilador, de $-37$ a $-51$~dBc según la ganancia (figura~\ref{fig:tono}). No baja con la amplitud digital, así que conviene usar la amplitud más alta posible y correr el tono lejos del centro.
+  \item La imagen es una copia del tono del otro lado del oscilador, a unos $-40$~dBc.
+  \item Según su controlador, el AD9361 corrige la fuga y la imagen al arrancar y cada vez que el oscilador se mueve más de 100~MHz. Los comandos \texttt{calibrate} de bladeRF-cli solo sirven para las placas Nuand de versión V1, lo cual no es el caso de la de este informe.
+  \item Con amplitud 1,0, de vez en cuando una muestra cae justo en el pico, no entra en los 12~bits y da la vuelta. Aparecen ráfagas de líneas a $-12$~dBc, como en la parte de abajo de la figura, así que la amplitud total nunca debe llegar a 1.
+  \item Los armónicos del reloj de 38,4~MHz aparecen entre $-74$ y $-78$~dBm (192,0, 345,6 y 422,4~MHz).
+\end{itemize}
 
 \begin{figure}[H]
   \centering
@@ -227,14 +232,22 @@ Con amplitud 1,0, de vez en cuando una muestra cae justo en el pico, no entra en
   \label{fig:armonicos}
 \end{figure}
 
-La salida no tiene filtro, así que cada tono se repite en los armónicos impares del oscilador: en $3C+S$, $5C-S$, $7C+S$ y así hasta el orden 17, de $-9$ a $-28$~dBc (figura~\ref{fig:armonicos}). Solo un filtro pasabajos los saca, y sin filtro conviene elegir $S$ para que caigan donde no molesten. La imagen del muestreo cae una tasa arriba del tono, y con el tono a un tercio de la tasa queda a unos $-33$~dBc, así que conviene que el tono quede lejos del borde del filtro.
+\begin{itemize}
+  \item La salida no tiene filtro, así que cada tono se repite en los armónicos impares del oscilador, en $3C+S$, $5C-S$, $7C+S$ y así hasta el orden 17, de $-9$ a $-28$~dBc (figura~\ref{fig:armonicos}). Solo un filtro pasabajos los saca, y sin filtro conviene elegir $S$ para que caigan donde no molesten.
+  \item La imagen del muestreo cae una tasa arriba del tono. Con el tono a un tercio de la tasa queda a unos $-33$~dBc, así que conviene que el tono quede lejos del borde del filtro.
+\end{itemize}
 
 % ============================================================================
 \section{Nivel de salida y calibración}
 
-La ganancia de TX es lineal,  10~dB más dan de 9,9 a 10,3~dB más a la salida. Con 45~dB y amplitud 0,25 cada tono sale en unos $-23$~dBm, y con 65~dB, en unos $-3$~dBm. A +3~dBm la salida comprime 0,4~dB.
-
-La respuesta en frecuencia no es plana. Sin calibrar, un peine con todas las líneas a la misma amplitud varía 4,7~dB de 50~MHz a 1~GHz y cae hacia arriba (figura~\ref{fig:peine}). Se calibra contra un analizador por cable: con la ganancia fija se mide cada frecuencia y se corrige su amplitud. Una vuelta dejó las líneas entre $-1{,}6$ y $+0{,}6$~dB del objetivo, y se repite hasta quedar en $\pm 1$~dB. La calibración vale para la tasa, el analizador y el cable con que se hizo.
+\begin{itemize}
+  \item La ganancia de TX es lineal, y cada 10~dB más dan de 9,9 a 10,3~dB más a la salida.
+  \item Con 45~dB y amplitud 0,25 cada tono sale en unos $-23$~dBm, y con 65~dB, en unos $-3$~dBm.
+  \item A +3~dBm la salida comprime 0,4~dB.
+  \item La respuesta en frecuencia no es plana. Sin calibrar, un peine con todas las líneas a la misma amplitud varía 4,7~dB de 50~MHz a 1~GHz y cae hacia arriba (figura~\ref{fig:peine}).
+  \item Se calibra contra un analizador por cable, midiendo cada frecuencia con la ganancia fija y corrigiendo su amplitud. Una vuelta dejó las líneas entre $-1{,}6$ y $+0{,}6$~dB del objetivo, y se repite hasta quedar en $\pm 1$~dB.
+  \item La calibración vale para la tasa, el analizador y el cable con que se hizo.
+\end{itemize}
 
 \begin{figure}[H]
   \centering
@@ -256,18 +269,18 @@ La respuesta en frecuencia no es plana. Sin calibrar, un peine con todas las lí
 \section{Cuidados del equipo}
 
 \begin{itemize}
-  \item No escribir la memoria de la placa ni actualizar el firmware sin necesidad. Bias tee siempre apagado: pondría continua en la entrada del instrumento conectado.
+  \item No escribir la memoria de la placa ni actualizar el firmware sin necesidad. Bias tee siempre apagado, porque pondría continua en la entrada del instrumento conectado.
   \item Nunca conectar el TX de la placa a su propio RX sin atenuador. Si hace falta, con 30~dB de ganancia de TX como máximo.
-  \item Con un analizador sin atenuador (+6~dBm de máximo en la tinySA), limitar la ganancia de TX: con 55~dB y amplitud 0,95 salen unos $-1$~dBm.
+  \item Con un analizador sin atenuador (+6~dBm de máximo en la tinySA), limitar la ganancia de TX. Con 55~dB y amplitud 0,95 salen unos $-1$~dBm.
   \item Conectar y desconectar cables y antenas sin transmitir, y descargarse antes tocando algo metálico a tierra.
-  \item Si un flujo se cierra mal, el TX puede quedar habilitado: cerrar el proceso de Python y desenchufar la placa. Después de un error de USB, desenchufarla un minuto.
+  \item Si un flujo se cierra mal, el TX puede quedar habilitado. En ese caso, cerrar el proceso de Python y desenchufar la placa. Después de un error de USB, desenchufarla un minuto.
   \item Emitir al aire solo dentro de una cámara, o fuera de ella con el nivel más bajo y el menor tiempo posibles.
 \end{itemize}
 
 % ============================================================================
 \section{Aplicaciones en el proyecto}
 
-En el proyecto la placa se usa como generador peine para verificar la cadena de RE: 96 líneas de 50~MHz a 1~GHz, una por vez, que el receptor junta con MAX HOLD, con calibración por cable e irradiada (flujo del EXP-28 y procedimiento RE-TP-001, TP1). También se probó un lazo de TX hacia RX por cable (EXP-18). El RX sigue al TX dB a dB, pero los armónicos del TX entran por las respuestas armónicas del RX y la lectura cambia de 1 a 2~dB en cada sintonía, así que se descartó como autocalibración. Su uso como fuente para susceptibilidad radiada, con el campo medido aparte con sensores, queda para el TP4.
+En el proyecto la placa se usa como generador peine para verificar la cadena de RE, con 96 líneas de 50~MHz a 1~GHz, una por vez, que el receptor junta con MAX HOLD, y con calibración por cable e irradiada (flujo del EXP-28 y procedimiento RE-TP-001, TP1). También se probó un lazo de TX hacia RX por cable (EXP-18). El RX sigue al TX dB a dB, pero los armónicos del TX entran por las respuestas armónicas del RX y la lectura cambia de 1 a 2~dB en cada sintonía, así que se descartó como autocalibración. Su uso como fuente para susceptibilidad radiada, con el campo medido aparte con sensores, queda para el TP4.
 
 % ============================================================================
 \section{Referencias}
