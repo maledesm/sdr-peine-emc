@@ -278,19 +278,12 @@ La frecuencia y la ganancia cambian al instante, pero la amplitud sale con el re
 \end{itemize}
 
 % ============================================================================
-\section{Aplicaciones en el proyecto}
-
-En el proyecto la placa se usa como generador peine para verificar la cadena de RE, con 96 líneas de 50~MHz a 1~GHz, una por vez, que el receptor junta con MAX HOLD, y con calibración por cable e irradiada (flujo del EXP-28 y procedimiento RE-TP-001, TP1). También se probó un lazo de TX hacia RX por cable (EXP-18). El RX sigue al TX dB a dB, pero los armónicos del TX entran por las respuestas armónicas del RX y la lectura cambia de 1 a 2~dB en cada sintonía, así que se descartó como autocalibración. Su uso como fuente para susceptibilidad radiada, con el campo medido aparte con sensores, queda para el TP4.
-
-% ============================================================================
 \section{Referencias}
 
 \begin{enumerate}
   \item Nuand, bladeRF 2.0 micro, documentación y libbladeRF.
   \item Analog Devices, AD9361, hoja de datos.
   \item GNU Radio 3.10 y gr-osmosdr, documentación.
-  \item tinySA Ultra, manual de uso.
-  \item RE-TP-001, Procedimiento de ensayo de emisiones radiadas (TP1 de este proyecto).
 \end{enumerate}
 
 \end{document}
