@@ -27,8 +27,8 @@
 
 % ---------------------------------------------------------------- datos ----
 \newcommand{\codigo}{RE-TP-001}
-\newcommand{\version}{2.2}
-\newcommand{\fecha}{22 de octubre de 2026}
+\newcommand{\version}{2.3}
+\newcommand{\fecha}{26 de octubre de 2026}
 
 % Texto que hay que completar o confirmar antes de usar el documento
 \newcommand{\pendiente}[1]{\textcolor{red}{[#1]}}
@@ -94,7 +94,8 @@
   1.1 (borrador) & 12 de octubre de 2026 & Antena transmisora y ajustes para la primera medición en el CETEM. \\
   2.0 (borrador) & 19 de octubre de 2026 & Entregable OE1. Calibración conducida e irradiada contra el límite de CISPR~11, peine con una línea cada 10~MHz, tres alturas de antena e incertidumbre. \\
   2.1 & 20 de octubre de 2026 & Grupo~1 clase~A. Calibración conducida hacia un objetivo por línea, perfil de referencia, tiempos del EXP-27 y plan de la visita. Texto más corto. \\
-  2.2 & \fecha & Software del EXP-28. Objetivo inicial plano, calibración irradiada con una sola traza y ajuste fino, patrón por cable y botón para reiniciar la calibración. \\
+  2.2 & 22 de octubre de 2026 & Software del EXP-28. Objetivo inicial plano, calibración irradiada con una sola traza y ajuste fino, patrón por cable y botón para reiniciar la calibración. \\
+  2.3 & \fecha & Incertidumbre simplificada en dB. Tolerancia de la verificación irradiada en $\pm 2$~dB y criterio de conformidad en $\pm 3{,}5$~dB. \\
   \bottomrule
 \end{tabular}
 
@@ -317,7 +318,7 @@ La primera vez en cada laboratorio y cada vez que cambie el montaje.
   \item Una pasada completa en una altura elegida, en vertical. Guardar la traza (.DAT, en dB$\mu$V/m).
   \item Calibración irradiada (botón~2) con esa única traza. Se le suma al objetivo el límite menos lo medido.
   \item Si la ventana avisa líneas sin margen, subir la ganancia de TX a la mínima que muestra.
-  \item Pasada de verificación en la misma altura: cada línea a $\pm 1$~dB del límite. Si no, botón~2 con la traza de esa pasada (ajuste fino, relativo a lo cargado) y repetir este paso.
+  \item Pasada de verificación en la misma altura: cada línea a $\pm 2$~dB del límite. Si no, botón~2 con la traza de esa pasada (ajuste fino, relativo a lo cargado) y repetir este paso.
 \end{enumerate}
 
 \begin{itemize}
@@ -392,7 +393,7 @@ Tildar PAUSA, cerrar el programa y desenchufar la SDR. Guardar trazas, fotos, ar
 \begin{itemize}
   \item Ruido de fondo: al menos 6~dB bajo el límite (tabla~\ref{tab:limites}), mejor 10~dB.
   \item Por línea: nivel en la geometría de calibración menos el límite, según la tabla de abajo.
-  \item Los $\pm$3~dB suman la tolerancia de la calibración ($\pm$1~dB) y la repetibilidad del montaje.
+  \item Los $\pm$3,5~dB son la incertidumbre expandida (3,3~dB) y los $\pm$6~dB, la suma de los límites (5,9~dB), según la sección~\ref{sec:incertidumbre}.
   \item Otras alturas y horizontal: solo que las líneas superen al piso en 10~dB.
   \item Las líneas a menos de 10~dB del ruido de fondo o de la emisión propia se marcan y no cuentan.
 \end{itemize}
@@ -403,12 +404,12 @@ Tildar PAUSA, cerrar el programa y desenchufar la SDR. Guardar trazas, fotos, ar
     \toprule
     Diferencia con el límite & Resultado \\
     \midrule
-    Hasta $\pm$3~dB          & Conforme \\
-    Entre $\pm$3 y $\pm$6~dB & Revisar el montaje contra las fotos y repetir \\
-    Más de $\pm$6~dB         & No conforme, investigar la cadena de medición \\
+    Hasta $\pm$3,5~dB          & Conforme \\
+    Entre $\pm$3,5 y $\pm$6~dB & Revisar el montaje contra las fotos y repetir \\
+    Más de $\pm$6~dB           & No conforme, investigar la cadena de medición \\
     \bottomrule
   \end{tabular}
-  \caption{Criterio de continuidad. Valores iniciales, a confirmar con el paso de repetibilidad.}
+  \caption{Criterio de continuidad. Se ajusta cuando el paso de repetibilidad reemplace la reposición del montaje estimada.}
 \end{table}
 
 Diagnóstico:
@@ -539,7 +540,46 @@ Diagnóstico:
 % ============================================================================
 \newpage
 \section{Incertidumbre de medición}\label{sec:incertidumbre}
-[FALTA COMPLETAR]
+
+\begin{itemize}
+  \item El procedimiento compara contra el día de referencia: no mide el campo en forma absoluta.
+  \item El factor de antena, la pérdida de los cables, el preamplificador y la exactitud del receptor son la cadena que se verifica. Se cancelan al comparar y no entran en la cuenta.
+  \item Entra solo lo que puede mover la lectura sin que la cadena haya cambiado. Todo en dB.
+  \item De cada contribución se conoce solo el límite $a$ (distribución rectangular), así que su incertidumbre es $u = a/\sqrt{3}$.
+\end{itemize}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{@{}lcp{5.6cm}c@{}}
+    \toprule
+    Contribución & $a$ (dB) & Origen & $u$ (dB) \\
+    \midrule
+    Reproducción del patrón por cable    & 1,0 & tolerancia de la calibración conducida (botón~1) & 0,58 \\
+    Residuo de la calibración irradiada  & 2,0 & tolerancia de la pasada de verificación & 1,15 \\
+    Reposición del montaje               & 1,5 & estimado, se reemplaza con el paso de repetibilidad & 0,87 \\
+    Lectura del receptor                 & 0,5 & señal estable, Peak con MAX HOLD & 0,29 \\
+    Estabilidad de la tinySA y su cable  & 0,5 & siempre los mismos, trazas de a 0,5~dB & 0,29 \\
+    Ruido de fondo                       & 0,4 & línea 10~dB sobre el piso: $10\log(1+0{,}1)$ & 0,23 \\
+    \midrule
+    Suma de los límites (peor caso)      & 5,9 & & \\
+    Incertidumbre combinada $u_c$        &     & & 1,62 \\
+    Incertidumbre expandida $U$ ($k=2$, 95~\%) & & & 3,3 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Presupuesto de incertidumbre de la verificación de continuidad.}
+  \label{tab:incertidumbre}
+\end{table}
+
+\begin{equation}
+  u_c = \sqrt{\textstyle\sum_i u_i^2} = 1{,}62~\text{dB} \qquad U = 2\,u_c = 3{,}3~\text{dB}
+\end{equation}
+
+\begin{itemize}
+  \item No se suman los límites: las contribuciones son independientes, y es muy raro que todas lleguen a su máximo a la vez y en el mismo sentido. Se suman sus cuadrados, como en la GUM y en CISPR~16-4-2.
+  \item La suma de los límites, 5,9~dB, es el peor caso: una diferencia mayor no se explica por la fuente ni por el montaje.
+  \item De estos dos números sale el criterio de la sección~\ref{sec:criterio}: hasta $U$ es conforme, entre $U$ y el peor caso se revisa el montaje, y más allá cambió la cadena.
+  \item Reposición del montaje: armarlo dos veces, medir en las dos y tomar como $a$ la mayor diferencia entre las pasadas, sin contar las líneas marcadas.
+\end{itemize}
 
 % ============================================================================
 \section{Configuración del SDR}\label{sec:sdr}
