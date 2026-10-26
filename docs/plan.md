@@ -35,7 +35,7 @@ Procedimiento normativo formal, paso a paso, para el ensayo de RE en laboratorio
 - [ ] Revisión de los docentes.
 
 ### TP2 · OE2 · Manual y procedimiento funcional de la SDR
-- [x] Versión 1.0 (26-10), pensada para usarse en cualquier laboratorio, cámara o facultad: requerimientos de la consigna, equipos e instalación, cuidados, arquitectura del peine, la ventana, procedimientos de cada botón, versiones y archivos, uso en otro laboratorio, problemas frecuentes, recepción, valores preliminares y limitaciones (11 páginas).
+- [x] Versión 1.0 (26-10), pensada para usarse en cualquier laboratorio, cámara o facultad: requerimientos de la consigna, equipos e instalación, cuidados, arquitectura del peine, la ventana, procedimientos de cada botón, versiones y archivos, uso en otro laboratorio, problemas frecuentes, recepción, valores preliminares y limitaciones. Versión 1.1 (26-10), corta: 7 carillas con la carátula.
 - [ ] Medir por cable con 20 y 30 MSPS y completar los valores preliminares.
 - [ ] Recepción para RS, junto con el TP4. La autocalibración por lazo TX→RX quedó descartada (EXP-18).
 - [ ] Revisión de los docentes.
