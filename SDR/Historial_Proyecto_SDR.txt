@@ -2478,6 +2478,34 @@ EXP-28 / resultado y cambio 22-10-2026 / primera conducida real y tasa atada a l
   nuevos de la tasa, todos bien. Falta probar con la placa: LED fijo a 20 y
   30 MSPS, planitud por cable y que no aparezcan espurias nuevas.
 
+PROCEDIMIENTO / 26-10-2026 / RE-TP-001 version 2.3: incertidumbre en dB
+  Archivo: TPs\TP1_OE1_Procedimiento_RE\main.tex (compila, 13 paginas).
+  Decisiones del usuario del 26-10:
+   - Incertidumbre simple, todo en dB y sin medir cosas que no se pueden
+     medir en casa, como la perdida de los cables.
+   - Tolerancia de la pasada de verificacion irradiada en +/-2 dB (antes
+     +/-1): en sus pruebas era casi imposible que quedara siempre en 1 dB.
+  Enfoque: la verificacion es relativa al dia de referencia, asi que el
+  factor de antena, los cables, el preamplificador y el receptor son la
+  cadena que se verifica y se cancelan. Solo entra lo que mueve la lectura
+  sin que la cadena cambie. Cada contribucion con su limite a y
+  distribucion rectangular, u = a / raiz(3):
+   - reproduccion del patron por cable 1,0 dB (u 0,58)
+   - residuo de la calibracion irradiada 2,0 dB (u 1,15)
+   - reposicion del montaje 1,5 dB, estimado (u 0,87)
+   - lectura del receptor 0,5 dB (u 0,29)
+   - estabilidad de la tinySA y su cable 0,5 dB (u 0,29)
+   - ruido de fondo con la linea 10 dB arriba 0,4 dB (u 0,23)
+  Combinada 1,62 dB, expandida (k = 2) 3,3 dB. Suma de los limites (peor
+  caso) 5,9 dB. Criterio: conforme hasta +/-3,5 dB (antes 3), revisar entre
+  3,5 y 6, no conforme mas de 6. La reposicion del montaje se reemplaza con
+  la prueba de repetibilidad (armar dos veces y tomar la mayor diferencia).
+  Con este enfoque no hacen falta los certificados del CETEM.
+  Pregunta del usuario: por que no sumar los limites. Porque son
+  independientes y es muy raro que todos lleguen al maximo a la vez y en el
+  mismo sentido: se suman las varianzas (GUM, CISPR 16-4-2). La suma de los
+  limites queda como peor caso y marca el limite de no conforme.
+
 CONSULTA / 05-10-2026 / Calibracion de continua y de IQ en la xA9
   Pedido del usuario mientras corria la primera pasada del EXP-21: volver a
   investigar la calibracion de la xA9, porque leyo que las "portadoras
