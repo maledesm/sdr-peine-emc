@@ -27,7 +27,7 @@ Resumen cronológico de lo hecho: visitas, reuniones, experimentos y decisiones.
 | 20-10-2026 | Diseño del EXP-27, peine cada 10 MHz con calibración conducida, irradiada y perfil de referencia. Versión 2.1 del TP1, con CISPR 11 grupo 1 clase A. |
 | 21-10-2026 | Los siete TPs quedan vinculados con sus proyectos de Overleaf. |
 | 22-10-2026 | EXP-28: el flujo del EXP-27 con objetivo plano, botones Reiniciar, conducida, irradiada con una sola traza y patrón, más versiones de casa y demo, probadas sin la placa. Martín confirma que el receptor del CETEM barra la banda en unos 3 s. Versión 2.2 del TP1, sin repeticiones (de 16 a 12 páginas). |
-| 26-10-2026 | Versión 2.3 del TP1: incertidumbre simplificada en dB, relativa al día de referencia (U = 3,3 dB), verificación irradiada en ±2 dB y criterio de conformidad en ±3,5 dB. TP2 rehecho como manual de la xA9 como instrumento de RF (versión 2.0), sin repetir el TP1 y con gráficos de mediciones propias. |
+| 26-10-2026 | Versión 2.3 del TP1: incertidumbre simplificada en dB, relativa al día de referencia (U = 3,3 dB), verificación irradiada en ±2 dB y criterio de conformidad en ±3,5 dB. TP2 rehecho como manual de la xA9 como instrumento de RF (versión 2.0), sin repetir el TP1 y con gráficos de mediciones propias. Versión 1.0 del TP3, el reporte de las mediciones de casa y del CETEM, con la comparación contra CISPR 11 pendiente de diciembre. |
 
 ## Etapas
 

@@ -43,9 +43,9 @@ Procedimiento normativo formal, paso a paso, para el ensayo de RE en laboratorio
 
 ### TP3 · OR3 · Reporte de mediciones de RE
 Con los datos del CETEM del 13-10 y las mediciones que se hagan en casa o en la facultad.
-- [ ] Análisis de los espectros, con la repetibilidad como eje. Explicar las portadoras casi al nivel de su línea con la antena a 1 y 2 m y los picos sueltos (265, 885 y 944 MHz en el CETEM, y el recurrente de 750 MHz en casa).
-- [ ] Comparación con CISPR 11 grupo 1 clase B a 3 m, 40 dBµV/m hasta 230 MHz y 47 dBµV/m de 230 a 1000 MHz (cuasi-pico, nosotros medimos con pico).
-- [ ] Fotos de las campañas.
+- [x] Versión 1.0 (26-10): campañas de casa (12-10) y del CETEM (13-10), emisión propia, comparación con el Comb generator, repetibilidad (altura, giro de la mesa, portadoras y picos sueltos) y medición en casa, con cuatro gráficos y tres fotos. 6 carillas con la carátula.
+- [ ] Comparación con CISPR 11 grupo 1 clase A, con las mediciones de diciembre de 2026 (queda como sección sin terminar). Las del 13-10 fueron con el peine a 0 dBm y no sirven para eso.
+- [ ] Explicar las portadoras casi al nivel de su línea con la antena a 1 y 2 m y los picos sueltos, cuando se confirme la causa.
 
 ### TP4 · OE4 · Procedimiento de calibración de RS
 Procedimiento escrito, por ahora sin mediciones, con la SDR como instrumento o generador de referencia.
