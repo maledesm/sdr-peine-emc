@@ -166,7 +166,7 @@ La placa se arma alrededor del transceptor AD9361, de conversión directa, que l
     Parámetro del osmocom Sink & Uso \\
     \midrule
     Device Arguments & \texttt{bladerf=<serie>,buffers=64,buflen=16384}. Bloques USB grandes para tasas altas \\
-    Sample Rate & Hasta 30~MSPS sin cortes. El flujo del peine usa 20 o 30~MSPS \\
+    Sample Rate & Hasta 30~MSPS sin cortes \\
     Ch0 Frequency & Frecuencia del oscilador local. Resintoniza en cada llamada, aunque el valor no cambie \\
     Ch0 RF Gain & La única ganancia que actúa, de a 1~dB. IF y BB Gain se ignoran \\
     Ch0 Bandwidth & El 90~\% de la tasa \\
@@ -261,7 +261,7 @@ La frecuencia y la ganancia cambian al instante, pero la amplitud sale con el re
       \legend{{Sin calibrar (amplitud 0,25)}, {Con una calibración}, {Objetivo}}
     \end{axis}
   \end{tikzpicture}
-  \caption{Nivel por cable de las 96 líneas de un peine, de 50~MHz a 1~GHz (EXP-28, 40~MSPS). Calibrado, el desvío baja de 1,2 a 0,35~dB.}
+  \caption{Nivel por cable de las 96 líneas de un peine, de 50~MHz a 1~GHz (40~MSPS). Calibrado, el desvío baja de 1,2 a 0,35~dB.}
   \label{fig:peine}
 \end{figure}
 
@@ -284,6 +284,7 @@ La frecuencia y la ganancia cambian al instante, pero la amplitud sale con el re
   \item Nuand, bladeRF 2.0 micro, documentación y libbladeRF.
   \item Analog Devices, AD9361, hoja de datos.
   \item GNU Radio 3.10 y gr-osmosdr, documentación.
+  \item tinySA Ultra, manual de uso.
 \end{enumerate}
 
 \end{document}
