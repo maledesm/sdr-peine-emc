@@ -115,6 +115,10 @@ corrida1 = leer_corrida(ARCHIVO_1)
 corrida2 = None
 if os.path.exists(ARCHIVO_2):
     corrida2 = leer_corrida(ARCHIVO_2)
+    # Si la planilla de la corrida 2 todavía no tiene datos, no se dibuja
+    if len(corrida2["circular"][0]) == 0 or len(corrida2["cuadrada"][0]) == 0:
+        print("La corrida 2 todavía no tiene datos de las dos puntas, se grafica solo la corrida 1")
+        corrida2 = None
 
 graficar("circular", "Punta circular", LIMITE_CIRCULAR, corrida1, corrida2,
          os.path.join(SALIDA, "zt_punta_circular.pdf"))

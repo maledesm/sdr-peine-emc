@@ -36,7 +36,7 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{\small \codigo{}, Medición con punta de corriente}
+\lhead{\small \codigo{} -- Medición con punta de corriente}
 \rhead{\small Versión \version}
 \cfoot{\small \thepage}
 
@@ -60,9 +60,9 @@
     \includegraphics[width=\textwidth]{logo_materia.png}
   \end{minipage}\par
   \vspace{0.8cm}
-  {\large Universidad de Buenos Aires, Facultad de Ingeniería\par}
+  {\large Universidad de Buenos Aires -- Facultad de Ingeniería\par}
   {\large Compatibilidad Electromagnética (8664 y TB074)\par}
-  {\large Trabajo Práctico N.\textsuperscript{o}~6, Entregable OE7\par}
+  {\large Trabajo Práctico N.\textsuperscript{o}~6 -- Entregable OE7\par}
   \vspace{1.6cm}
   {\LARGE \bfseries Medición con punta de corriente\par}
   \vspace{0.6cm}
@@ -103,13 +103,13 @@ Se suele dar en dB$\Omega$. Con $Z_t$ conocida, la corriente sale directo de la 
 \end{equation}
 En baja frecuencia $Z_t$ crece unos 20~dB por década. Después tiene una zona plana, que es donde conviene usar la punta, y a frecuencias altas aparecen resonancias del bobinado y del núcleo que la deforman.
 
-\subsection{Importancia de un \textit{JIG} normalizado}
+\subsection{Importancia de un JIG normalizado}
 
-Para medir $Z_t$ hay que hacer pasar por la punta una corriente conocida. La norma CISPR 16-1-2 usa un \textit{JIG} coaxial adaptado a 50~$\Omega$, de modo que la corriente se calcula a partir de la tensión sobre la carga de 50~$\Omega$~[\ref{ref:cispr}]. La norma ISO 11452-4 pide además que el \textit{JIG} tenga una ROE menor a 1,2. Si el \textit{JIG} no está bien adaptado aparecen reflexiones, la corriente real deja de ser la que se supone y el resultado cambia de un laboratorio a otro~[\ref{ref:sekiguchi}]. El problema es que estos \textit{JIG} son caros y muchos fabricantes no los venden.
+Para medir $Z_t$ hay que hacer pasar por la punta una corriente conocida. La norma CISPR 16-1-2 usa un JIG coaxial adaptado a 50~$\Omega$, de modo que la corriente se calcula a partir de la tensión sobre la carga de 50~$\Omega$~[\ref{ref:cispr}]. La norma ISO 11452-4 pide además que el JIG tenga una ROE menor a 1,2. Si el JIG no está bien adaptado aparecen reflexiones, la corriente real deja de ser la que se supone y el resultado cambia de un laboratorio a otro~[\ref{ref:sekiguchi}]. El problema es que estos JIG son caros y muchos fabricantes no los venden.
 
 \subsection{Objetivo}
 
-Medir la impedancia de transferencia de dos puntas de corriente caseras con un montaje más sencillo que un \textit{JIG} normalizado. Se usa un lazo de dos cables lo más corto posible, mucho menor que la longitud de onda, tomado de~[\ref{ref:paper}]. Se busca ver si el método da resultados útiles y si es repetible, comparando dos corridas hechas en días distintos.
+Medir la impedancia de transferencia de dos puntas de corriente caseras con un montaje más sencillo que un JIG normalizado. Se usa un lazo de dos cables lo más corto posible, mucho menor que la longitud de onda, tomado de~[\ref{ref:paper}]. Se busca ver si el método da resultados útiles y si es repetible, comparando dos corridas hechas en días distintos.
 
 % ============================================================================
 \section{Equipos y montaje}
@@ -236,7 +236,7 @@ Las figuras~\ref{fig:zt_circular} y~\ref{fig:zt_cuadrada} muestran $Z_t$ de cada
 \subsection{Respuesta de cada punta}
 
 \begin{itemize}
-  \item La punta circular es casi plana entre 40~kHz y 20~MHz, con 3,5~dB$\Omega$ de promedio (1,5~$\Omega$) y valores entre 2,9 y 4,4~dB$\Omega$. Por debajo de 40~kHz sube hasta 6,3~dB$\Omega$ en 10~kHz. Entre 20 y 56~MHz sube hasta unos 8~dB$\Omega$. No muestra la subida de 20~dB por década dentro del rango medido, así que su zona de baja frecuencia estaría por debajo de 10~kHz.
+  \item La punta circular es casi plana entre 40~kHz y 20~MHz, con 3,5~dB$\Omega$ de promedio (1,5~$\Omega$) y valores entre 2,9 y 4,4~dB$\Omega$. Por debajo de 40~kHz sube hasta 6,3~dB$\Omega$ en 10~kHz. Entre 20 y 56~MHz sube hasta unos 8~dB$\Omega$.
   \item La punta cuadrada sube unos 20~dB por década desde 10~kHz, como un transformador de corriente común, y es plana de 250~kHz a 8~MHz, con 7,6~dB$\Omega$ de promedio (2,4~$\Omega$) y valores entre 7,0 y 7,8~dB$\Omega$. Desde 10~MHz baja de a poco hasta 4,0~dB$\Omega$ en 35,5~MHz, y desde 40~MHz cae más rápido.
   \item En la punta cuadrada los valores medidos quedan dentro del rango de $Z_t$ que indica la etiqueta, de $-27$ a 10~dB$\Omega$. \pendiente{Comparar la circular cuando se lea su etiqueta completa.}
 \end{itemize}
@@ -291,12 +291,12 @@ En la primera corrida ya se vio que la punta cuadrada es delicada. Se abre para 
 \section{Conclusiones}
 
 \begin{itemize}
-  \item El lazo de dos cables permitió medir $Z_t$ de las dos puntas entre 10~kHz y 150~MHz con un generador y un analizador de espectro, sin \textit{JIG} normalizado.
+  \item El lazo de dos cables permitió medir $Z_t$ de las dos puntas entre 10~kHz y 150~MHz con un generador y un analizador de espectro, sin JIG normalizado.
   \item La punta circular funciona bien hasta 56~MHz y la cuadrada hasta 35,5~MHz. Más arriba aparecen saltos que se repiten, así que no conviene usarlas ahí.
   \item Las dos puntas fallan cerca de 60~MHz, lo que hace sospechar del montaje, por ejemplo del cierre del lazo con el cocodrilo, más que de las puntas.
   \item La punta circular es plana entre 40~kHz y 20~MHz con 3,5~dB$\Omega$. La cuadrada es plana entre 250~kHz y 8~MHz con 7,6~dB$\Omega$.
   \item La punta cuadrada es muy sensible al contacto entre las mitades del núcleo, incluso fija con cinta. \pendiente{Conclusión sobre la repetibilidad de las dos puntas con la corrida 2.}
-  \item El método sirve como opción sencilla para conocer la respuesta de una punta casera. Para un resultado con incertidumbre conocida sigue haciendo falta un \textit{JIG} normalizado o medir la corriente sobre la carga.
+  \item El método sirve como opción sencilla para conocer la respuesta de una punta casera. Para un resultado con incertidumbre conocida sigue haciendo falta un JIG normalizado o medir la corriente sobre la carga.
 \end{itemize}
 
 % ============================================================================
