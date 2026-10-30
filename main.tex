@@ -120,7 +120,7 @@
   \toprule
   Persona & Función \\
   \midrule
-  Martín Ledesma        & Autor. Operó la SDR en las dos campañas. \\
+  Martín Ledesma        & Autor. Operó la SDR en las dos ocasiones. \\
   Federico Martinez     & Operó la cámara, el mástil y el receptor del CETEM. \\
   Pablo Marino Belcaguy & Docente, revisión. \\
   Walter Gustavo Fano   & Docente, revisión. \\
@@ -132,10 +132,10 @@
 % ============================================================================
 \section{Introducción}
 
-Este reporte presenta las mediciones de emisiones radiadas hechas con el generador peine basado en la SDR bladeRF 2.0 micro xA9, en dos campañas. La primera fue en casa, el 12 de octubre de 2026, para comprobar que el peine se irradia y se recibe con margen. La segunda fue en la cámara semianecoica del CETEM, el 13 de octubre, donde además se midió el Comb generator de la tesis de otro alumno como referencia. En las dos el peine salía a 0~dBm por cable, el nivel del EXP-25, así que estas mediciones sirven para conocer la fuente y la repetibilidad del montaje, pero no para compararlas con un límite. El procedimiento de ensayo está en el RE-TP-001 (TP1) y la placa se describe en el manual de la SDR (TP2).
+Este reporte presenta las mediciones de emisiones radiadas hechas con el generador peine basado en la SDR bladeRF 2.0 micro xA9, en dos ocasiones. La primera fue en casa, el 12 de octubre de 2026, para comprobar que el peine se irradia y se recibe con margen. La segunda fue en la cámara semianecoica del CETEM, el 13 de octubre, donde además se midió el Comb generator de la tesis de otro alumno como referencia. En las dos el peine salía a 0~dBm por cable, el nivel del EXP-25, así que estas mediciones sirven para conocer la fuente y la repetibilidad del montaje, pero no para compararlas con un límite. El procedimiento de ensayo está en el RE-TP-001 (TP1) y la placa se describe en el manual de la SDR (TP2).
 
 % ============================================================================
-\section{Campañas y montaje}
+\section{Montaje}
 
 \begin{table}[H]
   \centering
@@ -152,7 +152,7 @@ Este reporte presenta las mediciones de emisiones radiadas hechas con el generad
     Configuración & Atenuación automática & De 30~MHz a 1~GHz, RBW de 120~kHz, detector de pico, MAX HOLD y preamplificador de 20~dB \\
     \bottomrule
   \end{tabular}
-  \caption{Las dos campañas.}
+  \caption{Montajes.}
 \end{table}
 
 \begin{figure}[H]
@@ -269,9 +269,7 @@ Las mediciones de este reporte se hicieron con el peine a 0~dBm por cable, muy p
 % ============================================================================
 \section{Conclusiones}
 
-El peine de la SDR se irradia y se recibe con margen en casi toda la banda, en casa y en la cámara, y emite unos 33~dB más que el Comb generator de referencia. Lo que más mueve la lectura es el montaje y no la fuente, porque la altura de la antena cambia cada línea una mediana de 7,8~dB y girar la mesa, unos 3~dB. Por eso la geometría tiene que quedar fija y documentada, como pide el RE-TP-001.
-
-Las mediciones dejaron además tres cambios para la próxima campaña. El nivel del peine tiene que bajar entre 26 y 40~dB según la línea para quedar en el límite de clase~A, el atenuador del receptor tiene que ir en 10~dB o menos para que el piso no tape las líneas, y la notebook tiene que quedar fuera de la cámara. Las portadoras y los picos sueltos, todavía sin causa confirmada, se revisan en la próxima visita con el corte en cada salto activado. Esos cambios ya están en el flujo del EXP-28 y en el RE-TP-001.
+\pendiente{Sección sin terminar. Faltan las mediciones de diciembre de 2026.}
 
 % ============================================================================
 \section{Referencias}
