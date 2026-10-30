@@ -141,7 +141,7 @@ Procedimiento de laboratorio para evaluar las emisiones radiadas de un Comb Gene
   \item Verificar la cadena de medición completa (cámara, antena, cables y receptor) y controlar su continuidad en el tiempo.
   \item El peine se prepara con una calibración conducida (sección~\ref{sec:cal_conducida}), una irradiada en la cámara (sección~\ref{sec:cal_irradiada}) y un patrón por cable (sección~\ref{sec:perfil}).
   \item En cada verificación posterior se carga el patrón, se recalibra por cable hasta reproducirlo y se compara contra el límite. Si el peine se recibe distinto, cambió la cadena.
-  \item La verificación es relativa al día de referencia: asume que ese día la cadena medía bien.
+  \item La verificación es relativa al día de referencia, osea que asume que ese día la cadena medía bien.
   \item El peine es un emisor intencional. El límite se usa como nivel de referencia, no como criterio de conformidad.
   \item Cambiar la antena transmisora, su posición, las alturas o el recorrido del USB obliga a repetir la calibración irradiada.
   \item Se usa la clase~A porque deja margen sobre el piso del receptor. Con 10~dB de atenuador, arriba de 230~MHz el piso queda a 8 a 12~dB del límite de clase~B y a unos 20~dB del de clase~A. A confirmar con el CETEM.
@@ -274,7 +274,7 @@ Procedimiento de laboratorio para evaluar las emisiones radiadas de un Comb Gene
 \end{itemize}
 
 \begin{enumerate}
-  \item Conectar TX1 a la tinySA: de 45 a 1005~MHz, RBW de 300~kHz, atenuación interna en 0~dB y MAX HOLD.
+  \item Conectar TX1 a la tinySA, configurado de 45 a 1005~MHz, con RBW de 300~kHz, atenuación interna en 0~dB y MAX HOLD.
   \item Abrir el flujo, que carga solo el objetivo y la calibración guardados. Para empezar de cero, Reiniciar calibración. Elegir la separación y una ganancia de TX de 31~dB. Destildar PAUSA.
   \item Guardar dos capturas, de dos pasadas completas.
   \item Calibración conducida (botón~1) con las dos capturas.
@@ -305,7 +305,7 @@ SDR apagada. Barrido Peak de 30~MHz a la máxima frecuencia de interés. Guardar
 \subsection{Emisión propia de la SDR}
 
 \begin{itemize}
-  \item En cada medición: flujo en PAUSA y traza en MAX HOLD durante un minuto. Muestra lo que emite la placa sola (su reloj y el USB).
+  \item Cada medición empieza con el flujo en PAUSA y traza en MAX HOLD durante un minuto. Muestra lo que emite la placa sola (su reloj y el USB).
   \item Solo la primera vez: carga de 50~$\Omega$ en TX1, PAUSA destildada y una pasada completa. Muestra lo que irradia la placa sin antena. Después, PAUSA y la antena de vuelta.
 \end{itemize}
 
@@ -320,13 +320,12 @@ La primera vez en cada laboratorio y cada vez que cambie el montaje.
   \item Una pasada completa en una altura elegida, en vertical. Guardar la traza (.DAT, en dB$\mu$V/m).
   \item Calibración irradiada (botón~2) con esa única traza. Se le suma al objetivo el límite menos lo medido.
   \item Si la ventana avisa líneas sin margen, subir la ganancia de TX a la mínima que muestra.
-  \item Pasada de verificación en la misma altura: cada línea a $\pm 2$~dB del límite. Si no, botón~2 con la traza de esa pasada (ajuste fino, relativo a lo cargado) y repetir este paso.
 \end{enumerate}
 
 \begin{itemize}
   \item El objetivo corregido y lo medido se guardan solos.
   \item El botón~2 rechaza una traza que no esté en dB$\mu$V/m, que traiga más de una traza o que ya se haya usado, aunque tenga otro nombre.
-  \item No corrige las líneas a más de 15~dB del límite. Si son más de 10 líneas, rechaza la traza entera: no es la del peine calibrado.
+  \item No corrige las líneas a más de 15~dB del límite. Si son más de 10 líneas, rechaza la traza entera.
   \item Las líneas que no llegan al límite ni con la amplitud máxima se anotan y quedan fuera del criterio.
   \item Recién con la calibración terminada se miden las otras alturas y la polarización horizontal, solo para comprobar el funcionamiento.
 \end{itemize}
@@ -348,7 +347,7 @@ El patrón es la referencia de la fuente para las verificaciones siguientes.
 La medición de rutina, con la geometría de la tabla~\ref{tab:geometria}.
 
 \begin{enumerate}
-  \item Antes de entrar a la cámara: Cargar patrón y recalibrar por cable (sección~\ref{sec:cal_conducida}) hasta que el botón~1 informe $\pm 1$~dB, con la misma separación y ganancia.
+  \item Antes de entrar a la cámara cargar patrón y recalibrar por cable (sección~\ref{sec:cal_conducida}) hasta que el botón~1 informe $\pm 1$~dB, con la misma separación y ganancia.
   \item Mesa en el ángulo elegido y antena de medición vertical, en la altura elegida.
   \item 3.\textsuperscript{er} LED de la SDR encendido fijo.
   \item Reiniciar MAX HOLD y esperar una pasada completa, 12~min con los valores por defecto. La ventana muestra el paso y la pasada.
@@ -414,19 +413,13 @@ Tildar PAUSA, cerrar el programa y desenchufar la SDR. Guardar trazas, fotos, ar
   \caption{Criterio de continuidad. Se ajusta cuando el paso de repetibilidad reemplace la reposición del montaje estimada.}
 \end{table}
 
-Diagnóstico:
-
-\begin{itemize}
-  \item Varias líneas contiguas apartadas en el mismo sentido: un elemento con respuesta en frecuencia (antena, cable, preamplificador).
-  \item Todas apartadas por igual: una ganancia o una atenuación.
-  \item Dudas sobre la fuente: capturar con la tinySA y comparar con el patrón. Si difiere en más de 1~dB, el problema está en la fuente y no en la cadena.
-\end{itemize}
 
 \subsection{Niveles por línea}
 
 \begin{itemize}
   \item Una planilla por polarización y por fecha (tabla~\ref{tab:planilla}). Niveles en dB$\mu$V/m.
-  \item $L$: límite. $h_1$ a $h_3$: las tres alturas. $\Delta$: nivel en la altura de calibración menos $L$. Las otras alturas solo comprueban el funcionamiento.
+  \item $L$: límite.
+  \item $h_1$ a $h_3$: las tres alturas. $\Delta$: nivel en la altura de calibración menos $L$. Las otras alturas solo comprueban el funcionamiento.
   \item La tabla~\ref{tab:niveles_v} es la medición del 13-10-2026, solo en vertical: peine anterior (una línea cada 40~MHz, 0~dBm por cable) y sin calibración irradiada. Las líneas quedan de 26 a 39~dB sobre el límite y no tienen resultado. Como no hubo altura de calibración, $\Delta$ se calculó con el mayor de los tres (Máx.).
 \end{itemize}
 
@@ -543,10 +536,10 @@ Diagnóstico:
 \section{Incertidumbre de medición}\label{sec:incertidumbre}
 
 \begin{itemize}
-  \item El procedimiento compara contra el día de referencia: no mide el campo en forma absoluta.
   \item El factor de antena, la pérdida de los cables, el preamplificador y la exactitud del receptor son la cadena que se verifica. Se cancelan al comparar y no entran en la cuenta.
-  \item Entra solo lo que puede mover la lectura sin que la cadena haya cambiado. Todo en dB.
   \item De cada contribución se conoce solo el límite $a$ (distribución rectangular), así que su incertidumbre es $u = a/\sqrt{3}$.
+  \item Las contribuciones son independientes, y es muy raro que todas lleguen a su máximo a la vez y en el mismo sentido. Se suman sus cuadrados, como en la GUM y en CISPR~16-4-2.
+  \item La suma de los límites, 5,9~dB, es el peor caso.
 \end{itemize}
 
 \begin{table}[H]
@@ -575,12 +568,6 @@ Diagnóstico:
   u_c = \sqrt{\textstyle\sum_i u_i^2} = 1{,}62~\text{dB} \qquad U = 2\,u_c = 3{,}3~\text{dB}
 \end{equation}
 
-\begin{itemize}
-  \item No se suman los límites: las contribuciones son independientes, y es muy raro que todas lleguen a su máximo a la vez y en el mismo sentido. Se suman sus cuadrados, como en la GUM y en CISPR~16-4-2.
-  \item La suma de los límites, 5,9~dB, es el peor caso: una diferencia mayor no se explica por la fuente ni por el montaje.
-  \item De estos dos números sale el criterio de la sección~\ref{sec:criterio}: hasta $U$ es conforme, entre $U$ y el peor caso se revisa el montaje, y más allá cambió la cadena.
-  \item Reposición del montaje: armarlo dos veces, medir en las dos y tomar como $a$ la mayor diferencia entre las pasadas, sin contar las líneas marcadas.
-\end{itemize}
 
 % ============================================================================
 \section{Configuración del SDR}\label{sec:sdr}
