@@ -9,7 +9,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[default]{sourcesanspro}
+\usepackage[default]{sourcesans}
 \usepackage[spanish,es-tabla,es-nodecimaldot]{babel}
 \usepackage[a4paper,margin=2.5cm,headheight=14pt]{geometry}
 \usepackage{graphicx}
@@ -45,6 +45,8 @@
 \begin{document}
 
 % ============================================================== caratula ====
+% numeracion aparte en la caratula para que no repita el ancla page.1 de hyperref
+\pagenumbering{alph}
 \begin{titlepage}
   \centering
   \vspace*{0.5cm}
@@ -79,6 +81,7 @@
   \end{tabular}
   \vspace{1cm}
 \end{titlepage}
+\pagenumbering{arabic}
 
 \tableofcontents
 \newpage
@@ -207,7 +210,7 @@ donde $20\log_{10}(50) = 34{,}0$~dB y $L = 0{,}13$~dB es la pérdida del RG213 d
 % ============================================================================
 \section{Resultados}
 
-Las figuras~\ref{fig:zt_circular} y~\ref{fig:zt_cuadrada} muestran $Z_t$ de cada punta en la primera corrida. La figura~\ref{fig:zt_circular_util} repite la punta circular solo en su rango útil, con la escala vertical ampliada para ver mejor la zona plana. \pendiente{Sumar la corrida 2 a los gráficos.} En todas las frecuencias la señal quedó por lo menos 26~dB por encima del piso, así que el ruido no afecta las lecturas.
+Las figuras~\ref{fig:zt_circular} y~\ref{fig:zt_cuadrada} muestran $Z_t$ de cada punta en la primera corrida. La figura~\ref{fig:zt_rango_util} muestra las dos puntas juntas, cada una solo en su rango útil, para ver mejor la zona plana y la subida de baja frecuencia. \pendiente{Sumar la corrida 2 a los gráficos.} En todas las frecuencias la señal quedó por lo menos 26~dB por encima del piso, así que el ruido no afecta las lecturas.
 
 \begin{figure}[H]
   \centering
@@ -225,9 +228,9 @@ Las figuras~\ref{fig:zt_circular} y~\ref{fig:zt_cuadrada} muestran $Z_t$ de cada
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.9\textwidth]{Imagenes/zt_punta_circular_rango_util.pdf}
-  \caption{Impedancia de transferencia de la punta circular dentro de su rango útil.}
-  \label{fig:zt_circular_util}
+  \includegraphics[width=0.9\textwidth]{Imagenes/zt_rango_util.pdf}
+  \caption{Impedancia de transferencia de las dos puntas dentro de su rango útil.}
+  \label{fig:zt_rango_util}
 \end{figure}
 
 \subsection{Respuesta de cada punta}

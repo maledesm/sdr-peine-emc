@@ -49,37 +49,55 @@ def recortar(curva, limite):
     return frecuencias, valores
 
 
-def graficar(punta, titulo, limite, corrida1, corrida2, archivo, solo_rango_util=False):
-    curva1 = corrida1[punta]
-    if solo_rango_util:
-        curva1 = recortar(curva1, limite)
+def graficar(punta, titulo, limite, corrida1, corrida2, archivo):
+    # Una punta en todo el rango medido, con una línea punteada donde termina el rango útil
     plt.figure(figsize=(6.3, 3.6))
-    plt.semilogx(curva1[0], curva1[1], color="black", linestyle="-",
+    plt.semilogx(corrida1[punta][0], corrida1[punta][1], color="black", linestyle="-",
                  marker="o", markersize=3.5, linewidth=1.2, label="Corrida 1")
     if corrida2 is not None:
-        curva2 = corrida2[punta]
-        if solo_rango_util:
-            curva2 = recortar(curva2, limite)
-        plt.semilogx(curva2[0], curva2[1], color="black", linestyle="--",
+        plt.semilogx(corrida2[punta][0], corrida2[punta][1], color="black", linestyle="--",
                      marker="s", markersize=3.5, markerfacecolor="white", linewidth=1.2,
                      label="Corrida 2")
-    if solo_rango_util:
-        plt.xlim(0.01, 100)
-    else:
-        plt.axvline(limite, color="black", linestyle=":", linewidth=1)
-        plt.text(limite * 0.92, plt.ylim()[0] + 1, "fin del rango útil", rotation=90,
-                 ha="right", va="bottom", fontsize=8)
-        plt.xlim(0.01, 200)
+    plt.axvline(limite, color="black", linestyle=":", linewidth=1)
+    plt.text(limite * 0.92, plt.ylim()[0] + 1, "fin del rango útil", rotation=90,
+             ha="right", va="bottom", fontsize=8)
+    plt.xlim(0.01, 200)
     plt.xticks([0.01, 0.1, 1, 10, 100], ["0,01", "0,1", "1", "10", "100"])
     plt.xlabel("Frecuencia (MHz)")
     plt.ylabel("Zt (dBΩ)")
     plt.title(titulo, fontsize=10)
     plt.grid(True, which="major", color="0.75", linewidth=0.6)
     plt.grid(True, which="minor", color="0.9", linewidth=0.4)
-    if solo_rango_util:
-        plt.legend(fontsize=8, loc="upper center")
-    else:
-        plt.legend(fontsize=8, loc="lower center")
+    plt.legend(fontsize=8, loc="lower center")
+    plt.tight_layout()
+    plt.savefig(archivo)
+    plt.close()
+
+
+def graficar_rango_util(corrida1, corrida2, archivo):
+    # Las dos puntas juntas, cada una solo hasta su límite, con líneas sin puntos
+    plt.figure(figsize=(6.3, 3.6))
+    curvas = [("circular", LIMITE_CIRCULAR, "Punta circular", "-", ":"),
+              ("cuadrada", LIMITE_CUADRADA, "Punta cuadrada", "--", "-.")]
+    for punta, limite, nombre, linea1, linea2 in curvas:
+        curva1 = recortar(corrida1[punta], limite)
+        if corrida2 is None:
+            plt.semilogx(curva1[0], curva1[1], color="black", linestyle=linea1,
+                         linewidth=1.4, label=nombre)
+        else:
+            curva2 = recortar(corrida2[punta], limite)
+            plt.semilogx(curva1[0], curva1[1], color="black", linestyle=linea1,
+                         linewidth=1.4, label=nombre + ", corrida 1")
+            plt.semilogx(curva2[0], curva2[1], color="black", linestyle=linea2,
+                         linewidth=1.4, label=nombre + ", corrida 2")
+    plt.xlim(0.01, 100)
+    plt.xticks([0.01, 0.1, 1, 10, 100], ["0,01", "0,1", "1", "10", "100"])
+    plt.xlabel("Frecuencia (MHz)")
+    plt.ylabel("Zt (dBΩ)")
+    plt.title("Rango útil de las dos puntas", fontsize=10)
+    plt.grid(True, which="major", color="0.75", linewidth=0.6)
+    plt.grid(True, which="minor", color="0.9", linewidth=0.4)
+    plt.legend(fontsize=8, loc="lower right")
     plt.tight_layout()
     plt.savefig(archivo)
     plt.close()
@@ -100,10 +118,9 @@ if os.path.exists(ARCHIVO_2):
 
 graficar("circular", "Punta circular", LIMITE_CIRCULAR, corrida1, corrida2,
          os.path.join(SALIDA, "zt_punta_circular.pdf"))
-graficar("circular", "Punta circular, rango útil", LIMITE_CIRCULAR, corrida1, corrida2,
-         os.path.join(SALIDA, "zt_punta_circular_rango_util.pdf"), solo_rango_util=True)
 graficar("cuadrada", "Punta cuadrada con apertura", LIMITE_CUADRADA, corrida1, corrida2,
          os.path.join(SALIDA, "zt_punta_cuadrada.pdf"))
+graficar_rango_util(corrida1, corrida2, os.path.join(SALIDA, "zt_rango_util.pdf"))
 
 resumen("circular", corrida1, 0.04, 20)
 resumen("cuadrada", corrida1, 0.25, 8)
