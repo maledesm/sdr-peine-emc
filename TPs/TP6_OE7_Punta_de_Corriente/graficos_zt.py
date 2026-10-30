@@ -11,8 +11,9 @@ ARCHIVO_1 = os.path.join(CARPETA, "TP6_Zt_puntas.xlsx")
 ARCHIVO_2 = os.path.join(CARPETA, "TP6_Zt_puntas_corrida2.xlsx")
 SALIDA = os.path.join(CARPETA, "Imagenes")
 
-# Frecuencia hasta la que la punta funciona bien (después aparecen saltos)
-LIMITE_MHZ = 56
+# Frecuencia hasta la que cada punta funciona bien (MHz)
+LIMITE_CIRCULAR = 56
+LIMITE_CUADRADA = 35.5
 
 
 def leer_corrida(archivo):
@@ -37,25 +38,48 @@ def leer_corrida(archivo):
     return datos
 
 
-def graficar(punta, titulo, corrida1, corrida2, archivo):
+def recortar(curva, limite):
+    # Deja solo los puntos hasta la frecuencia límite
+    frecuencias = []
+    valores = []
+    for f, z in zip(curva[0], curva[1]):
+        if f <= limite:
+            frecuencias.append(f)
+            valores.append(z)
+    return frecuencias, valores
+
+
+def graficar(punta, titulo, limite, corrida1, corrida2, archivo, solo_rango_util=False):
+    curva1 = corrida1[punta]
+    if solo_rango_util:
+        curva1 = recortar(curva1, limite)
     plt.figure(figsize=(6.3, 3.6))
-    plt.semilogx(corrida1[punta][0], corrida1[punta][1], color="black", linestyle="-",
+    plt.semilogx(curva1[0], curva1[1], color="black", linestyle="-",
                  marker="o", markersize=3.5, linewidth=1.2, label="Corrida 1")
     if corrida2 is not None:
-        plt.semilogx(corrida2[punta][0], corrida2[punta][1], color="black", linestyle="--",
+        curva2 = corrida2[punta]
+        if solo_rango_util:
+            curva2 = recortar(curva2, limite)
+        plt.semilogx(curva2[0], curva2[1], color="black", linestyle="--",
                      marker="s", markersize=3.5, markerfacecolor="white", linewidth=1.2,
                      label="Corrida 2")
-    plt.axvline(LIMITE_MHZ, color="black", linestyle=":", linewidth=1)
-    plt.text(LIMITE_MHZ * 0.92, plt.ylim()[0] + 1, "fin del rango útil", rotation=90,
-             ha="right", va="bottom", fontsize=8)
-    plt.xlim(0.01, 200)
+    if solo_rango_util:
+        plt.xlim(0.01, 100)
+    else:
+        plt.axvline(limite, color="black", linestyle=":", linewidth=1)
+        plt.text(limite * 0.92, plt.ylim()[0] + 1, "fin del rango útil", rotation=90,
+                 ha="right", va="bottom", fontsize=8)
+        plt.xlim(0.01, 200)
     plt.xticks([0.01, 0.1, 1, 10, 100], ["0,01", "0,1", "1", "10", "100"])
     plt.xlabel("Frecuencia (MHz)")
     plt.ylabel("Zt (dBΩ)")
     plt.title(titulo, fontsize=10)
     plt.grid(True, which="major", color="0.75", linewidth=0.6)
     plt.grid(True, which="minor", color="0.9", linewidth=0.4)
-    plt.legend(fontsize=8, loc="lower center")
+    if solo_rango_util:
+        plt.legend(fontsize=8, loc="upper center")
+    else:
+        plt.legend(fontsize=8, loc="lower center")
     plt.tight_layout()
     plt.savefig(archivo)
     plt.close()
@@ -74,9 +98,11 @@ corrida2 = None
 if os.path.exists(ARCHIVO_2):
     corrida2 = leer_corrida(ARCHIVO_2)
 
-graficar("circular", "Punta circular", corrida1, corrida2,
+graficar("circular", "Punta circular", LIMITE_CIRCULAR, corrida1, corrida2,
          os.path.join(SALIDA, "zt_punta_circular.pdf"))
-graficar("cuadrada", "Punta cuadrada con apertura", corrida1, corrida2,
+graficar("circular", "Punta circular, rango útil", LIMITE_CIRCULAR, corrida1, corrida2,
+         os.path.join(SALIDA, "zt_punta_circular_rango_util.pdf"), solo_rango_util=True)
+graficar("cuadrada", "Punta cuadrada con apertura", LIMITE_CUADRADA, corrida1, corrida2,
          os.path.join(SALIDA, "zt_punta_cuadrada.pdf"))
 
 resumen("circular", corrida1, 0.04, 20)

@@ -66,7 +66,7 @@
   \vspace{0.6cm}
   {\Large Caracterización de la impedancia de transferencia\par}
   \vspace{0.8cm}
-  {\large Código: \textbf{\codigo} \qquad Versión: \textbf{\version}\par}
+  {\large Código: \textbf{\codigo}\par}
   \vfill
   \begin{tabular}{ll}
     \toprule
@@ -88,7 +88,7 @@
 
 \subsection{Cómo funciona una punta de corriente}
 
-Una punta de corriente es un transformador de corriente. El cable que se quiere medir pasa por el centro de un núcleo de ferrite y hace de primario. Sobre el núcleo hay un bobinado secundario que se conecta a un instrumento con entrada de 50~$\Omega$, por ejemplo un analizador de espectro. Así se mide la corriente sin cortar el cable, y por eso en EMC se usa para medir las corrientes de modo común que circulan por los cables~[\ref{ref:paul}].
+Una punta de corriente es un transformador de corriente. El cable que se quiere medir pasa por el centro de un núcleo de ferrita y hace de primario. Sobre el núcleo hay un bobinado secundario que se conecta a un instrumento con entrada de 50~$\Omega$, por ejemplo un analizador de espectro. Así se mide la corriente sin cortar el cable, y por eso en EMC se usa para medir las corrientes de modo común que circulan por los cables~[\ref{ref:paul}].
 
 La punta se describe con su impedancia de transferencia $Z_t$, que es la tensión a la salida de la punta sobre la corriente en el conductor:
 \begin{equation}
@@ -119,11 +119,11 @@ Medir la impedancia de transferencia de dos puntas de corriente caseras con un m
     \midrule
     Generador de RF & RIGOL DSG830 & 9~kHz a 3~GHz, usado en 0~dBm \\
     Analizador de espectro & Siglent SSA3032X & 9~kHz a 3,2~GHz \\
-    Cable de alimentación del lazo & RG58 & \pendiente{largo} \\
+    Cable de alimentación del lazo & RG58 & 75~cm \\
     Cable de la punta al analizador & RG213 & 1~m \\
-    Carga & 50~$\Omega$ con conector BNC & \pendiente{modelo} \\
-    Punta circular & Casera, impresa en 3D & Etiqueta 10~kHz a \pendiente{?}, $Z_t$ desde $-22$~dB$\Omega$ \\
-    Punta cuadrada con apertura & Casera, impresa en 3D & Etiqueta 10~kHz a 90~MHz, $Z_t$ de $-27$ a 10~dB$\Omega$ \\
+    Carga & Sin modelo & 50~$\Omega$ con conector BNC \\
+    Punta circular & Casera & Etiqueta 10~kHz a 90~MHz, $Z_t$ desde $-22$~dB$\Omega$ \\
+    Punta cuadrada con apertura & Casera & Etiqueta 10~kHz a 90~MHz, $Z_t$ de $-27$ a 10~dB$\Omega$ \\
     \bottomrule
   \end{tabular}
   \caption{Equipos usados.}
@@ -149,21 +149,16 @@ El generador alimenta un cable RG58. En su extremo el vivo y la malla se separan
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.6\textwidth]{Imagenes/banco.jpg}
+  \includegraphics[width=0.95\textwidth]{Imagenes/banco.jpg}
   \caption{Banco de trabajo con el generador, el analizador y el lazo.}
   \label{fig:banco}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \begin{minipage}[c]{0.3\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{Imagenes/lazo.jpg}
-  \end{minipage}\hfill
-  \begin{minipage}[c]{0.66\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{Imagenes/cable_rg213.jpg}
-  \end{minipage}
+  % misma altura para que las dos fotos queden como mosaico
+  \includegraphics[height=7.2cm]{Imagenes/lazo.jpg}\hfill
+  \includegraphics[height=7.2cm]{Imagenes/cable_rg213.jpg}
   \caption{Extremo del lazo con el conector BNC de chasis (izquierda) y cable RG213 de 1~m (derecha).}
   \label{fig:lazo}
 \end{figure}
@@ -212,7 +207,7 @@ donde $20\log_{10}(50) = 34{,}0$~dB y $L = 0{,}13$~dB es la pérdida del RG213 d
 % ============================================================================
 \section{Resultados}
 
-Las figuras~\ref{fig:zt_circular} y~\ref{fig:zt_cuadrada} muestran $Z_t$ de cada punta en la primera corrida. \pendiente{Sumar la corrida 2 a los dos gráficos.} En todas las frecuencias la señal quedó por lo menos 26~dB por encima del piso, así que el ruido no afecta las lecturas.
+Las figuras~\ref{fig:zt_circular} y~\ref{fig:zt_cuadrada} muestran $Z_t$ de cada punta en la primera corrida. La figura~\ref{fig:zt_circular_util} repite la punta circular solo en su rango útil, con la escala vertical ampliada para ver mejor la zona plana. \pendiente{Sumar la corrida 2 a los gráficos.} En todas las frecuencias la señal quedó por lo menos 26~dB por encima del piso, así que el ruido no afecta las lecturas.
 
 \begin{figure}[H]
   \centering
@@ -228,17 +223,24 @@ Las figuras~\ref{fig:zt_circular} y~\ref{fig:zt_cuadrada} muestran $Z_t$ de cada
   \label{fig:zt_cuadrada}
 \end{figure}
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Imagenes/zt_punta_circular_rango_util.pdf}
+  \caption{Impedancia de transferencia de la punta circular dentro de su rango útil.}
+  \label{fig:zt_circular_util}
+\end{figure}
+
 \subsection{Respuesta de cada punta}
 
 \begin{itemize}
-  \item La punta circular es casi plana entre 40~kHz y 20~MHz, con 3,5~dB$\Omega$ de promedio (1,5~$\Omega$) y valores entre 2,9 y 4,4~dB$\Omega$. Por debajo de 40~kHz sube hasta 6,3~dB$\Omega$ en 10~kHz. Entre 20 y 56~MHz sube hasta unos 8~dB$\Omega$.
-  \item La punta cuadrada sube unos 20~dB por década desde 10~kHz, como un transformador de corriente común, y es plana de 250~kHz a 8~MHz, con 7,6~dB$\Omega$ de promedio (2,4~$\Omega$) y valores entre 7,0 y 7,8~dB$\Omega$. Desde 10~MHz baja de a poco hasta $-2$~dB$\Omega$ en 56~MHz.
+  \item La punta circular es casi plana entre 40~kHz y 20~MHz, con 3,5~dB$\Omega$ de promedio (1,5~$\Omega$) y valores entre 2,9 y 4,4~dB$\Omega$. Por debajo de 40~kHz sube hasta 6,3~dB$\Omega$ en 10~kHz. Entre 20 y 56~MHz sube hasta unos 8~dB$\Omega$. No muestra la subida de 20~dB por década dentro del rango medido, así que su zona de baja frecuencia estaría por debajo de 10~kHz.
+  \item La punta cuadrada sube unos 20~dB por década desde 10~kHz, como un transformador de corriente común, y es plana de 250~kHz a 8~MHz, con 7,6~dB$\Omega$ de promedio (2,4~$\Omega$) y valores entre 7,0 y 7,8~dB$\Omega$. Desde 10~MHz baja de a poco hasta 4,0~dB$\Omega$ en 35,5~MHz, y desde 40~MHz cae más rápido.
   \item En la punta cuadrada los valores medidos quedan dentro del rango de $Z_t$ que indica la etiqueta, de $-27$ a 10~dB$\Omega$. \pendiente{Comparar la circular cuando se lea su etiqueta completa.}
 \end{itemize}
 
 \subsection{Rango útil}
 
-Se toma como criterio que la punta funciona bien mientras cada punto queda cerca de sus vecinos, y que deja de funcionar cuando aparecen saltos grandes entre puntos cercanos. A partir de 58~MHz las dos puntas muestran saltos de casi 10~dB. Los puntos entre 56 y 63~MHz se midieron varias veces, yendo y viniendo en frecuencia, y el salto se repitió igual, así que no es un error de lectura. Con este criterio las dos puntas sirven hasta unos 56~MHz, por debajo de los 90~MHz de la etiqueta.
+Se toma como criterio que la punta funciona bien mientras cada punto queda cerca de sus vecinos, y que deja de funcionar cuando aparecen saltos grandes entre puntos cercanos. En la punta circular el primer salto aparece en 58~MHz, así que su rango útil llega hasta 56~MHz. En la cuadrada la curva empieza a caer más rápido desde 40~MHz y en 58~MHz aparecen saltos de casi 10~dB, así que su rango útil se toma hasta 35,5~MHz. Las dos quedan por debajo de los 90~MHz de la etiqueta. Los puntos entre 56 y 63~MHz se midieron varias veces, yendo y viniendo en frecuencia, y el salto se repitió igual, así que no es un error de lectura.
 
 \begin{table}[H]
   \centering
@@ -247,12 +249,23 @@ Se toma como criterio que la punta funciona bien mientras cada punto queda cerca
     Punta & Zona plana & $Z_t$ en la zona plana & Rango útil & Diferencia entre corridas \\
     \midrule
     Circular & 40~kHz a 20~MHz & 3,5~dB$\Omega$ (1,5~$\Omega$) & 10~kHz a 56~MHz & \pendiente{corrida 2} \\
-    Cuadrada & 250~kHz a 8~MHz & 7,6~dB$\Omega$ (2,4~$\Omega$) & 10~kHz a 56~MHz & \pendiente{corrida 2} \\
+    Cuadrada & 250~kHz a 8~MHz & 7,6~dB$\Omega$ (2,4~$\Omega$) & 10~kHz a 35,5~MHz & \pendiente{corrida 2} \\
     \bottomrule
   \end{tabular}
   \caption{Resumen de resultados.}
   \label{tab:resumen}
 \end{table}
+
+\subsection{Falla de las dos puntas cerca de 60~MHz}
+
+Las dos puntas fallan en frecuencias muy cercanas, entre 56 y 62~MHz, lo que hace sospechar del montaje más que de cada punta. No parece un efecto de la longitud de onda, porque a 60~MHz la longitud de onda es de 5~m y el tramo abierto de 10~cm es unas 50 veces más corto. Otras causas posibles son:
+\begin{itemize}
+  \item Una resonancia del lazo. El tramo abierto, el cocodrilo y la carga suman inductancia, y junto con las capacidades parásitas entre los cables y la punta pueden resonar en esa zona.
+  \item El cierre con el cocodrilo sobre el conector de la carga, que es un contacto pobre y deja un tramo de cable sin blindar.
+  \item Corrientes de modo común por las mallas del RG58 y del RG213, que forman un lazo de algunos metros con los chasis del generador y del analizador. Un lazo de ese tamaño sí puede resonar cerca de 60~MHz.
+  \item Una resonancia propia de las puntas. Las dos son caseras y parecen del mismo diseño, así que podrían resonar en frecuencias parecidas.
+\end{itemize}
+Para separar las causas sirve medir la tensión sobre la carga entre 50 y 70~MHz, con el analizador en lugar de la carga. Si esa tensión también salta, el problema es del lazo. Si queda pareja, está en las puntas. También sirve cambiar el cocodrilo por una unión firme y ver si el salto se corre de frecuencia. \pendiente{Completar con la corrida 2.}
 
 \subsection{Repetibilidad}
 
@@ -276,7 +289,8 @@ En la primera corrida ya se vio que la punta cuadrada es delicada. Se abre para 
 
 \begin{itemize}
   \item El lazo de dos cables permitió medir $Z_t$ de las dos puntas entre 10~kHz y 150~MHz con un generador y un analizador de espectro, sin \textit{JIG} normalizado.
-  \item Las dos puntas funcionan bien hasta unos 56~MHz. Más arriba aparecen saltos que se repiten, así que no conviene usarlas ahí.
+  \item La punta circular funciona bien hasta 56~MHz y la cuadrada hasta 35,5~MHz. Más arriba aparecen saltos que se repiten, así que no conviene usarlas ahí.
+  \item Las dos puntas fallan cerca de 60~MHz, lo que hace sospechar del montaje, por ejemplo del cierre del lazo con el cocodrilo, más que de las puntas.
   \item La punta circular es plana entre 40~kHz y 20~MHz con 3,5~dB$\Omega$. La cuadrada es plana entre 250~kHz y 8~MHz con 7,6~dB$\Omega$.
   \item La punta cuadrada es muy sensible al contacto entre las mitades del núcleo, incluso fija con cinta. \pendiente{Conclusión sobre la repetibilidad de las dos puntas con la corrida 2.}
   \item El método sirve como opción sencilla para conocer la respuesta de una punta casera. Para un resultado con incertidumbre conocida sigue haciendo falta un \textit{JIG} normalizado o medir la corriente sobre la carga.
