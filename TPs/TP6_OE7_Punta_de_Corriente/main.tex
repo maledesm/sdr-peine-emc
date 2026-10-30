@@ -9,7 +9,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[default]{sourcesanspro}
+\usepackage[default]{sourcesans}
 \usepackage[spanish,es-tabla,es-nodecimaldot]{babel}
 \usepackage[a4paper,margin=2.5cm,headheight=14pt]{geometry}
 \usepackage{graphicx}
@@ -45,6 +45,8 @@
 \begin{document}
 
 % ============================================================== caratula ====
+% numeracion aparte en la caratula para que no repita el ancla page.1 de hyperref
+\pagenumbering{alph}
 \begin{titlepage}
   \centering
   \vspace*{0.5cm}
@@ -79,6 +81,7 @@
   \end{tabular}
   \vspace{1cm}
 \end{titlepage}
+\pagenumbering{arabic}
 
 \tableofcontents
 \newpage
