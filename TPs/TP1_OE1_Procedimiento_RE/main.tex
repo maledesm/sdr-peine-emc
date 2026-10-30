@@ -130,7 +130,7 @@ Procedimiento de laboratorio para evaluar las emisiones radiadas de un Comb Gene
 
 \begin{itemize}
   \item EUT/DUT: Comb Generator basado en SDR (bladeRF 2.0 micro xA9), en su papel de calibrador. El peine que emite es la referencia de la cadena de medición.
-  \item También se registran sus emisiones propias, en pausa y sin antena: son el fondo contra el que se leen las líneas.
+  \item También se registran sus emisiones propias, en pausa y sin antena, que son el fondo contra el que se leen las líneas.
   \item Normas: CISPR 16-1-1, CISPR 16-2-3, CISPR 16-4-2, CISPR~11 (grupo~1, clase~A, hasta 20~kVA) y ANSI C63.4.
   \item Rango: 30~MHz a 1~GHz, ampliable hasta 6~GHz. Peine: 50~MHz a 1~GHz, una línea cada 10~MHz.
 \end{itemize}
@@ -141,7 +141,7 @@ Procedimiento de laboratorio para evaluar las emisiones radiadas de un Comb Gene
   \item Verificar la cadena de medición completa (cámara, antena, cables y receptor) y controlar su continuidad en el tiempo.
   \item El peine se prepara con una calibración conducida (sección~\ref{sec:cal_conducida}), una irradiada en la cámara (sección~\ref{sec:cal_irradiada}) y un patrón por cable (sección~\ref{sec:perfil}).
   \item En cada verificación posterior se carga el patrón, se recalibra por cable hasta reproducirlo y se compara contra el límite. Si el peine se recibe distinto, cambió la cadena.
-  \item La verificación es relativa al día de referencia, osea que asume que ese día la cadena medía bien.
+  \item La verificación es relativa al día de referencia, o sea que asume que ese día la cadena medía bien.
   \item El peine es un emisor intencional. El límite se usa como nivel de referencia, no como criterio de conformidad.
   \item Cambiar la antena transmisora, su posición, las alturas o el recorrido del USB obliga a repetir la calibración irradiada.
   \item Se usa la clase~A porque deja margen sobre el piso del receptor. Con 10~dB de atenuador, arriba de 230~MHz el piso queda a 8 a 12~dB del límite de clase~B y a unos 20~dB del de clase~A. A confirmar con el CETEM.
@@ -274,7 +274,7 @@ Procedimiento de laboratorio para evaluar las emisiones radiadas de un Comb Gene
 \end{itemize}
 
 \begin{enumerate}
-  \item Conectar TX1 a la tinySA, configurado de 45 a 1005~MHz, con RBW de 300~kHz, atenuación interna en 0~dB y MAX HOLD.
+  \item Conectar TX1 a la tinySA, configurada de 45 a 1005~MHz, con RBW de 300~kHz, atenuación interna en 0~dB y MAX HOLD.
   \item Abrir el flujo, que carga solo el objetivo y la calibración guardados. Para empezar de cero, Reiniciar calibración. Elegir la separación y una ganancia de TX de 31~dB. Destildar PAUSA.
   \item Guardar dos capturas, de dos pasadas completas.
   \item Calibración conducida (botón~1) con las dos capturas.
@@ -320,6 +320,7 @@ La primera vez en cada laboratorio y cada vez que cambie el montaje.
   \item Una pasada completa en una altura elegida, en vertical. Guardar la traza (.DAT, en dB$\mu$V/m).
   \item Calibración irradiada (botón~2) con esa única traza. Se le suma al objetivo el límite menos lo medido.
   \item Si la ventana avisa líneas sin margen, subir la ganancia de TX a la mínima que muestra.
+  \item Pasada de verificación en la misma altura. Si alguna línea queda a más de $\pm 2$~dB del límite, repetir desde el paso~3 con esa traza.
 \end{enumerate}
 
 \begin{itemize}
@@ -347,7 +348,7 @@ El patrón es la referencia de la fuente para las verificaciones siguientes.
 La medición de rutina, con la geometría de la tabla~\ref{tab:geometria}.
 
 \begin{enumerate}
-  \item Antes de entrar a la cámara cargar patrón y recalibrar por cable (sección~\ref{sec:cal_conducida}) hasta que el botón~1 informe $\pm 1$~dB, con la misma separación y ganancia.
+  \item Antes de entrar a la cámara, cargar patrón y recalibrar por cable (sección~\ref{sec:cal_conducida}) hasta que el botón~1 informe $\pm 1$~dB, con la misma separación y ganancia.
   \item Mesa en el ángulo elegido y antena de medición vertical, en la altura elegida.
   \item 3.\textsuperscript{er} LED de la SDR encendido fijo.
   \item Reiniciar MAX HOLD y esperar una pasada completa, 12~min con los valores por defecto. La ventana muestra el paso y la pasada.
@@ -410,7 +411,7 @@ Tildar PAUSA, cerrar el programa y desenchufar la SDR. Guardar trazas, fotos, ar
     Más de $\pm$6~dB           & No conforme, investigar la cadena de medición \\
     \bottomrule
   \end{tabular}
-  \caption{Criterio de continuidad. Se ajusta cuando el paso de repetibilidad reemplace la reposición del montaje estimada.}
+  \caption{Criterio de continuidad.}
 \end{table}
 
 
@@ -420,7 +421,7 @@ Tildar PAUSA, cerrar el programa y desenchufar la SDR. Guardar trazas, fotos, ar
   \item Una planilla por polarización y por fecha (tabla~\ref{tab:planilla}). Niveles en dB$\mu$V/m.
   \item $L$: límite.
   \item $h_1$ a $h_3$: las tres alturas. $\Delta$: nivel en la altura de calibración menos $L$. Las otras alturas solo comprueban el funcionamiento.
-  \item La tabla~\ref{tab:niveles_v} es la medición del 13-10-2026, solo en vertical: peine anterior (una línea cada 40~MHz, 0~dBm por cable) y sin calibración irradiada. Las líneas quedan de 26 a 39~dB sobre el límite y no tienen resultado. Como no hubo altura de calibración, $\Delta$ se calculó con el mayor de los tres (Máx.).
+  \item La tabla~\ref{tab:niveles_v} es la medición del 13-10-2026, solo en vertical, con el peine anterior (una línea cada 40~MHz, 0~dBm por cable) y sin calibración irradiada. Las líneas quedan de 26 a 39~dB sobre el límite y no tienen resultado. Como no hubo altura de calibración, $\Delta$ se calculó con el mayor de los tres (Máx.).
 \end{itemize}
 
 \begingroup
@@ -550,7 +551,7 @@ Tildar PAUSA, cerrar el programa y desenchufar la SDR. Guardar trazas, fotos, ar
     \midrule
     Reproducción del patrón por cable    & 1,0 & tolerancia de la calibración conducida (botón~1) & 0,58 \\
     Residuo de la calibración irradiada  & 2,0 & tolerancia de la pasada de verificación & 1,15 \\
-    Reposición del montaje               & 1,5 & estimado, se reemplaza con el paso de repetibilidad & 0,87 \\
+    Reposición del montaje               & 1,5 & estimado & 0,87 \\
     Lectura del receptor                 & 0,5 & señal estable, Peak con MAX HOLD & 0,29 \\
     Estabilidad de la tinySA y su cable  & 0,5 & siempre los mismos, trazas de a 0,5~dB & 0,29 \\
     Ruido de fondo                       & 0,4 & línea 10~dB sobre el piso: $10\log(1+0{,}1)$ & 0,23 \\
@@ -573,7 +574,7 @@ Tildar PAUSA, cerrar el programa y desenchufar la SDR. Guardar trazas, fotos, ar
 \section{Configuración del SDR}\label{sec:sdr}
 
 \begin{itemize}
-  \item La SDR no genera pulsos de 1~ns: la tasa máxima es 61,44~MSPS. El peine usa 20 o 30~MSPS según la separación de la portadora, menos de los 40~MSPS que sostiene el USB de la PC usada.
+  \item La SDR no genera pulsos de 1~ns, porque su tasa máxima es 61,44~MSPS. El peine usa 20 o 30~MSPS según la separación de la portadora, menos de los 40~MSPS que sostiene el USB de la PC usada.
   \item El peine se arma por saltos del oscilador local. La SDR emite una línea por vez y el receptor, en MAX HOLD, las acumula.
 \end{itemize}
 
@@ -599,6 +600,6 @@ Tildar PAUSA, cerrar el programa y desenchufar la SDR. Guardar trazas, fotos, ar
   \caption{Parámetros del generador peine (flujo del EXP-28).}
 \end{table}
 
-El manejo del software, las calibraciones y la elección de la separación de la portadora se describen en el manual de la SDR (OE2).
+La placa, su uso desde GNU Radio, sus defectos y su nivel de salida se describen en el manual de la SDR (OE2).
 
 \end{document}
